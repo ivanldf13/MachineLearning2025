@@ -12,7 +12,7 @@ toc-depth: 1
 number-sections: true
 execute:
   engine: knitr
-editor: visual
+editor: source
 ---
 
 > **Disclaimer**: This material includes content adapted from the lectures and presentations of Prof. S. Engelke and other study materials. It is reproduced for educational purposes only and is not intended to infringe upon the rights of the original authors.
