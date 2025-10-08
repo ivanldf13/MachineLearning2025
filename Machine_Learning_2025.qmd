@@ -1,0 +1,319 @@
+---
+title: "Machine Learning 2025"
+author: "Paco"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+format: 
+  pdf:
+    latex-engine: xelatex
+    mainfont: "Times New Roman"
+    include-in-header: disclaimer.tex
+toc: true
+toc-depth: 1
+number-sections: true
+execute:
+  engine: knitr
+editor: visual
+---
+
+> **Disclaimer**: This material includes content adapted from the lectures and presentations of Prof. S. Engelke and other study materials. It is reproduced for educational purposes only and is not intended to infringe upon the rights of the original authors.
+
+\newpage
+
+# What is Machine Learning?
+
+### What is Machine Learning?
+
+Machine learning aims at programming a computer to learn from information (Data) to perform a task (Prediction, etc.) in an optimal way in terms of a performance measure (Loss Function).
+
+Recent success of machine learning due to advances in its main ingredients:
+
+1.  Data availability: huge growth due to automation, digitalization, web applications.
+
+2.  Computing power: significant increase thanks to GPU computing, parallelization, etc.
+
+3.  The learning algorithms: theoretical developments of new statistical models and training methods.
+
+## The statistical framework
+
+Types of variables:
+
+-   quantitative variables take values in an ordered set, typically the real numbers R;
+
+-   qualitative variables (also called categorical or factor) take values in a finite set $G = {G1, . . . , Gq }$ without ordering, e.g., ${Yes, No}$, ${blue, red, green, yellow}$, etc.
+
+**Supervised learning**
+
+We observe training data ($x_i , y_i ), i = 1, . . . , n$ where
+
+-   the inputs $xi ∈ Rp$ are called predictors, covariates or features;
+
+-   the outputs $y_i$ are called responses (in this course we assume they are univariate).
+
+The goal is to predict the (unknown) response $y_0$ for a new (known) predictor $x_0$.
+
+Regression: the responses $y_i ∈ R$ are quantitative.
+
+Classification: the responses $y_i ∈ G$ are qualitative.
+
+**Unsupervised learning**
+
+We only observe multivariate data $x_i ∈ R^p , i = 1, . . . , n$ but without a particular response.
+
+The goal is to summarize, understand, interpret and visualize the data.
+
+![Machine Learning: an overview](Images_qmd_ML/overview_ML1.png)
+
+## Regression: simple linear model
+
+-   **Data**: Observations (x1, y1), . . . , (xn, yn)
+
+-   **Goal**: Predict unknown outcome y0 for new predictor x0.
+
+## Linear regression
+
+$\hat{y}_0 = \hat{\beta}_0 + \hat{\beta}_1 x_0$
+
+-   $\hat{y}_0$: This is the predicted value of the response variable $y$ when the input is $x_0$. The "hat" (\^) indicates it's an estimate, not the true value.
+
+-   $\hat{\beta}_0$: This is the estimated intercept.\
+    It represents the predicted value of $y$ when $x = 0$. It's called an *estimate* because it's computed from data and is an approximation of the true underlying intercept $\beta_0$.
+
+-   $\hat{\beta}_1$: This is the estimated slope (also an approximation). It tells us how much $y$ is expected to increase (or decrease) when $x$ increases by 1 unit.
+
+-   $x_0$: This is the value of the predictor (input) variable that we're using to make a prediction.
+
+The numbers $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ are estimated model parameters. \### What does $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ mean?
+
+It says both $\hat{\beta}_0$ and $\hat{\beta}_1$ are **real numbers** — elements of the set of real numbers $\mathbb{R}$.
+
+In practical terms: they're just numerical values (like 2.3, -1.5, etc.) estimated from the data using statistical methods (usually least squares).
+
+![Regression: simple linear model](Images_qmd_ML/regression_ML1.png){width="50%"}
+
+## Regression: kNN method
+
+-   **Data**: Observations (x1, y1), . . . , (xn, yn)
+
+-   **Goal**: Predict unknown outcome y0 for new predictor x0.
+
+### The k-Nearest Neighbor (kNN) Method
+
+The prediction for a new input $x_0$ is given by:
+
+$$
+\hat{y}_0 = \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} y_i = \text{ave}\{y_i : x_i \in N_k(x_0)\}
+$$
+
+-   $N_k(x_0)$ refers to the $k$ closest points $x_i$ to $x_0$ in the training data.
+-   The number $k$ is a **tuning parameter** that controls how many neighbours are used to make the prediction.
+
+![K = 1](Images_qmd_ML/pred_kNN_1_ML1.png){width="33%"} ![K = 5](Images_qmd_ML/pred_kNN_5_ML1.png){width="33%"} ![K = 20](Images_qmd_ML/pred_kNN_20_ML1.png){width="33%"}
+
+As we see in the figures above, the greater the number of neighbours, the smoother the curve since we are taking into account more information.
+
+```{r}
+#TODO how to put the three images next to each other with the undertitle
+```
+
+Business application: advertising
+
+Medical application: body fat
+
+## Classification: Simple Linear Regression
+
+-   **Data:** Observations $(x_1, y_1), \ldots, (x_n, y_n)$, where $y_i \in G = \{0, 1\}$
+
+```{r}
+#TODO can classification methods have more y_i than 0 or 1?
+```
+
+-   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$
+
+Directly apply linear regression treating the classes as quantitative values 0 and 1.\
+The prediction is
+
+$$
+\hat{y}_0 = \begin{cases}
+1, & \text{if } \hat{\beta}_0 + \hat{\beta}^T x_0 \geq \frac{1}{2}, \\
+0, & \text{otherwise}.
+\end{cases}
+$$
+
+The numbers $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ are estimated model parameters.
+
+can be explained term-by-term as follows:
+
+-   $\hat{y}_0$: The predicted class label for a new input $x_0$. The hat ($\hat{\ }$) indicates it's an estimate from the model.
+
+-   **The piecewise notation** $\begin{cases} ... \end{cases}$ means the prediction depends on a condition.
+
+-   $\hat{\beta}_0$: The estimated intercept of the linear regression model, a scalar.
+
+-   $\hat{\beta}^T x_0$: The dot product (transpose of $\hat{\beta}$ times $x_0$), representing the weighted sum of the input features.
+
+-   $\hat{\beta}_0 + \hat{\beta}^T x_0$: The linear combination of the intercept and weighted features — the model’s predicted score.
+
+-   $\geq \frac{1}{2}$: The threshold. If the score is greater than or equal to 0.5, predict class 1; otherwise, 0.
+
+-   **1 and 0**: The two possible class labels (e.g., positive/negative or class 1/class 0).
+
+In simple terms:\
+You calculate a score from the model for $x_0$. If it’s at least 0.5, you predict class 1; otherwise, class 0.
+
+![Classification: simple linear model](Images_qmd_ML/classification_lr_ML1.png){width="50%"}
+
+## Classification: the kNN Method
+
+-   **Data:** Observations $(x_1, y_1), \ldots, (x_n, y_n)$, where $y_i \in G = \{0, 1\}$
+
+-   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$
+
+The k-Nearest-Neighbor (kNN) method predicts the majority class in the neighborhood:
+
+$$
+\hat{y}_0 = \begin{cases}
+1, & \text{if } \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} \mathbf{1}\{y_i = 1\} > \frac{1}{2}, \\
+0, & \text{otherwise}.
+\end{cases}
+$$
+
+Here, $N_k(x_0)$ are the $k$ closest points $x_i$ to $x_0$.\
+The number $k$ is a tuning parameter, meaning that it does not come from the data. We can choose which k would be better using Cross Validation, for example.
+
+### Explanation of terms:
+
+-   $\hat{y}_0$: The predicted class label for the new input $x_0$.
+
+-   $N_k(x_0)$: The set of the $k$ closest neighbors to $x_0$ in the training data.
+
+-   $\mathbf{1}\{y_i = 1\}$: An indicator function that equals 1 if the class label $y_i$ is 1, and 0 otherwise.
+
+-   $\frac{1}{k} \sum_{i : x_i \in N_k(x_0)} \mathbf{1}\{y_i = 1\}$: The fraction of neighbours whose class is 1 — effectively, the proportion of class 1 in the neighbourhood.
+
+-   $> \frac{1}{2}$: The decision threshold — if more than half the neighbours are class 1, predict 1; otherwise, predict 0.
+
+-   $k$: The tuning parameter controlling how many neighbors to consider.
+
+![K = 1](Images_qmd_ML/class_kNN_1_ML1.png){width="33%"} ![K = 5](Images_qmd_ML/class_kNN_5_ML1.png){width="33%"} ![K = 20](Images_qmd_ML/class_kNN_20_ML1.png){width="33%"}
+
+Again, with low $k$, we tend to overfit the model to our training data.
+
+### Handwritten characters / digits recognitions
+
+Each pixel gives us the amount of darkness in a grey scale (0 to 9). We have 32 predictors (16 times 16, the size of the pictures). Given this predictors the system has to predict
+
+## What is the right model?
+
+*All models are wrong, some models are useful.*
+
+\begin{flushright}
+— George Box
+\end{flushright}
+
+In a sense its right since we would never find the model that has generated our data since Nature is too complex for this. However if they are flexible enough to capture the essence of what is happening in Nature.
+
+*Everything should be made as simple as possible. But not simpler.*
+
+\begin{flushright}
+— Albert Einstein
+\end{flushright}
+
+We want to create a model that represents reality but we don't want to make it too complicated, if we can make it simpler without decreasing the goodness of fit, then we need to go with the simpler. In deep learning this does not apply.
+
+# Regression Framework
+
+## Regression Framework: the Stochastic Framework
+
+### The Stochastic / Population model
+
+-   We have a quantitative response $Y$ and $p$ predictors $X_1, \ldots, X_p$.\
+-   We assume there is a relationship between $Y$ and $X = (X_1, \ldots, X_p)$ : $Y = f(X) + \varepsilon$ where $\varepsilon$ is a random error term with $\mathbb{E}(\varepsilon) = 0$ and $\mathrm{Var}(\varepsilon) = \sigma^2$.\
+-   The function $f$ is fixed but unknown and represents the systematic information that $X$ provides about $Y$.
+
+**Example**
+
+$Y = \text{house price (100k)}; \; X = \text{size (m}^2)$
+
+$$ Y = 2 + 0.03X + \varepsilon $$
+
+$$ \text{house price} = 2 + 0.03 \times \text{size} + \text{error} $$
+
+-   This true relationship $f(X) = 2 + 0.03X$ is called the population regression line.\
+-   Note: $(X, Y)$ is a $(p + 1)$-dimensional random vector. In this simulated example:
+
+$$ X \sim \mathcal{N}(0, \sigma_X^2), \quad Y = 2 + 0.03X + \mathcal{N}(0, \sigma_\varepsilon^2) $$
+
+In regression, $X$ is not just one variable — it’s a vector of predictors: $X = (X_1, X_2, \dots, X_p)$
+
+1.  What we mean by $(X, Y)$
+
+Each $X_j$ represents one feature (e.g. size, number of rooms, location, etc.), and there are $p$ such features in total. The response variable $Y$ is another random variable — the outcome we want to predict (e.g. house price). So when we consider the pair $(X, Y)$ together, we’re grouping all predictors and the response into one joint random vector.
+
+2.  Counting the dimensions
+
+$X$ alone has $p$ dimensions, because it contains $p$ predictor variables. $Y$ adds one more dimension (the outcome variable). Hence, when combined:
+
+$$(X, Y) = (X_1, X_2, \dots, X_p, Y)$$
+
+This vector has $p + 1$ components → therefore, it’s a $(p + 1)$-dimensional random vector.
+
+3.  Why it matters
+
+We call it a **random vector** because all its components (the predictors $X_1, \ldots, X_p$ and the response $Y$)are random variables.
+
+Their joint distribution $P(X_1, X_2, \dots, X_p, Y)$ describes how they vary together in the population.
+
+The goal of regression is to understand the **conditional relationship** between them, i.e., how $Y$ depends on $X$:
+
+$$\mathbb{E}[Y \mid X] = f(X)$$
+
+That conditional expectation is exactly the **regression function** we try to estimate.
+
+## 4. Intuitive analogy
+
+Think of each observation (say, one house in your dataset) as a point in a $(p+1)$-dimensional space:
+
+-   $p$ coordinates for its predictors (size, rooms, etc.),
+-   and one coordinate for its price ($Y$).
+
+So if you had $p = 2$ predictors, each data point would live in 3D space — one axis per predictor, plus one for the response.
+
+### The Training Data
+
+-   Assume we are given $n$ measurements $(x_1, y_1), \dots, (x_n, y_n)$ of $(X, Y)$, where\
+    $x_i = (x_{i1}, \dots, x_{ip})^\top$, and
+    -   the inputs $x_i \in \mathbb{R}^p$ are called **predictors**\
+    -   the outputs $y_i$ are called **responses**
+-   We will use this data to **learn** the unknown relationship $f$ between $Y$ and $X$, i.e., to **train** (or **estimate**) a predictive model $\hat{f}$
+
+**Example** : $[Y = \text{house price (100k)}; \quad X = \text{size (m}^2)]$
+
+$\text{house price} \approx \hat{f}(\text{size}) = 2.977 + 0.027 \times \text{size}$
+
+-   The training data are realizations of the random vector $(X, Y)$:
+
+| Observation  | X (Size in m²) | Y (House Price in 100k) |
+|--------------|:--------------:|:-----------------------:|
+| $(x_1, y_1)$ |      327       |           9.0           |
+| $(x_2, y_2)$ |      154       |           7.9           |
+| $(x_3, y_3)$ |      233       |           8.7           |
+
+## Why do we estimate $f$?
+
+1.  **Prediction** : Machine Learning
+
+-   A set of inputs $X$ are readily available, but $Y$ cannot be easily obtained.
+
+-   We can predict $Y$ by: $\hat{Y} = \hat{f}(X)$ where $\hat{f}$ is our **predictive model** for $f$.
+
+-   The function $\hat{f}$ is often treated as a **black box**: we are not concerned with the exact form of $\hat{f}$ provided it yields good prediction for $Y$.
+
+2.  **Inference**: Classical Multivariate Analysis
+
+-   We are often interested in understanding **how** $Y$ is affected as $X_1, \dots, X_p$ change.
+-   Cannot treat $\hat{f}$ as a black box; we need to know the exact form.
+-   We want to answer questions such as:
+    -   Which predictor is associated with the response?
+    -   What is the relationship of the response and each predictor (positive, negative, ...)?
+    -   Is the relationship linear or more complicated?
+    -   etc.
