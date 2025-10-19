@@ -517,7 +517,7 @@ We square the error for three main reasons:
 This ensures that every observation is used for both training and testing, giving a more robust estimate of the model’s predictive accuracy.
 
 | Concept | Definition | Interpretation |
-|:-----------------------|:-----------------------|:-----------------------|
+|:---|:---|:---|
 | $\text{Err}_{\hat{f}}$ | $\mathbb{E}\{[Y - \hat{f}(X)]^2\}$ | True (theoretical) expected error |
 | $\text{err}_{\hat{f}}$ | $\frac{1}{m} \sum_{i=1}^{m} [\tilde{y}_i - \hat{f}(\tilde{x}_i)]^2$ | Empirical estimate (MSE) from test data |
 
