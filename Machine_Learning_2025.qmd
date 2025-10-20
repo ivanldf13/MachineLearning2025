@@ -1365,3 +1365,237 @@ The **right panel** again shows the cross-validation MSE across values of $\lamb
 Together, these results demonstrate how both ridge and lasso manage the bias–variance trade-off, but differ in **model complexity**: ridge smooths coefficients continuously, while lasso introduces sparsity by setting some exactly to zero.
 
 ## 
+
+# Image Recognition
+
+## Image Recognition: introduction 
+
+Image recognition aims to identify or classify objects within digital images by learning the relationship between pixel intensities and their corresponding labels. Each image is represented as a grid of pixels, where each pixel encodes the degree of darkness on a greyscale from 0 (white) to 9 (black). In this example, every handwritten digit image consists of $16 \times 16 = 256$ pixels, meaning we have 256 predictors for each observation.
+
+Each predictor corresponds to a specific pixel intensity, and together these values form a feature vector $\mathbf{x}_i = (x_{i1}, x_{i2}, \ldots, x_{i256})$. The model learns a mapping $\hat{f}(\mathbf{x}_i)$ that associates these pixel values with the corresponding digit label $y_i \in \{0, \ldots, 9\}$. Classification algorithms such as logistic regression, neural networks, or convolutional networks can be used to learn this mapping.
+
+This approach converts visual information into numerical data, allowing statistical or machine learning methods to identify complex patterns of brightness and shape that define each digit. The more pixels that are used as predictors, the higher the potential resolution and detail the model can learn, although this also increases computational cost and the need for regularisation.
+
+## Two-class classiﬁcation: one predictor
+
+The two rows of digits above illustrate how the greyscale information is represented numerically. The top row shows examples of handwritten digits, while the bottom row highlights in red the pixel being used as a predictor (marked with a blue cross). Each pixel’s greyscale value serves as an input feature $x_{ij}$, and the task is to learn which configurations of these features correspond to each digit.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Two-class example:} If we simplify the problem to classify only two digits (e.g. zero and one), a single pixel can already provide limited predictive power. Suppose we use the value at Pixel 1 (blue cross) as our predictor $X_1$. Applying logistic regression, we can fit a classifier based solely on $X_1$. The decision boundary divides the range of pixel values into regions associated with each class.
+
+\smallskip
+
+The predictor and class definitions are:
+\begin{itemize}
+\tightlist
+\item Value at Pixel 1 (blue cross) is the predictor, $X_1 \in [-1, 1]$.
+\item The class is $Y \in \{0, 1\} = \{\text{zero}, \text{one}\}$.
+\item Logistic regression provides the following classifier:
+\end{itemize}
+$$\hat{G}(x) =
+\begin{cases}
+\text{zero} & \text{if (Pixel 1) < 0.45} \\
+\text{one} & \text{otherwise.}
+\end{cases}$$
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_op_plot.png}
+\caption{Two-class classification using a single pixel as predictor}
+\label{fig-ML6-op-plot}
+\end{figure}
+\end{minipage}
+
+This shows that even a single pixel may carry some information about class membership, but meaningful recognition requires combining all 256 pixel predictors to capture the full spatial structure of each digit. As seen in Figure~\ref{fig-ML6-op-plot}, logistic regression produces a smooth probability curve separating the two classes based on Pixel 1 intensity.
+
+## Two-class classification: two predictors
+
+We now extend the previous example to include two pixel predictors instead of one. Each handwritten image is still represented as a $16 \times 16$ greyscale matrix, but we now focus on two specific pixel locations whose intensity values serve as features. Let these be $X_1$ (Pixel 1) and $X_2$ (Pixel 2), each scaled to the interval $[-1, 1]$. The model must distinguish between two classes, $Y \in \{0, 1\} = \{\text{zero}, \text{one}\}$, based on these two predictors.
+
+![](Images_qmd_ML/ML6_two_pred.png)
+
+The two rows above show examples of handwritten zeros and ones. The blue crosses mark the pixels chosen as predictors. The top row displays the original digits, while the bottom row highlights in red the regions where these two pixels vary in intensity. Together, $X_1$ and $X_2$ capture more information about the digit’s shape than a single pixel could, since their joint variation reflects spatial structure.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Two predictors:} Increasing the number of predictors from one to two allows the classifier to capture dependencies between neighbouring pixels. The logistic regression model now uses two predictors to estimate a decision boundary in the $(X_1, X_2)$ plane. The following definitions summarise the setup:
+
+\smallskip
+
+\begin{itemize}
+\tightlist
+\item $p = 2$: Predictors are  
+  $X_1 =$ “value at Pixel 1” $\in [-1, 1]$,  
+  $X_2 =$ “value at Pixel 2” $\in [-1, 1]$.
+\item The class is $Y \in \{0, 1\} = \{\text{zero}, \text{one}\}$.
+\item We apply logistic regression to obtain a classifier based only on $X_1$ and $X_2$.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_op_plot_2pred.png}
+\caption{Two-class classification using two pixel predictors}
+\label{fig-ML6-op-plot-2pred}
+\end{figure}
+\end{minipage}
+
+As seen in Figure \ref{fig-ML6-op-plot-2pred}, the logistic regression model constructs a linear decision boundary in the two-dimensional pixel space. Although still a simple model, it illustrates how combining multiple pixel predictors improves the classifier’s ability to capture the geometric characteristics of each digit.
+
+## 10-class classification: two predictors
+
+We now extend the model to classify all ten digits simultaneously. Each handwritten image is represented by 256 pixel intensities, but here we restrict the model to use only two predictors: $X_1$ (Pixel 1) and $X_2$ (Pixel 2), each scaled to the interval $[-1, 1]$. The goal is to predict one of ten classes $Y \in \{0, 1, \ldots, 9\} = \{\text{zero}, \text{one}, \ldots, \text{nine}\}$ using just these two features.
+
+![](Images_qmd_ML/ML6_col_numb.png)
+
+The digits above illustrate the complexity of the task. The blue crosses mark the two pixel positions used as predictors. Although these pixels provide some information about local brightness, they are clearly insufficient to distinguish all ten digits reliably. This visual example highlights how limited features constrain the classifier’s ability to capture the structural variation among digits.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Ten classes with two predictors:} Extending from binary to multiclass classification requires the model to output a probability distribution across ten possible classes. The logistic regression generalises to a \emph{multinomial regression} model. The main elements are:
+
+\smallskip
+
+\begin{itemize}
+\tightlist
+\item $p = 2$: Predictors are  
+  $X_1 =$ “value at Pixel 1” $\in [-1, 1]$,  
+  $X_2 =$ “value at Pixel 2” $\in [-1, 1]$.
+\item The class is $Y \in \{0, 1, \ldots, 9\} = \{\text{zero}, \text{one}, \ldots, \text{nine}\}$.
+\item We apply \emph{multinomial regression} based only on $X_1$ and $X_2$, though with only two pixels this remains a very difficult task.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_col_plot.png}
+\caption{Ten-class classification using two pixel predictors}
+\label{fig-ML6-col-plot}
+\end{figure}
+\end{minipage}
+
+As seen in Figure \ref{fig-ML6-col-plot}, the classifier attempts to separate the ten classes within the $(X_1, X_2)$ plane, but the overlap between classes is substantial. With only two predictors, the model cannot capture the high-dimensional structure of the digits, showing why richer feature sets are essential for effective image recognition. Luckily, we have $p = 256$ predictors (pixel values) to perform this task.
+
+## Digit classification
+
+We now apply the classification methods to the full ten-digit problem using all $p = 256$ pixel predictors. Each image is represented as a point in $\mathbb{R}^{256}$, where the predictors $\mathbf{x}_i$ correspond to the greyscale values of all pixels, and the outcome $y_i$ indicates which digit is shown.
+
+![](Images_qmd_ML/ML6_digit_class.png){#fig-ML6-digit-class}
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Training and test data:}  
+\begin{itemize}
+\tightlist
+\item Training data $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_n, y_n)$, $n = 7290$, are used for model fitting and selection.  
+  \begin{itemize}
+  \tightlist
+  \item Predictors $\mathbf{x}_i =$ $i$-th image $\in \mathbb{R}^p$ are the greyscale pixel values.  
+  \item Outcomes $y_i =$ $i$-th digit $\in \{\text{zero}, \text{one}, \ldots, \text{nine}\}$.
+  \end{itemize}
+\item Test data $(\hat{\mathbf{x}}_1, \hat{y}_1), \ldots, (\hat{\mathbf{x}}_m, \hat{y}_m)$, $m = 2006$, are not used for fitting or selection, only for evaluating performance.
+\end{itemize}
+
+\smallskip
+\textbf{Models compared:}  
+\begin{itemize}
+\tightlist
+\item \textbf{linreg:} direct linear regression.  
+\item \textbf{LDA1:} Linear Discriminant Analysis (LDA) based on the values $x_i$.  
+\item \textbf{LDA2:} LDA based on $x_i$ and $x_i^2$.  
+\item \textbf{QDA:} Quadratic Discriminant Analysis with a distinct covariance matrix for each class.  
+\item \textbf{log:} logistic (multinomial) regression.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\textbf{Training and test errors (\%)}  
+\begin{tabular}{lcc}
+\hline
+Method & Training & Test \\
+\hline
+linreg & 7.6 & 13.1 \\
+LDA1 & 6.2 & 11.5 \\
+LDA2 & 3.9 & 10.2 \\
+QDA & 1.8 & 13.5 \\
+log & 0.01 & 11.1 \\
+\hline
+\end{tabular}
+\end{center}
+\end{minipage}
+
+QDA yields the lowest training error but performs worst on the test data due to high variance and overfitting. In contrast, multinomial logistic regression achieves a balanced trade-off between bias and variance, maintaining strong generalisation performance across unseen digits.
+
+## Digit classification: visualisation of LDA1
+
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_LDA1.png}
+\caption{Estimated class centres from LDA1}
+\label{fig-ML6-LDA1}
+\end{figure}
+\end{minipage}
+\hfill
+\begin{minipage}{0.55\textwidth}
+\textbf{Visualising class centres:}  
+The figure on the left shows the estimated class means $\hat{\mu}_1, \ldots, \hat{\mu}_q$ obtained from the LDA1 model. Each image corresponds to the \emph{average digit} for one class, formed by taking the mean pixel intensity across all training examples belonging to that class.
+
+This visualisation provides an intuitive impression of the class centroids, illustrating how the model perceives the typical form of each handwritten digit. In other words, it shows how an “average” American writer tends to shape the digits 0–9.
+\end{minipage}
+
+
+## Example: digit classification
+
+The table below shows a few misclassified test observations from the LDA1 model. Each row corresponds to one test image, with its true label shown in parentheses. The ten columns on the right display the predicted class probabilities (in %) for $k \in \{0, \ldots, 9\}$.
+
+These results illustrate how the model distributes probability mass across different classes when uncertain. For example, a digit “6” may be partly misclassified as an “8” if the loop closure is faint, or a “9” mistaken for a “4” if the stem is short. Such errors reveal how subtle variations in handwriting can affect class boundaries and show the limits of simple linear discriminant models.
+
+![](Images_qmd_ML/ML6_dig_class.png)
+
+## Digit classification with regularisation
+
+We can now refine our previous results on digit classification (see @fig-ML6-digit-class). When estimating the multinomial logistic regression, we introduce two regularisation terms in the likelihood: a \emph{ridge penalty} and a \emph{lasso penalty}. These control model complexity by shrinking or selecting coefficients, helping to prevent overfitting.
+
+The optimal tuning parameters $\hat{\lambda}$ for both penalties are determined by 5-fold cross-validation, balancing the trade-off between training accuracy and test performance.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Models compared:}  
+\begin{itemize}
+\tightlist
+\item \textbf{linreg:} direct linear regression.  
+\item \textbf{LDA1:} Linear Discriminant Analysis (LDA) based on the values $x_i$.  
+\item \textbf{LDA2:} LDA based on $x_i$ and $x_i^2$.  
+\item \textbf{QDA:} Quadratic Discriminant Analysis with a distinct covariance matrix for each class.  
+\item \textbf{log:} logistic regression (multinomial).  
+\item \textbf{log-ridge:} logistic regression (multinomial) with ridge penalty.  
+\item \textbf{log-lasso:} logistic regression (multinomial) with lasso penalty.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\textbf{Training and test errors (\%)}  
+\begin{tabular}{lcc}
+\hline
+Method & Training & Test \\
+\hline
+linreg & 7.6 & 13.1 \\
+LDA1 & 6.2 & 11.5 \\
+LDA2 & 3.9 & 10.2 \\
+QDA & 1.8 & 13.5 \\
+log & 0.01 & 11.1 \\
+log-ridge & 4.1 & 9.0 \\
+log-lasso & 2.7 & 8.8 \\
+\hline
+\end{tabular}
+\end{center}
+\end{minipage}
+
+Regularisation improves generalisation by penalising overly complex models. Both ridge and lasso versions outperform unpenalised logistic regression, reducing the test error to below 9%. The lasso penalty performs slightly better, as it enforces sparsity by effectively selecting the most informative pixel predictors.
+
+#
+
+## 
