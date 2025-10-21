@@ -1368,7 +1368,7 @@ Together, these results demonstrate how both ridge and lasso manage the bias–v
 
 # Image Recognition
 
-## Image Recognition: introduction 
+## Image Recognition: introduction
 
 Image recognition aims to identify or classify objects within digital images by learning the relationship between pixel intensities and their corresponding labels. Each image is represented as a grid of pixels, where each pixel encodes the degree of darkness on a greyscale from 0 (white) to 9 (black). In this example, every handwritten digit image consists of $16 \times 16 = 256$ pixels, meaning we have 256 predictors for each observation.
 
@@ -1408,7 +1408,7 @@ $$\hat{G}(x) =
 \end{figure}
 \end{minipage}
 
-This shows that even a single pixel may carry some information about class membership, but meaningful recognition requires combining all 256 pixel predictors to capture the full spatial structure of each digit. As seen in Figure~\ref{fig-ML6-op-plot}, logistic regression produces a smooth probability curve separating the two classes based on Pixel 1 intensity.
+This shows that even a single pixel may carry some information about class membership, but meaningful recognition requires combining all 256 pixel predictors to capture the full spatial structure of each digit. As seen in Figure\~\ref{fig-ML6-op-plot}, logistic regression produces a smooth probability curve separating the two classes based on Pixel 1 intensity.
 
 ## Two-class classification: two predictors
 
@@ -1546,7 +1546,6 @@ The figure on the left shows the estimated class means $\hat{\mu}_1, \ldots, \ha
 This visualisation provides an intuitive impression of the class centroids, illustrating how the model perceives the typical form of each handwritten digit. In other words, it shows how an “average” American writer tends to shape the digits 0–9.
 \end{minipage}
 
-
 ## Example: digit classification
 
 The table below shows a few misclassified test observations from the LDA1 model. Each row corresponds to one test image, with its true label shown in parentheses. The ten columns on the right display the predicted class probabilities (in %) for $k \in \{0, \ldots, 9\}$.
@@ -1596,6 +1595,176 @@ log-lasso & 2.7 & 8.8 \\
 
 Regularisation improves generalisation by penalising overly complex models. Both ridge and lasso versions outperform unpenalised logistic regression, reducing the test error to below 9%. The lasso penalty performs slightly better, as it enforces sparsity by effectively selecting the most informative pixel predictors.
 
-#
+# Decision trees: regression
+
+## Tree-based methods
+
+Tree-based methods stratify or segment the feature space recursively into simple regions, denoted $R_1, \ldots, R_J$. They can be applied to both classification and regression tasks.\
+For a given observation, the prediction corresponds to either:
+
+\- the \emph{mean} of the training responses in the region (for regression), or\
+- the \emph{most common class} of the training observations in the region (for classification).
+
+The method divides the input space into rectangles that are successively refined, producing a piecewise-constant model with clear interpretability.
+
+![](Images_qmd_ML/ML6_tbm.png){#fig-tbm}
+
+Tree-based approaches can be grouped as follows:
+
+1\. **Decision trees:** Single trees offering clear interpretability and simple decision rules.\
+2. **Bagging / Boosting:** Methods combining multiple trees to improve prediction accuracy by reducing variance or bias.\
+3. **Random forests:** Ensembles that decorrelate bagged trees, increasing stability and robustness.
+
+As illustrated in Figure @fig-tbm, the **left panel** displays a small regression tree built using the predictors *age* ($X_1$) and *cancer size* ($X_2$). Each internal node represents a decision rule that splits the data based on a threshold value (e.g. *size < 0.14*), dividing observations into smaller, more homogeneous groups. The **terminal nodes** (leaves) indicate the predicted response for each region. In this example, coloured as *red* and *black* to distinguish lower and higher predicted values.
+
+The **right panel** shows how these splits translate into a partitioning of the two-dimensional predictor space. Each rectangular region corresponds to one terminal node from the tree, defining an area where all observations receive the same fitted value. The vertical and horizontal lines represent the thresholds used in the tree’s internal splits. Collectively, these partitions form a **piecewise-constant regression surface**, demonstrating how decision trees approximate complex, nonlinear relationships through a sequence of simple, interpretable divisions.
+
+## Example: Hitters data set
+
+As introduced in Figure \ref{fig-hitters}, the \textbf{Hitters} data set from the \emph{ISLR} package contains the annual \textbf{Salary} of 263 baseball players and $p = 19$ predictors such as the number of \textbf{Years} played in the major leagues and the number of \textbf{Hits} during the previous season.
+
+In what follows, we focus only on the variables \emph{Years} and \emph{Hits} to illustrate how a \textbf{regression tree} predicts the (log) salary of a player. This simplified example allows us to visualise how the tree partitions the feature space and introduces the main terminology of tree models.
+
+## Regression trees: terminology
+
+\begin{minipage}{0.55\textwidth}
+We fit a regression tree to predict the log \textbf{Salary} of a baseball player using only \textbf{Years} and \textbf{Hits} as predictors from the \textbf{Hitters} data set.\par
+Each split in the tree is called a \textbf{node}, and a terminal node is referred to as a \textbf{leaf}. The interior nodes connect to further branches, forming a hierarchical structure of decision rules.\par
+The label $(X_j < t)$ indicates the \emph{left-hand branch} from a split, while $(X_j \ge t)$ corresponds to the \emph{right-hand branch}. Each leaf contains the mean predicted value for all observations that fall into that region.\par
+An important advantage of trees is their strong \textbf{interpretability}: the step-by-step structure mirrors how humans make sequential decisions, making them highly intuitive in applied prediction problems.
+\end{minipage}\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_regtree_terms.png}
+\caption{Regression tree predicting log Salary using Years and Hits}
+\label{fig-ML6-regtree-terms}
+\end{figure}
+\end{minipage}
+
+## Regression trees: segmentation of feature space
+
+The regression tree partitions the feature space into three regions, each corresponding to one of the terminal nodes (leaves). Each region $R_j$ contains the observations that satisfy the set of split conditions leading to that node.
+
+-   $R_1 = \{\mathbf{X} \mid \text{Years} < 4.5\}$,
+-   $R_2 = \{\mathbf{X} \mid \text{Years} \ge 4.5,\, \text{Hits} < 117.5\}$,
+-   $R_3 = \{\mathbf{X} \mid \text{Years} \ge 4.5,\, \text{Hits} \ge 117.5\}$.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Interpretation:}
+\begin{itemize}
+\tightlist
+\item \emph{Years} is the most influential variable in determining \textbf{Salary}: players with fewer than 4.5 years of experience tend to earn less.  
+\item Among more experienced players, \emph{Hits} becomes relevant, i.e., those with more than 117.5 hits typically have higher salaries.  
+\item This simple tree structure highlights how regression trees create interpretable, piecewise-constant models of salary prediction.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML6_regtree_seg.png}
+\caption{Segmentation of feature space by the regression tree}
+\label{fig-ML6-regtree-seg}
+\end{figure}
+\end{minipage}
+
+## How to grow a regression tree?
+
+Given a training data set $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_n, y_n)$ with $\mathbf{x}_i \in \mathbb{R}^p$ and $y_i \in \mathbb{R}$, we seek to construct a regression tree that divides the predictor space into $J$ non-overlapping regions $R_1, \ldots, R_J$.
+
+-   The goal is to partition the predictor space $(X_1, \ldots, X_p)$ into distinct regions that are as homogeneous as possible with respect to the response $y_i$.
+
+-   Although the regions could take any shape, regression trees restrict them to high-dimensional **rectangles (boxes)** for interpretability.
+
+-   For each observation falling into region $R_j$, we predict a constant value: $$ \hat{y}_{R_j} = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} y_i $$\
+    where $n_j$ is the number of training observations in region $R_j$.
+
+-   The prediction in each region is thus the **mean** of the training responses for that region
+
+-   The optimal partitioning aims to find the regions $R_1, \ldots, R_J$ that minimise the residual sum of squares (RSS): $$ \sum_{j=1}^{J} \sum_{i : \mathbf{x}_i \in R_j} (y_i - \hat{y}_{R_j})^2$$ This recursive partitioning procedure builds the tree by successively splitting the predictor space to reduce the RSS at each step, producing a hierarchy of simple, interpretable decision rules.
+
+## Tree growing: greedy algorithm
+
+It is computationally infeasible to test all possible ways of dividing the feature space into $J$ regions. Instead, regression trees are built using a **top-down, greedy algorithm**, also known as **recursive binary splitting**.
+
+-   It is *top-down* because it starts at the root (the full training set) and **recursively splits** the predictor space into smaller regions.
+-   It is *greedy* because each split is chosen to produce the best immediate improvement in fit, without considering future splits.
+-   At each step, the algorithm searches over all predictors and all possible split points to find the combination $(j, t)$ that minimises the Residual Sum of Squares (RSS).
+-   The process continues until a **stopping criterion** is reached. For example, when no region contains more than a minimum number of observations.
+
+Formally, for each predictor $X_j$ and potential cutpoint $t$, we define the half-planes:
+
+$$R_1(j, t) = \{ \mathbf{X} \mid X_j < t \}, \quad R_2(j, t) = \{ \mathbf{X} \mid X_j \ge t \}.$$
+
+The algorithm finds the values $(j^*, t^*)$ that minimise the sum of squared residuals:
+
+$$\sum_{i : \mathbf{x}_i \in R_1(j, t)} (y_i - \hat{y}_{R_1(j, t)})^2 + \sum_{i : \mathbf{x}_i \in R_2(j, t)} (y_i - \hat{y}_{R_2(j, t)})^2.$$
+
+The splitting process is then repeated **recursively** on the resulting regions, producing a hierarchical partitioning of the predictor space.
+
+Once the regions $R_1, \ldots, R_J$ are formed, predictions for a new observation $\mathbf{x}$ are made by assigning it to the appropriate region $R_j$ and using the average response within that region:
+
+$$\hat{f}(\mathbf{x}) = \sum_{j=1}^{J} \hat{y}_{R_j} \mathbf{1}\{ \mathbf{x} \in R_j \}.$$
+
+## Regression tree: two-dimensional feature space
+
+A regression tree partitions the predictor space into a series of non-overlapping rectangular regions. In a two-dimensional example with predictors $X_1$ and $X_2$, the recursive binary splits successively divide the plane into subregions $\{R_1, R_2, \ldots, R_5\}$.
+
+Each split corresponds to a threshold (cutpoint) on one of the variables, forming a hierarchical structure as shown below. The final model can be visualised both as a **tree diagram** and as a **piecewise-constant surface**, where each flat region represents the predicted response $\hat{y}_{R_j}$ for all observations in $R_j$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\linewidth]{Images_qmd_ML/ML6_2D_tree.png}
+\caption{Two-dimensional feature space partition and corresponding regression tree}
+\label{fig-ML6-2D-tree}
+\end{figure}
+
+## Cost-complexity pruning
+
+When a tree is fully grown, it may overfit the training data. To improve generalisation, we prune it to a smaller subtree that balances fit and simplicity. This is achieved through **cost-complexity pruning** (or *weakest-link pruning*).
+
+We consider a sequence of trees indexed by a tuning parameter $\alpha \ge 0$. For each $\alpha$, the corresponding subtree $T_\alpha \subset T_0$ minimises:
+
+$$ \sum_{j=1}^{|T_\alpha|} \sum_{i : \mathbf{x}_i \in R_j} (y_i - \hat{y}_{R_j})^2 + \alpha |T_\alpha|. $$
+
+-   The first term measures the **fit** of the tree (training error).
+-   The second term $\alpha |T_\alpha|$ penalises **model complexity**, where $|T_\alpha|$ is the number of terminal nodes.
+-   The tuning parameter $\alpha$ controls the degree of pruning:
+    -   Large $\alpha$ → stronger penalty → simpler tree.
+    -   Small $\alpha$ → weaker penalty → larger tree.
+-   $\alpha$ plays a similar role to $\lambda$ in ridge or lasso regression.
+-   The optimal $\alpha$ is typically selected by **cross-validation**.
+
+![cost-complexity pruning applied to a regression tree](Images_qmd_ML/ML6_pruned_tree.png){#fig-pruned-tree width="70%" fig-align="center"}
+
+As we can see in Figure @fig-pruned-tree, the **pruned tree** is a simplified version of the original full tree grown on the *Hitters* dataset.\
+Each internal node splits the data based on one predictor (e.g. `Years`, `Hits`, or `Walks`), while each **leaf** represents the **average log-salary** for players falling into that region.
+
+-   Players with **few years in the league** and **low hits** are predicted to have **lower salaries**.
+-   More experienced players with **higher hits** or **walks** tend to have **higher predicted salaries**.
+-   By pruning, redundant splits are removed, retaining only those that meaningfully reduce the prediction error.
+
+The pruned tree thus strikes a **bias–variance balance**: it is simpler (less variance) but still captures the main salary patterns (low bias), leading to better test performance.
+
+## Regression example: Hitters data set
+
+To evaluate the effect of pruning, the **Hitters** data set is split into 132 training observations and 131 test observations.\
+A large regression tree is first grown on the training data and then **pruned** by varying the penalty parameter $\alpha$ to obtain subtrees with different numbers of terminal nodes.
+
+**Six-fold cross-validation** is performed on the 132 training observations to estimate the mean squared error (MSE) for each subtree.\
+The final test error is computed on the 131 test observations, which are **not used** for model fitting or selection.
+
+![Cross-validation and test errors for trees of increasing size](Images_qmd_ML/ML6_prune_cv_plot.png){#fig-prune-cv-plot width="70%" fig-align="center"}
+
+As we see in @fig-prune-cv-plot, **training error** (black) continues to decrease as the tree grows, while **cross-validation** (green) and **test** (orange) errors reach a minimum and then rise again, a clear sign of **overfitting** beyond the optimal tree size.
+
+-   Small trees underfit the data, yielding high bias and poor predictive accuracy.
+-   Large trees overfit, capturing noise and yielding high variance.
+-   The **optimal subtree** is chosen where the **cross-validation error is minimal**, achieving the best balance between bias and variance.
+
+In the *Hitters* example, this corresponds to a **moderately sized tree** that retains the main predictors (Years, Hits, Walks) while discarding redundant splits, leading to improved generalisation performance.
+
+# 
 
 ## 
