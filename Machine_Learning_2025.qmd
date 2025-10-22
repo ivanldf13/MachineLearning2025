@@ -1615,7 +1615,7 @@ Tree-based approaches can be grouped as follows:
 2. **Bagging / Boosting:** Methods combining multiple trees to improve prediction accuracy by reducing variance or bias.\
 3. **Random forests:** Ensembles that decorrelate bagged trees, increasing stability and robustness.
 
-As illustrated in Figure @fig-tbm, the **left panel** displays a small regression tree built using the predictors *age* ($X_1$) and *cancer size* ($X_2$). Each internal node represents a decision rule that splits the data based on a threshold value (e.g. *size < 0.14*), dividing observations into smaller, more homogeneous groups. The **terminal nodes** (leaves) indicate the predicted response for each region. In this example, coloured as *red* and *black* to distinguish lower and higher predicted values.
+As illustrated in Figure @fig-tbm, the **left panel** displays a small regression tree built using the predictors *age* ($X_1$) and *cancer size* ($X_2$). Each internal node represents a decision rule that splits the data based on a threshold value (e.g. *size \< 0.14*), dividing observations into smaller, more homogeneous groups. The **terminal nodes** (leaves) indicate the predicted response for each region. In this example, coloured as *red* and *black* to distinguish lower and higher predicted values.
 
 The **right panel** shows how these splits translate into a partitioning of the two-dimensional predictor space. Each rectangular region corresponds to one terminal node from the tree, defining an area where all observations receive the same fitted value. The vertical and horizontal lines represent the thresholds used in the tree’s internal splits. Collectively, these partitions form a **piecewise-constant regression surface**, demonstrating how decision trees approximate complex, nonlinear relationships through a sequence of simple, interpretable divisions.
 
@@ -1765,6 +1765,128 @@ As we see in @fig-prune-cv-plot, **training error** (black) continues to decreas
 
 In the *Hitters* example, this corresponds to a **moderately sized tree** that retains the main predictors (Years, Hits, Walks) while discarding redundant splits, leading to improved generalisation performance.
 
-# 
+# Decision trees: classification
 
-## 
+## Classification trees
+
+**Classification trees** are conceptually similar to regression trees, except that they predict a **qualitative** rather than a **quantitative** response. The response variable takes values in a finite set $\mathcal{G} = \{1, \ldots, q\}$, representing different classes.
+
+For each region $R_j$, the prediction is a constant $\hat{y}_{R_j}$ corresponding to the **most frequently occurring class** among the training observations that fall into that region. Formally, for class $g = 1, \ldots, q$: $$\hat{p}_{jg} = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} \mathbf{1}\{y_i = g\}.$$
+
+Hence, the classifier assigns each new observation to the region $R_j$ that maximises $\hat{p}_{jg}$, producing the final prediction function: $$\hat{G}(\mathbf{x}) = \sum_{j=1}^{J} \hat{y}_{R_j} \mathbf{1}\{\mathbf{x} \in R_j\}.$$
+
+The construction principles — such as **tree growth**, **pruning**, and **subtree selection** — are the same as in regression trees. However, the **residual sum of squares (RSS)** cannot be used as a loss function for qualitative outcomes. Instead, classification trees rely on **measures of node impurity**, which quantify the heterogeneity of classes within a region.
+
+Common impurity measures for a terminal node $R_j$ include:
+
+1.  **Misclassification error:** $$M = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} \mathbf{1}\{y_i \ne \hat{y}_{R_j}\}.$$
+
+2.  \*\*Gini index:\* $$G = \sum_{g=1}^{q} \hat{p}_{jg} (1 - \hat{p}_{jg}).$$
+
+3.  **Cross-entropy (or deviance):** $$D = - \sum_{g=1}^{q} \hat{p}_{jg} \log \hat{p}_{jg}.$$
+
+These impurity measures are minimised when the node is “pure”, meaning that nearly all observations within it belong to the same class.
+
+## Node impurity measures
+
+-   In the case of two classes (see Figure @fig-node-imp below), the **misclassification error** is $1 - \max(p, 1 - p)$ (black), the **Gini index** is $2p(1 - p)$ (blue), and the **cross-entropy** is $-p \log p - (1 - p) \log(1 - p)$ (red).
+
+-   The misclassification impurity is non-differentiable and thus unsuitable for optimisation.
+
+-   The Gini index and the cross-entropy both **favour pure nodes**, where $p_{jg} \approx 0$ or $p_{jg} \approx 1$; they are numerically very similar.
+
+![](Images_qmd_ML/ML6_node_imp.png){#fig-node-imp width="60%" fig-align="center"}
+
+-   As we see above in Figure @fig-node-imp, both the Gini and cross-entropy curves decrease smoothly toward zero as the node becomes purer.
+
+-   The cross-entropy (red) penalises uncertainty more strongly around $p = 0.5$, offering steeper gradients that make it more sensitive than the Gini index (blue).
+
+-   The misclassification error (black), by contrast, changes abruptly and lacks the smoothness required for effective optimisation.
+
+## Example: heart disease
+
+The **heart** data set from the *ISLR* package records whether or not a patient has a heart disease (AHD), i.e. $G \in \{\text{Yes}, \text{No}\}$, for 303 patients who presented with chest pain. There are 13 predictors (e.g. *sex*, *age*, *chol*, …). A subset of the data is shown below:
+
+| **AHD** | **Age** | **Sex** | **ChestPain** | **RestBP** | **Chol** | **Fbs** | **RestECG** | **MaxHR** |
+|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
+| No | 63 | 1 | typical | 145 | 233 | 1 | 2 | 150 |
+| Yes | 67 | 1 | asymptomatic | 160 | 286 | 0 | 2 | 108 |
+| Yes | 67 | 1 | asymptomatic | 120 | 229 | 0 | 2 | 129 |
+
+![Unpruned tree](Images_qmd_ML/ML6_heart_t_unprun.png){#fig-heart-tree width="80%" fig-align="center"}
+
+A **classification tree** is fitted to predict the presence of heart disease (Yes/No). The tree uses variables such as *Thal*, *Ca*, *ChestPain*, and *MaxHR* to partition patients into subgroups with different risk levels.
+
+In @fig-heart-tree we can see the **unpruned tree**, which is relatively complex and may overfit the training data.
+
+![Training, CV and Test errors & Pruned tree](Images_qmd_ML/ML6_heart_t_prun.png){#fig-heart-pruned width="80%" fig-align="center"}
+
+In Figure @fig-heart-pruned, the **bottom-left panel** shows the training, cross-validation, and test errors for trees of increasing size. The **bottom-right panel** shows the **pruned tree** corresponding to the optimal level of complexity, selected by cross-validation. Pruning simplifies the model, improving interpretability while maintaining nearly the same predictive accuracy.
+
+In this tree, several predictors are qualitative, for example, *Thal* and *ChestPain*. The algorithm evaluates all possible binary partitions of their categories. For instance, the split *ChestPain:bc* divides the data into two groups, one with “typical” or “asymptomatic” pain and another with “nonanginal” or “nontypical” patterns.
+
+Some splits lead to terminal nodes with the same predicted value, increasing **node purity**, i.e. greater certainty in classification. Decision trees can also handle missing predictor values directly, maintaining robustness during prediction.
+
+## usTree growing in Python
+
+The following tree, shown in @fig-tree-py, was generated using the *Heart* dataset in Python with `DecisionTreeClassifier` from *scikit-learn*. It predicts whether a patient has heart disease (`Yes`/`No`) based on three main predictors: **Thal**, **Ca**, and **Age**.
+
+![Decision tree for heart disease prediction](Images_qmd_ML/ML6_tre_py.png){#fig-tree-py width="70%" fig-align="center"}
+
+The algorithm splits the data recursively to minimise node impurity, measured by the *Gini index*. Each node in the tree contains the following information:
+
+-   **Splitting rule** (e.g. `Thal_normal <= 0.5`): the condition dividing the observations into left and right child nodes.
+-   **Samples**: percentage of training instances reaching that node.
+-   **Value**: class proportions for `No` (first element) and `Yes` (second element).
+-   **Colour intensity**: indicates the dominant class, with blue for `No disease` and orange for `Heart disease`.
+-   The **root node** splits first on `Thal_normal <= 0.5`, distinguishing patients based on the *Thal* test results, i.e., the most informative feature.
+-   For patients with `Thal_normal > 0.5`, the next split occurs on `Age <= 53.5`, separating younger and older individuals.
+-   For those with `Thal_normal <= 0.5`, the split is on `Ca <= 0.5`, reflecting calcium levels in major vessels as a key determinant.
+
+The **leaf nodes** display the predicted class probabilities. For example:
+
+-   The leftmost leaf shows patients with *abnormal Thal* and *low calcium* having a **54% chance of not having heart disease**.
+-   The rightmost leaf shows older patients with *normal Thal* having a **64% chance of heart disease**.
+
+This visualisation illustrates how a decision tree partitions the predictor space into regions of high class homogeneity. In other words, it forms a simple yet interpretable classification model.
+
+## Cost-complexity pruning in Python
+
+The **cross-validation (CV) error plot**, shown in Figure @fig-cv-error, illustrates how the model’s performance changes as the pruning parameter $\alpha$ increases.
+
+![Cross-validation error plot](Images_qmd_ML/ML6_CV_error.png){#fig-cv-error width="65%" fig-align="center"}
+
+As $\alpha$ grows, the penalty for tree complexity becomes stronger, leading to **simpler trees** with fewer splits. Initially, this reduces **overfitting**, and the CV error decreases. However, beyond an optimal point, excessive pruning causes **underfitting**, and the CV error rises again.  
+
+The **minimum of the CV error curve** corresponds to the value of $\alpha$ that achieves the best trade-off between bias and variance — that is, the subtree with the lowest expected prediction error on unseen data.
+
+## Trees versus linear classifiers
+
+![](Images_qmd_ML/ML6_trees_vs_linear.png){#fig-trees-vs-linear width="80%" fig-align="center"}
+
+The plots in @fig-trees-vs-linear compare **decision trees** and **linear classifiers** in two-dimensional feature spaces.  
+
+- The **top-left** panel shows a linear classifier that separates the feature space using a single straight decision boundary.  
+- The **top-right** panel illustrates how a decision tree can approximate that same boundary by performing multiple **axis-aligned splits**, resulting in a stepwise partition of the space.  
+- The **bottom-left** panel shows a situation where the relationship between predictors is non-linear; here, trees can flexibly adapt their partitions to capture local structure that linear models would miss.  
+- The **bottom-right** panel demonstrates how trees create **rectangular regions** that align with the axes, providing a highly interpretable model at the cost of some boundary smoothness.  
+
+Overall, decision trees can approximate complex decision boundaries, while linear models are constrained to global linear relationships.
+
+## Pros and cons of trees
+
+**Pros**
+- Trees are very **easy to explain** and interpret — even more so than linear regression.  
+- They **mirror human decision-making**, following a sequential and intuitive structure.  
+- Results can be visualised **graphically**, making them accessible to non-experts.  
+- Can naturally handle **qualitative predictors** without requiring dummy variables.
+
+**Cons**
+- Single trees generally have **poor predictive performance** compared to ensemble methods.  
+- They are **highly sensitive** to small changes in the data, which can lead to very different tree structures.  
+
+Although individual trees are often unstable and limited in accuracy, **combining many trees** (through methods such as **bagging**, **random forests**, or **boosting**) leads to more powerful and reliable predictive models.
+
+
+
+# 
