@@ -1364,7 +1364,93 @@ The **right panel** again shows the cross-validation MSE across values of $\lamb
 
 Together, these results demonstrate how both ridge and lasso manage the bias–variance trade-off, but differ in **model complexity**: ridge smooths coefficients continuously, while lasso introduces sparsity by setting some exactly to zero.
 
-## 
+# Classification Framework
+
+## Classification: Introduction
+
+Classification, also called *pattern recognition*, aims to predict **qualitative** response variables $Y$ that take values in an unordered set $\mathcal{G} = \{ G_1, \ldots, G_q \}$, for example: infected $\in \{\text{Yes}, \text{No}\}$ and eye colour $\in \{\text{brown}, \text{blue}, \text{green}\}$.
+
+Given the vector of predictors $\mathbf{X} = (X_1, \ldots, X_p)$, the goal of classification is to build a function $G$, called a *classifier*, that takes $\mathbf{X}$ and predicts the value of $Y$, i.e. $G(\mathbf{X}) \in \mathcal{G}$.
+
+Often, one is more interested in the **probability** that $Y$ belongs to each class $G_1, \ldots, G_q$, for instance:  
+- the probability that a bank client will default  
+- the probability that a tumour is malignant  
+- etc.
+
+We typically identify the $q$ classes with the numbers $1$ to $q$, such that $\mathcal{G} = \{1, \ldots, q\}$, or if there are only two classes (*binary data*), then $\mathcal{G} = \{0, 1\}$.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example.} Classification of cancer with $p = 2$ and $q = 2$.  
+We aim to find a classifier $$G(\textit{age}, \textit{size}) \in \mathcal{G} = \{\text{benign}, \text{malignant}\}$$ that predicts whether a cancer is \textcolor{red}{benign} or \textcolor{black}{malignant}, based on the predictors $\textit{age}$ and $\textit{size}$.
+
+Each observation corresponds to a patient, represented by their age ($X_1$) and tumour size ($X_2$). The classifier will learn a decision boundary that best separates the two classes.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML4_class_intro.png}
+\caption{Scatter plot of tumour size versus patient age, coloured by diagnosis.}
+\label{fig-class-intro}
+\end{figure}
+\end{minipage}
+
+This example illustrates a **binary classification** task where each observation is assigned to one of two possible categories. The goal is to construct a decision function $G(\mathbf{X})$ that correctly predicts the label $Y$ for new, unseen patients.
+
+Let us clarify that the classifier $G$ maps the two predictor variables $(\textit{age}, \textit{size})$ to one of the possible outcomes in $\mathcal{G}$, either *benign* or *malignant*. In other words, $G$ is a decision rule that assigns each patient to a diagnostic category based on these predictors.
+
+# Linear and Quadratic Discriminant Analysis
+
+## Linear Decision Boundaries: Hyperplanes
+
+Suppose we have two classes, denoted by $G = \{0, 1\}$. Linear classification methods produce \emph{linear decision boundaries}, called hyperplanes.  
+
+In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $\mathbf{x} \in \mathbb{R}^p$ satisfying  
+
+$$ b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
+
+If a point $\mathbf{x}$ does not satisfy this equality, then  
+
+$$ b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
+
+indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.  
+This sign rule underlies how linear classifiers partition the feature space into distinct class regions.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example $p = 1$.} In one dimension, the hyperplane degenerates into a single point separating two classes along a line:
+$$ b_0 + b_1x = 0 \;\;\Longleftrightarrow\;\; x = -\frac{b_0}{b_1}. $$
+The scalar value $x = -b_0/b_1$ marks the threshold where the predicted class changes.  
+Points to the left or right of this value correspond to opposite signs of the linear combination $b_0 + b_1x$.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_hyperpl.png}
+\captionof{figure}{Linear decision boundary in $\mathbb{R}^1$ (a point dividing two classes).}\label{fig:hyperplane-1d}
+\end{minipage}
+
+\bigskip
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example $p = 2$.} In two dimensions, the hyperplane becomes a line dividing the plane into two half-spaces:
+$$(x_1, x_2) \in \mathbb{R}^2 : \; b_0 + b_1x_1 + b_2x_2 = 0$$
+or equivalently,
+$$ x_2 = -\frac{b_0}{b_2} - \frac{b_1}{b_2}x_1. $$
+The slope $-\frac{b_1}{b_2}$ defines the orientation of the boundary, and the intercept $-\frac{b_0}{b_2}$ determines its position.  
+Points above or below the line correspond to different classes, depending on the sign of the linear combination.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_hyperp_2.png}
+\captionof{figure}{Linear decision boundary in $\mathbb{R}^2$ separating two classes.}\label{fig:hyperplane-2d}
+\end{minipage}
+
+As shown in Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d}, increasing the number of dimensions generalises the concept of a simple threshold to a separating line, plane, or hyperplane.  
+The geometric intuition remains the same: classification decisions depend on which side of the boundary each observation lies.
+
+
+# Logistic Regression
 
 # Image Recognition
 
