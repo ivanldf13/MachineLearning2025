@@ -1854,39 +1854,39 @@ This visualisation illustrates how a decision tree partitions the predictor spac
 
 The **cross-validation (CV) error plot**, shown in Figure @fig-cv-error, illustrates how the model’s performance changes as the pruning parameter $\alpha$ increases.
 
-![Cross-validation error plot](Images_qmd_ML/ML6_CV_error.png){#fig-cv-error width="65%" fig-align="center"}
+![Cross-validation error plot](Images_qmd_ML/ML6_CV_error.png){#fig-cv-error fig-align="center" width="60%"}
 
-As $\alpha$ grows, the penalty for tree complexity becomes stronger, leading to **simpler trees** with fewer splits. Initially, this reduces **overfitting**, and the CV error decreases. However, beyond an optimal point, excessive pruning causes **underfitting**, and the CV error rises again.  
+As $\alpha$ grows, the penalty for tree complexity becomes stronger, leading to **simpler trees** with fewer splits. Initially, this reduces **overfitting**, and the CV error decreases. However, beyond an optimal point, excessive pruning causes **underfitting**, and the CV error rises again.
 
 The **minimum of the CV error curve** corresponds to the value of $\alpha$ that achieves the best trade-off between bias and variance — that is, the subtree with the lowest expected prediction error on unseen data.
 
 ## Trees versus linear classifiers
 
-![](Images_qmd_ML/ML6_trees_vs_linear.png){#fig-trees-vs-linear width="80%" fig-align="center"}
+![Comparison of decision trees and linear classifiers in two-dimensional feature spaces](Images_qmd_ML/ML6_trees_vs_linear.png){#fig-trees-vs-linear fig-align="center" width="65%"}
 
-The plots in @fig-trees-vs-linear compare **decision trees** and **linear classifiers** in two-dimensional feature spaces.  
+The plots in @fig-trees-vs-linear compare **decision trees** and **linear classifiers** in two-dimensional feature spaces.
 
-- The **top-left** panel shows a linear classifier that separates the feature space using a single straight decision boundary.  
-- The **top-right** panel illustrates how a decision tree can approximate that same boundary by performing multiple **axis-aligned splits**, resulting in a stepwise partition of the space.  
-- The **bottom-left** panel shows a situation where the relationship between predictors is non-linear; here, trees can flexibly adapt their partitions to capture local structure that linear models would miss.  
-- The **bottom-right** panel demonstrates how trees create **rectangular regions** that align with the axes, providing a highly interpretable model at the cost of some boundary smoothness.  
+-   The **top-left** panel shows a linear classifier that separates the feature space using a single straight decision boundary.
+-   The **top-right** panel illustrates how a decision tree can approximate that same boundary by performing multiple **axis-aligned splits**, resulting in a stepwise partition of the space.
+-   The **bottom-left** panel shows a situation where the relationship between predictors is non-linear; here, trees can flexibly adapt their partitions to capture local structure that linear models would miss.
+-   The **bottom-right** panel demonstrates how trees create **rectangular regions** that align with the axes, providing a highly interpretable model at the cost of some boundary smoothness.
 
 Overall, decision trees can approximate complex decision boundaries, while linear models are constrained to global linear relationships.
 
 ## Pros and cons of trees
 
 **Pros**
-- Trees are very **easy to explain** and interpret — even more so than linear regression.  
-- They **mirror human decision-making**, following a sequential and intuitive structure.  
-- Results can be visualised **graphically**, making them accessible to non-experts.  
-- Can naturally handle **qualitative predictors** without requiring dummy variables.
+
+-   Trees are very **easy to explain** and interpret, even more so than linear regression.
+-   They **mirror human decision-making**, following a sequential and intuitive structure.
+-   Results can be visualised **graphically**, making them accessible to non-experts.
+-   Can naturally handle **qualitative predictors** without requiring dummy variables.
 
 **Cons**
-- Single trees generally have **poor predictive performance** compared to ensemble methods.  
-- They are **highly sensitive** to small changes in the data, which can lead to very different tree structures.  
+
+-   Single trees generally have **poor predictive performance** compared to ensemble methods.
+-   They are **highly sensitive** to small changes in the data, which can lead to very different tree structures.
 
 Although individual trees are often unstable and limited in accuracy, **combining many trees** (through methods such as **bagging**, **random forests**, or **boosting**) leads to more powerful and reliable predictive models.
-
-
 
 # 
