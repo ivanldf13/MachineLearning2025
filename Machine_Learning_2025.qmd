@@ -954,6 +954,10 @@ The figure above illustrates how **training** and **test errors** evolve as mode
 
 When model flexibility is low, both training and test errors are high, in other words, the model underfits and fails to capture the structure of the data. As flexibility increases, the model fits the training data better and generalises more effectively, reaching a point of **optimal complexity** where test error is minimised. Beyond this point, further flexibility causes the model to memorise noise, leading to rising test error, i.e., the hallmark of **overfitting**.
 
+```{r}
+#TODO LDA invariant to rescaling
+```
+
 ## The Bias–Variance Decomposition
 
 -   We assume a simple model where the outcome is generated as $$Y = f(X) + \varepsilon, \quad \text{with } \mathbb{E}(\varepsilon) = 0 \text{ and } \text{Var}(\varepsilon) = \sigma_\varepsilon^2.$$
@@ -1354,13 +1358,15 @@ The **right panel** shows the **mean squared error (MSE)** estimated by cross-va
 
 ![Lasso regression: coefficient paths and cross-validation error](Images_qmd_ML/ML4_hitters_lasso.png){#fig-hitters-lasso}
 
-In @fig-hitters-lasso, the **left panel** shows the *lasso coefficient paths*.\
-- As $\lambda$ increases, some coefficients drop exactly to zero, removing the corresponding predictors from the model.\
-- This reflects lasso’s ability to perform **automatic variable selection** by enforcing sparsity.
+In @fig-hitters-lasso, the **left panel** shows the *lasso coefficient paths*.
+
+-   As $\lambda$ increases, some coefficients drop exactly to zero, removing the corresponding predictors from the model.
+-   This reflects lasso’s ability to perform **automatic variable selection** by enforcing sparsity.
 
 The **right panel** again shows the cross-validation MSE across values of $\lambda$.\
-- The optimal $\lambda$ (dotted line) identifies a simpler model that excludes less relevant predictors while maintaining strong predictive performance.\
-- Compared with ridge, lasso yields more interpretable models by retaining only a subset of significant predictors.
+
+-   The optimal $\lambda$ (dotted line) identifies a simpler model that excludes less relevant predictors while maintaining strong predictive performance.
+-   Compared with ridge, lasso yields more interpretable models by retaining only a subset of significant predictors.
 
 Together, these results demonstrate how both ridge and lasso manage the bias–variance trade-off, but differ in **model complexity**: ridge smooths coefficients continuously, while lasso introduces sparsity by setting some exactly to zero.
 
@@ -1372,10 +1378,11 @@ Classification, also called *pattern recognition*, aims to predict **qualitative
 
 Given the vector of predictors $\mathbf{X} = (X_1, \ldots, X_p)$, the goal of classification is to build a function $G$, called a *classifier*, that takes $\mathbf{X}$ and predicts the value of $Y$, i.e. $G(\mathbf{X}) \in \mathcal{G}$.
 
-Often, one is more interested in the **probability** that $Y$ belongs to each class $G_1, \ldots, G_q$, for instance:  
-- the probability that a bank client will default  
-- the probability that a tumour is malignant  
-- etc.
+Often, one is more interested in the **probability** that $Y$ belongs to each class $G_1, \ldots, G_q$, for instance:
+
+-   the probability that a bank client will default
+-   the probability that a tumour is malignant
+-   etc.
 
 We typically identify the $q$ classes with the numbers $1$ to $q$, such that $\mathcal{G} = \{1, \ldots, q\}$, or if there are only two classes (*binary data*), then $\mathcal{G} = \{0, 1\}$.
 
@@ -1399,21 +1406,158 @@ This example illustrates a **binary classification** task where each observation
 
 Let us clarify that the classifier $G$ maps the two predictor variables $(\textit{age}, \textit{size})$ to one of the possible outcomes in $\mathcal{G}$, either *benign* or *malignant*. In other words, $G$ is a decision rule that assigns each patient to a diagnostic category based on these predictors.
 
-# Linear and Quadratic Discriminant Analysis
+## The 0–1 Loss Function
+
+How do we measure the quality of a prediction? For classification, the squared error loss is not ideal. Therefore, to measure the the **misclassification error** for a prediction $\hat{y}$, we usually use the **0–1 loss function** $$L(y, \hat{y}) = \mathbf{1}\{y \ne \hat{y}\} = 
+  \begin{cases}
+  0 & \text{if } y = \hat{y} \\
+  1 & \text{if } y \ne \hat{y}
+  \end{cases}.$$
+
+-   For a classifier $\hat{G}$, the **expected misclassification rate** is $$\text{Err}_{\hat{G}} = \mathbb{E}[\,\mathbf{1}\{Y \ne \hat{G}(X)\}\,] = \Pr\{Y \ne \hat{G}(X)\}, $$ where the expectation is taken over $(X, Y)$.
+
+-   **Note:** Other loss functions for classification tasks are also common, since:
+
+    -   In medical or safety-critical settings, false negatives and false positives are not equally severe, so one may wish to penalise one type of error more than the other.
+    -   The 0–1 loss is not smooth, which can lead to optimisation difficulties when fitting models.
+
+## The Bayes Classifier
+
+What is a \textbf{good classifier}? Ideally, we would like to find the optimal $G^*$ that minimises  
+$$ \text{Err}_{\hat{G}} = \Pr\{Y \ne \hat{G}(X)\}. $$
+
+For simplicity, consider \textbf{two-class classification}, i.e. $\mathcal{G} = \{0, 1\}$.  
+The optimal $G^*$ is called the \textbf{Bayes classifier}, which assigns each observation to the class with the highest conditional probability $\Pr(Y = j \mid X = \mathbf{x})$.
+
+Formally, the Bayes classifier assigns to a predictor $\mathbf{x}$ the most likely class:
+$$ G^*(\mathbf{x}) = \underset{j = 0, 1}{\arg\max} \, \Pr(Y = j \mid X = \mathbf{x}) = 
+  \begin{cases}
+  0 & \text{if } \Pr(Y = 0 \mid X = \mathbf{x}) > 1/2, \\
+  1 & \text{otherwise.}
+  \end{cases} $$
+
+- The \textbf{Bayes decision boundary} is the curve (in $\mathbb{R}^p$) where  
+  $$ \Pr(Y = 0 \mid X = \mathbf{x}) = 1/2. $$
+
+- The Bayes classifier achieves the \textbf{lowest possible 0–1 loss} — this minimum achievable error is called the \textbf{Bayes error rate}, given by  
+  $$ \text{Err}_{G^*} = \Pr\{Y \ne G^*(X)\}. $$
+
+The Bayes classifier represents the theoretical ideal: it predicts the class with the highest conditional probability given the input $X = \mathbf{x}$.  
+In practice, the true probabilities $\Pr(Y \mid X)$ are unknown, so learning algorithms approximate this rule from data.  
+The \textbf{decision boundary} (white curve in Figure \ref{fig-bayes-classifier}) separates regions where each class is more likely; in other words, it marks $\Pr(Y = 0 \mid X) = 0.5$.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example:} Bayes classifier for a two-class problem.  
+The \textbf{Bayes classifier} is the theoretical ideal: it assigns each observation to the class with the highest conditional probability $\Pr(Y = j \mid X = \mathbf{x})$.  
+Since the true probabilities $\Pr(Y \mid X)$ are unknown, learning algorithms approximate this rule from sample data.  
+The \textbf{decision boundary} (white curve in the plot) separates regions where one class is more likely than the other, corresponding to $\Pr(Y = 0 \mid X) = 0.5$.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML4_Bayes.png}
+\caption{Bayes classifier and decision boundary for a two-class problem.}
+\label{fig-bayes-classifier}
+\end{figure}
+\end{minipage}
+
+## The Bayes Decision Rule
+
+The **Bayes classifier** provides the theoretical optimum but requires knowing the true probabilities $\Pr(Y \mid X)$, which are unknown in practice. To approximate it, we estimate the **posterior class probabilities** $$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}), \quad j = 0, 1, $$ and then apply the **plug-in decision rule**: $$ \hat{G}(\mathbf{x}) =
+\begin{cases}
+0 & \text{if } \widehat{\Pr}(Y = 0 \mid X = \mathbf{x}) > 1/2, \\
+1 & \text{otherwise.}
+\end{cases} $$
+
+The **decision boundary** is the line (or surface in higher dimensions) where both posterior probabilities are equal: $$ \widehat{\Pr}(Y = 0 \mid X = \mathbf{x}) = \widehat{\Pr}(Y = 1 \mid X = \mathbf{x}) = 1/2. $$
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example.} Estimated and true Bayes decision boundaries.  
+This figure compares the \textbf{true} and \textbf{estimated decision boundaries} for a two-class classification problem. The blue solid line represents the \textbf{estimated boundary} obtained from sample data, while the dashed line corresponds to the \textbf{theoretical Bayes boundary}.  
+
+In practice, the plug-in rule approximates the Bayes classifier by estimating $\Pr(Y \mid X)$ from observed data rather than knowing it exactly. This illustrates how statistical learning methods attempt to reproduce the optimal (but unattainable) Bayes boundary using empirical information.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML4_b_rule.png}
+\caption{Estimated and true Bayes decision boundaries for a two-class problem.}
+\label{fig-bayes-decision-rule}
+\end{figure}
+\end{minipage}
+
+## Statistical Modelling of $\hat{G}$
+
+Depending on how we model the relationship between $Y$ and $X$, we can distinguish three main approaches to classification:
+
+**(a) Generative models** estimate the **joint distribution** of $(Y, X)$ and then deduce the posterior class probabilities for $j = 0, 1$:  
+$$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}) = \frac{\widehat{\Pr}(Y = j, X = \mathbf{x})}{\widehat{\Pr}(X = \mathbf{x})}. $$  
+- More complex and data-demanding, as they require modelling both $Y$ and $X$.  
+- **Examples:** Linear/Quadratic Discriminant Analysis, Naive Bayes.
+
+**(b) Discriminative models** estimate only the **conditional distribution** $\Pr(Y \mid X)$. That is, they directly model the posterior class probabilities $\widehat{\Pr}(Y = j \mid X = \mathbf{x})$.  
+- Usually preferred, since they provide posterior probabilities and are less complex than generative models.  
+- **Examples:** *k*-Nearest Neighbours (kNN), Logistic Regression, Random Forest, Neural Networks.
+
+**(c) Geometric models** directly estimate a **decision boundary function** that predicts the class (0 or 1) from $\mathbf{x}$ without modelling probabilities.  
+- Simpler, since no probability distribution is assumed, but they do not provide estimates of class probabilities.  
+- **Examples:** Support Vector Machines (SVM).
+
+## The Empirical Misclassification Rate
+
+Given a **training data set** $(x_1, y_1), \ldots, (x_n, y_n)$, with $x_i \in \mathbb{R}^p$ and $y_i \in \{1, \ldots, q\}$, how can we estimate the model $\hat{G}$?
+
+In regression, we minimise the **empirical mean squared error** on the training set. Similarly, for classification, we can minimise the **empirical misclassification rate**: $$ \text{err}_{\hat{G}} = \frac{1}{n} \sum_{i = 1}^{n} \mathbf{1}\{y_i \ne \hat{G}(x_i)\}. $$
+
+However, the **0–1 loss function** $\mathbf{1}\{y \ne \hat{y}\}$ is **discontinuous**, which makes **numerical optimisation** difficult.
+
+Different methods such as **maximum likelihood estimation** are therefore used for **parameter estimation**, providing differentiable alternatives that approximate the 0–1 loss.
+
+The **0–1 loss** can still be used for **model selection** or for comparing models fitted with different methods.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Example.} Empirical misclassification rate.  
+The plot on the right shows how the empirical misclassification rate changes with different values of $\beta_0$. Each point represents the average error across the training data for a given parameter value. The goal is to minimise this error to improve classification performance.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML4_misscla.png}
+\caption{Empirical misclassification rate as a function of $\beta_0$.}
+\label{fig-empirical-misclassification}
+\end{figure}
+\end{minipage}
+
+## K-Fold Cross-Validation
+
+Given a **data set** $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, we perform **K-Fold Cross-Validation (CV)** to estimate how well a classifier generalises to unseen data.
+
+For each fold $C_k$, $k = 1, \ldots, K$, we treat $C_k$ as the **validation/test set** and fit the classification model $\hat{G}_{-k}$ on the remaining $K - 1$ folds.  
+The **empirical misclassification rate** for fold $k$ is given by  
+$$ \text{err}_k = \frac{1}{|C_k|} \sum_{i \in C_k} L(y_i, \hat{G}_{-k}(x_i)) = \frac{1}{n/K} \sum_{i \in C_k} \mathbf{1}\{y_i \ne \hat{G}_{-k}(x_i)\}. $$
+
+The **K-Fold CV estimate** is then the average of these values:  
+$$ \text{CV}(K) = \frac{1}{K} \sum_{k = 1}^{K} \text{err}_k. $$
+
+![K-Fold Cross-Validation: the dataset is divided into $K$ subsets (folds). Each fold acts once as a validation set (in red) while the remaining folds (in blue) are used for training. The process is repeated $K$ times, and the average error provides an overall estimate of model performance.](Images_qmd_ML/ML4_kfold.png){#fig-kfold-cv}
+
+As shown in @fig-kfold-cv, each block $C_1, C_2, \ldots, C_K$ represents a different subset of the data. The algorithm cycles through these folds, training on $K - 1$ parts and validating on the remaining one. This rotation ensures that every observation is used both for training and validation exactly once, producing a balanced and robust estimate of model accuracy.
+
+
+# Linear and Quadratic Discriminant Analysis (LDA & QDA)
 
 ## Linear Decision Boundaries: Hyperplanes
 
-Suppose we have two classes, denoted by $G = \{0, 1\}$. Linear classification methods produce \emph{linear decision boundaries}, called hyperplanes.  
+Suppose we have two classes, denoted by $G = \{0, 1\}$. Linear classification methods produce \emph{linear decision boundaries}, called hyperplanes.
 
-In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $\mathbf{x} \in \mathbb{R}^p$ satisfying  
+In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $\mathbf{x} \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
 
-$$ b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
+If a point $\mathbf{x}$ does not satisfy this equality, then $$b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
 
-If a point $\mathbf{x}$ does not satisfy this equality, then  
-
-$$ b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
-
-indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.  
+indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.\
 This sign rule underlies how linear classifiers partition the feature space into distinct class regions.
 
 \begin{minipage}{0.55\textwidth}
@@ -1446,9 +1590,8 @@ Points above or below the line correspond to different classes, depending on the
 \captionof{figure}{Linear decision boundary in $\mathbb{R}^2$ separating two classes.}\label{fig:hyperplane-2d}
 \end{minipage}
 
-As shown in Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d}, increasing the number of dimensions generalises the concept of a simple threshold to a separating line, plane, or hyperplane.  
+As shown in Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d}, increasing the number of dimensions generalises the concept of a simple threshold to a separating line, plane, or hyperplane.\
 The geometric intuition remains the same: classification decisions depend on which side of the boundary each observation lies.
-
 
 # Logistic Regression
 
