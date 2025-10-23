@@ -1,5 +1,10 @@
-*.mp4 
+# Ignore video files
+*.mp4
+# Ignore macOS system files
 .DS_Store
-.Rproj.user
+# Ignore R project files
+.Rproj.user/
 # Ignore Microsoft Office temporary lock files
 ~$*
+# Ignore Python virtual environment
+.venv/
