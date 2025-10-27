@@ -109,7 +109,7 @@ In @fig-heart-bag, the **OOB error rate** decreases rapidly as the number of tre
 
 ## Variance reduction and correlation
 
--   Recall that given a set of $B$ **independent** observations $z_1, \dots, z_B$, each with variance $\sigma^2$, the variance of their mean is $$ \bar{z} = \frac{1}{B} \sum_{i=1}^{B} z_i $$ and the variance of $\bar{z}$ is $\sigma^2 / B$.
+-   Recall that given a set of $B$ **independent** observations $z_1, \dots, z_B$, each with variance $\sigma^2$, the variance of their mean is $$ \bar{z} = \frac{1}{B} \sum_{i=1}^{B} z_i$$ and the variance of $\bar{z}$ is $\sigma^2 / B$.
 -   This result holds only if the $z_i$ are independent. If they are **correlated**, the variance reduction achieved by averaging becomes much smaller.
 -   In bagging, each model is trained on a bootstrap sample of the data. These samples overlap substantially, so the fitted trees are often **correlated**. As a result, the averaging in bagging does not reduce variance as effectively as it would if the models were completely independent.
 -   To understand this, consider $z_i \sim \mathcal{N}(0,1)$ and three levels of correlation between them:
@@ -127,7 +127,7 @@ The **right plot** shows the distribution of the sample mean when $B = 500$. Ind
 
 This demonstrates that averaging only reduces variance effectively when the individual models or samples are **uncorrelated**. If the models are correlated (because they rely on similar features or data points) the benefit of averaging diminishes.
 
-In the next section, we’ll see how **random forests** address this limitation by injecting randomness into tree construction, reducing correlation between trees and thus improving variance reduction beyond bagging.
+In the next section, we see how random forests address this limitation by introducing feature-level randomness, reducing correlation between trees and improving variance reduction beyond bagging.
 
 ## Bagging: correlated trees
 
@@ -136,7 +136,7 @@ In the next section, we’ll see how **random forests** address this limitation 
 -   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$.
 
 As seen in @fig-bootstrapped-trees, the three trees trained on different bootstrap samples from the same dataset share much of their structure.\
-They all split first on similar variables such as *Thal*, *Ca*, or *Oldpeak*, and their overall shapes are nearly identical. This shows how, despite resampling, the bagged trees remain **strongly correlated** because they repeatedly rely on the same dominant predictors for their early decisions.
+They all split early on similar variables (Thal, Ca, Oldpeak), showing that even after resampling, the bagged trees remain strongly correlated.This shows how, despite resampling, the bagged trees remain **strongly correlated** because they repeatedly rely on the same dominant predictors for their early decisions.
 
 Such correlation limits the benefit of averaging in bagging: even though we combine many trees, if they make **similar errors**, the ensemble’s variance does not decrease as much as expected.\
 This motivates the next step, i.e., **random forests**, which introduce randomness in feature selection at each split to decorrelate the trees and achieve greater variance reduction.
@@ -150,7 +150,7 @@ This motivates the next step, i.e., **random forests**, which introduce randomne
 ### Random forest algorithm
 
 1.  **Bootstrap the data** $B$ times, obtaining $B$ bootstrap samples $Z^{*1}, \dots, Z^{*B}$.
-2.  **Grow a tree** on each bootstrap sample. At each node, select $m$ predictors at random from the total $p$ predictors, and choose the best split among these $m$.
+2.  **Grow a tree** on each bootstrap sample. At each node, randomly select $m$ predictors out of $p$, and choose the best split among those $m$.
 3.  **Grow the trees fully**, without pruning (as in bagging).
 4.  **Aggregate predictions**:
     -   For **regression**, average the predictions from the $B$ trees.
@@ -181,8 +181,8 @@ The code trains two ensemble models:
 -   A **bagging classifier**, where each tree is built from a bootstrap sample of the training data.
 -   A **random forest classifier**, which extends bagging by randomly selecting a subset of predictors at each split (`max_features="sqrt"`).
 
-Each model is trained incrementally (`warm_start=True`) from 3 to 600 trees, and the **OOB score** — an internal cross-validation estimate — is tracked at every step.\
-The **random forest** (orange line) achieves a consistently lower OOB error rate than **bagging** (blue line).\
+Each model is trained incrementally (`warm_start=True`) from 3 to 600 trees, and the **OOB score** (an internal cross-validation estimate) is tracked at every step.\
+The **random forest** (orange line)  achieves a lower OOB error than bagging (blue line) because random feature selection reduces tree correlation, leading to lower variance and improved generalisation.\
 This improvement arises because random feature selection decorrelates the trees, reducing the ensemble’s overall variance.
 
 \begin{minipage}{0.55\textwidth}
@@ -210,7 +210,7 @@ These results confirm that random forests enhance predictive power by combining 
 
 -   Bagging and random forests have **high predictive power**, but the resulting ensemble of trees is difficult to interpret visually.
 -   To recover interpretability, we define an **overall measure of variable importance** that quantifies how much each predictor contributes to model performance.
--   For **regression**, we record the total amount that the **Residual Sum of Squares (RSS)** decreases due to splits involving a given predictor $X_j$, for $j = 1, \dots, p$.
+-   For **regression**, we record the total reduction in **Residual Sum of Squares (RSS)** due to splits involving a predictor $X_j$.
 -   For **classification**, we record the total decrease in **Gini index** or **deviance** associated with each predictor.
 -   Another way to assess importance is by **randomly permuting** a given predictor among the **out-of-bag (OOB) observations** and measuring how much the model’s prediction error increases. A strong increase indicates that the variable was important for accurate predictions.
 
@@ -221,7 +221,7 @@ This ranking provides a powerful interpretative tool to understand which feature
 
 ## Random forests and nearest-neighbours
 
-Random forests can be understood as an **adaptive or weighted nearest-neighbours method**, where “close” observations are assigned different **weights** depending on how frequently they fall into the same terminal nodes as a new observation.
+Random forests can be understood as an **adaptive weighted nearest-neighbours method**, where “closeness” is defined by how often two observations fall into the same leaf nodes across trees.
 
 -   Recall that trees in a random forest are **fully grown and unpruned**. Each terminal node (leaf) represents a small region of the feature space containing similar training observations.
 
@@ -259,7 +259,7 @@ They are highly practical because they combine **robustness**, **accuracy**, and
 
 ## Digit classification with random forest
 
-As seen in @fig-digit-class, the **digit classification** task involves recognising handwritten digits (0–9) based on pixel intensity values.  
+As seen in @fig-digit-class, the **digit classification** task involves recognising handwritten digits (0–9) based on pixel intensity values.\
 Each model is trained on the same dataset and evaluated on its ability to correctly classify unseen digits.
 
 ![Examples of handwritten digits used in the classification task.](Images_qmd_ML/ML6_digit_class.png){#fig-digit-class width="70%" fig-align="center"}
@@ -299,26 +299,27 @@ RF & 0.0 & 5.9 \\
 \end{center}
 \end{minipage}
 
-The results show that **random forests** achieve the lowest **test error (5.9%)**, outperforming all other methods.  
-This strong generalisation comes from combining many decision trees trained on bootstrapped samples with random subsets of features — a structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
+The results show that **random forests** achieve the lowest **test error (5.9%)**, outperforming all other methods.\
+This strong generalisation comes from combining many decision trees trained on bootstrapped samples with random subsets of features. thereby creating a model structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
 
-Regularised logistic models (ridge and lasso) also perform well, as they prevent overfitting by penalising large coefficients.  
+This strong generalisation arises from combining many decision trees trained on bootstrapped samples with random feature subsets, creating a structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
+
+Regularised logistic models (ridge and lasso) also perform well, as they prevent overfitting by penalising large coefficients.\
 However, random forests remain the most powerful approach here, thanks to their ability to model intricate decision boundaries while maintaining robustness through averaging and decorrelation.
-
 
 ## Digit classification: variable importance
 
-As shown in @fig-digit-imp, random forests allow us to interpret complex models by computing a measure of **variable importance** — in this case, identifying which **pixels** contribute most to distinguishing each handwritten digit.
+As shown in @fig-digit-imp, random forests allow us to interpret complex models by computing a measure of **variable importance**, in this case, identifying which **pixels** contribute most to distinguishing each handwritten digit.
 
 ![Pixel-level variable importance for each digit in the random forest model. Darker areas indicate higher importance.](Images_qmd_ML/ML7_imp.png){#fig-digit-imp width="75%" fig-align="center"}
 
-Each heatmap corresponds to one digit (0–9), where the **dark regions** highlight the pixels most influential in the model’s decisions.  
-For example, the central pixels are highly important for distinguishing **0** and **8**, whereas the **vertical strokes** dominate the importance maps for **1**.  
-These visual patterns align with how humans recognise digits — the model learns to focus on the structural areas that define each number.
+Each heatmap corresponds to one digit (0–9), where the **dark regions** highlight the pixels most influential in the model’s decisions.\
+For example, the central pixels are highly important for distinguishing **0** and **8**, whereas the **vertical strokes** dominate the importance maps for **1**.\
+These visual patterns align with how humans recognise digits, showing that the model learns to focus on the structural areas that define each number.
 
-This technique provides a useful diagnostic tool:  
-- It helps confirm that the random forest has learned meaningful visual features rather than random noise.  
-- It also offers limited interpretability despite the ensemble’s overall “black-box” nature, giving insights into what drives the model’s predictions.  
+This technique provides a useful diagnostic tool:
 
-In other words, variable importance visualisation bridges the gap between performance and explainability, showing how random forests internally differentiate complex image classes.
+-   It helps confirm that the random forest has learned meaningful visual features rather than random noise.
+-   It also offers limited interpretability despite the ensemble’s overall “black-box” nature, giving insights into what drives the model’s predictions.
 
+Thus, pixel-level variable importance visualisation bridges the gap between **performance** and **explainability**, showing how random forests internally differentiate complex visual classes.
