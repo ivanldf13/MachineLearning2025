@@ -1,0 +1,25 @@
+---
+title: "Testing code"
+author: "Paco"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+format: 
+  pdf:
+    latex-engine: xelatex
+    mainfont: "Times New Roman"
+    include-in-header:
+      - file: disclaimer.tex
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{float}
+    tbl-style: booktabs
+    tbl-cap-location: top
+    tbl-colwidths: auto
+toc: true
+toc-depth: 1
+number-sections: true
+execute:
+  engine: knitr
+editor: source
+---
+
+
