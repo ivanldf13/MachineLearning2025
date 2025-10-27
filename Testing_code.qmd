@@ -7,7 +7,6 @@ format:
     latex-engine: xelatex
     mainfont: "Times New Roman"
     include-in-header:
-      - file: disclaimer.tex
       - text: |
           \usepackage{booktabs}
           \usepackage{float}
@@ -21,5 +20,87 @@ execute:
   engine: knitr
 editor: source
 ---
+# Bagging
 
+## Bagging: main idea
+
+- **Bootstrap aggregation**, or **bagging**, is a general-purpose procedure for reducing the variance of a statistical learning method. It reduces variability by training multiple models on different bootstrap samples and averaging their predictions. Since each model sees a slightly different subset of the data, their individual errors tend to cancel out when aggregated, leading to a smoother and more stable estimator.
+- Given a set of $B$ independent observations $z_1, \dots, z_B$ each with variance $\sigma^2$, the variance of the mean $$\bar{z} = \frac{1}{B} \sum_{i=1}^{B} z_i $$
+  is $\sigma^2 / B$.
+- We can therefore reduce the variance by averaging a set of predictions. However, this is not practical because we usually do not have access to multiple training sets.
+- Instead, we use the bootstrap by taking repeated samples from the training data $$ Z = \{ (x_i, y_i),\, i = 1, \dots, n \}.$$
+
+Bagging works by creating multiple bootstrap samples from the original dataset, training a separate model on each, and averaging their predictions. This aggregation stabilises the model by lowering variance without significantly increasing bias.
+
+
+## The bootstrap
+
+- Let $B$ be the number of desired bootstrap datasets $Z^{*1}, \dots, Z^{*B}$.
+- For $b = 1, \dots, B$:
+  - Sample $n$ observations from $Z$ **with replacement**.
+  - This is the $b$th bootstrap dataset, denoted $Z^{*b}$.
+- Each bootstrap dataset contains on average 63.2% of the original samples.
+
+\begin{minipage}{0.55\textwidth}
+The bootstrap procedure generates multiple resampled datasets by drawing with replacement from the original data. Each sample replicates the variability inherent in the population, allowing us to estimate model variance or prediction stability without requiring new data. This approach underlies bagging and several ensemble methods.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML7_boot.png}
+\caption{Bootstrap sampling}
+\label{fig-bootstrap}
+\end{figure}
+\end{minipage}
+
+
+## Bagging
+
+- Let $Z^{*1}, \dots, Z^{*B}$ be $B$ bootstrap datasets from the training data. For all $b = 1, \dots, B$, we can fit our predictive regression model $\hat{f}^{*b}$ on the $b$th bootstrap dataset $Z^{*b}$.
+- We then average all the predictions to obtain a single bagged model $$\hat{f}_{\text{bag}}(x) = \frac{1}{B} \sum_{b=1}^{B} \hat{f}^{*b}(x) $$ which is called **bagging**.
+- If the individual models $\hat{f}^{*b}$ have low bias but high variance, the combined estimator $\hat{f}_{\text{bag}}$ retains a similar bias but exhibits lower variance.
+- In practice, we use a value of $B$ sufficiently large for the error to stabilise. Typically, a value between 100 and 1000 is sufficient.
+
+Bagging therefore reduces variance through model aggregation while preserving the bias of the underlying learners, resulting in more stable and robust predictions.
+
+## Out-of-bag error estimate
+
+- There is a straightforward way to estimate the test error of a bagged model, called the **out-of-bag (OOB) error estimate**.
+- The key idea of bagging is that the model is repeatedly fitted to bootstrap subsets of the data, which contain on average about two-thirds of the observations (≈ 63%).
+- The remaining one-third (≈ 37%) of the observations not used to fit a given bagged model are referred to as the **out-of-bag observations**.
+- We can predict the response for the $i$th observation using all models $\hat{f}^{*b}$ with $b \in I_{x_i} = \{ b = 1, \dots, B : (x_i, y_i) \notin Z^{*b} \}$, i.e. the models for which the observation was OOB. This yields around $B/3$ predictions for the $i$th observation, which we average: $$ \text{Err}_{\hat{f}_{\text{bag}}}(x_i) = \frac{1}{|I_{x_i}|} \sum_{b \in I_{x_i}} (y_i - \hat{f}^{*b}(x_i))^2$$
+- The average over all $n$ observations gives the overall OOB error estimate: $$ \text{Err}_{\hat{f}_{\text{bag}}} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_{\hat{f}_{\text{bag}}}(x_i) $$
+- For large $B$, this estimator can be shown to be equivalent to the Leave-One-Out Cross-Validation (LOOCV) estimator — but in bagging, it comes for free.
+
+The OOB error provides an internal validation mechanism without requiring an explicit test set, making it especially efficient for ensemble methods such as Random Forests.
+
+## Bagging for trees
+
+- Classification and regression trees are perfectly suited for bagging, since their poor predictive accuracy comes from their high variance.
+- For a regression problem, [^4] for all $B$ bootstrap training sets we grow a large tree **without pruning** to obtain a high-variance predictive model.
+- We then average all these (possibly overfitted) trees to obtain a bagged model with reduced variance.
+- This has shown to give impressive improvements in prediction accuracy, though at the cost of interpretability.
+- Importantly, $B$ is not a classical tuning parameter, since a large $B$ will not overfit the data; the error will simply stabilise.
+- For classification, we fit $B$ classification trees $\hat{G}^{*b}$ and then choose the predicted class by majority vote, that is $$ \hat{G}_{\text{bag}}(x) = \arg\max_{g=1,\dots,q} \frac{1}{B} \sum_{b=1}^{B} \mathbf{1}\{ g = \hat{G}^{*b}(x) \} $$
+
+Bagging is therefore especially effective for high-variance, low-bias models such as decision trees, as averaging across bootstrap replicates substantially reduces their prediction variance.
+
+[^4]: In this context, a regression problem refers to a supervised learning task where the target variable $y$ is continuous. In contrast, a classification problem deals with categorical outputs.
+
+## Example: bagging and variance reduction
+
+To illustrate the effect of bagging, we return to the **heart disease** dataset, where decision trees are used to predict whether a patient has heart disease. As seen earlier, a single unpruned tree has high variance — small changes in the data can lead to very different tree structures.
+
+Bagging mitigates this instability by repeatedly resampling the training data and averaging the resulting models.
+
+![Bootstrapped trees](Images_qmd_ML/ML7_boot_trees.png){#fig-bootstrapped-trees width="90%" fig-align="center"}
+
+In @fig-bootstrapped-trees, three trees are trained on different bootstrap samples drawn **with replacement** from the same dataset. Each tree follows a different structure and makes slightly different predictions, showing the variability of high-variance learners such as decision trees.
+
+By averaging the predictions from all these trees, bagging produces a single, more stable model with reduced variance. The gain from aggregation is evident in the out-of-bag (OOB) error plot below.
+
+![OOB error rate for bagged trees](Images_qmd_ML/ML7_heart_bag.png){#fig-heart-bag width="80%" fig-align="center"}
+
+In @fig-heart-bag, the **OOB error rate** decreases rapidly as the number of trees increases, then stabilises once variance reduction saturates. This shows how bagging improves generalisation performance by averaging across many slightly different models rather than relying on a single, unstable one.
 

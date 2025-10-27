@@ -2010,7 +2010,7 @@ Common impurity measures for a terminal node $R_j$ include:
 
 1.  **Misclassification error:** $$M = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} \mathbf{1}\{y_i \ne \hat{y}_{R_j}\}.$$
 
-2.  \*\*Gini index:\* $$G = \sum_{g=1}^{q} \hat{p}_{jg} (1 - \hat{p}_{jg}).$$
+2.  **Gini index:** $$G = \sum_{g=1}^{q} \hat{p}_{jg} (1 - \hat{p}_{jg}).$$
 
 3.  **Cross-entropy (or deviance):** $$D = - \sum_{g=1}^{q} \hat{p}_{jg} \log \hat{p}_{jg}.$$
 
