@@ -117,7 +117,7 @@ In @fig-heart-bag, the **OOB error rate** decreases rapidly as the number of tre
     2.  **Weak dependence:** $\text{cor}(z_i, z_{i+1}) = 0.3$.
     3.  **Strong dependence:** $\text{cor}(z_i, z_{i+1}) = 0.8$.
 
-![](Images_qmd_ML/ML7_var_red_corr.png){#fig-var-red-corr}
+![Effect of Correlation on Variance Reduction](Images_qmd_ML/ML7_var_red_corr.png){#fig-var-red-corr}
 
 As seen in @fig-var-red-corr, correlation among observations (or models) greatly affects how quickly variance decreases when averaging.
 
@@ -127,19 +127,32 @@ The **right plot** shows the distribution of the sample mean when $B = 500$. Ind
 
 This demonstrates that averaging only reduces variance effectively when the individual models or samples are **uncorrelated**. If the models are correlated (because they rely on similar features or data points) the benefit of averaging diminishes.
 
-In the next section, we see how random forests address this limitation by introducing feature-level randomness, reducing correlation between trees and improving variance reduction beyond bagging.
+In the next section, we see how random forests address this limitation by introducing randomness in feature selection (by randomly choosing subsets of predictors at each split) which reduces correlation between trees and improves variance reduction beyond bagging.
+
+```{r}
+#TODO add this foot ntoe_ the specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features.
+```
+
 
 ## Bagging: correlated trees
 
 -   In bagging, each tree is trained on a bootstrap dataset that is drawn **with replacement** from the original training data. Because these bootstrap samples overlap substantially, the trees share **many common observations**.
 -   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity. Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
--   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$.
+```{r}
+#TODO include this as a footnote: Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity — that is, makes the resulting groups more homogeneous.
+# In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
+```
+
+-   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$. In other words, for all $b = 1, \dots, B$” means that this correlation property applies across all the trees in the bagged ensemble, each $\hat{f}^{*b}(x_0)$ tends to give a similar prediction for the same input $x_0$.
 
 As seen in @fig-bootstrapped-trees, the three trees trained on different bootstrap samples from the same dataset share much of their structure.\
 They all split early on similar variables (Thal, Ca, Oldpeak), showing that even after resampling, the bagged trees remain strongly correlated.This shows how, despite resampling, the bagged trees remain **strongly correlated** because they repeatedly rely on the same dominant predictors for their early decisions.
 
 Such correlation limits the benefit of averaging in bagging: even though we combine many trees, if they make **similar errors**, the ensemble’s variance does not decrease as much as expected.\
 This motivates the next step, i.e., **random forests**, which introduce randomness in feature selection at each split to decorrelate the trees and achieve greater variance reduction.
+```{r}
+#TODO but if we add randomness to then reduce the variance, isnt it a bit working twice?
+```
 
 ## Random forest: main idea
 
@@ -174,9 +187,7 @@ This rule of thumb works well in practice because it balances diversity and pred
 
 ![](Images_qmd_ML/ML7_heart_1.png){#fig-heart-oob width="50%" fig-align="center"}
 
-As shown in @fig-heart-oob, the **out-of-bag (OOB) error rate** decreases rapidly as the number of trees increases for both methods.\
-The experiment is based on the *Heart Disease* dataset, where the goal is to predict whether a patient has heart disease (AHD = Yes/No) using medical predictors such as age, cholesterol, and maximum heart rate.\
-The code trains two ensemble models:
+As shown in @fig-heart-oob, the **out-of-bag (OOB) error rate** decreases rapidly as the number of trees increases for both methods. The experiment is based on the *Heart Disease* dataset, where the goal is to predict whether a patient has heart disease (AHD = Yes/No) using medical predictors such as age, cholesterol, and maximum heart rate. The code trains two ensemble models:
 
 -   A **bagging classifier**, where each tree is built from a bootstrap sample of the training data.
 -   A **random forest classifier**, which extends bagging by randomly selecting a subset of predictors at each split (`max_features="sqrt"`).
@@ -189,10 +200,10 @@ This improvement arises because random feature selection decorrelates the trees,
 \textbf{Example:} Comparison of classification performance using confusion matrices.  
 The figure on the right compares how bagging and random forest predict heart disease:
 
-- The \textbf{top confusion matrix} corresponds to \textbf{bagging}. It correctly classifies 80% of patients without heart disease and 77% of those with it.
+- The \textbf{top confusion matrix} corresponds to \textbf{bagging}. It correctly classifies 80\% of patients without heart disease and 77\% of those with it.
 
 
-- The \textbf{bottom confusion matrix} corresponds to the \textbf{random forest}, which slightly improves accuracy to 83% and 78% respectively.
+- The \textbf{bottom confusion matrix} corresponds to the \textbf{random forest}, which slightly improves accuracy to 83\% and 78\% respectively.
 
 These results confirm that random forests enhance predictive power by combining decorrelated trees, producing more stable and generalisable predictions than simple bagging.
 \end{minipage}

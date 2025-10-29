@@ -1551,20 +1551,20 @@ As shown in @fig-kfold-cv, each block $C_1, C_2, \ldots, C_K$ represents a diffe
 
 ## Linear Decision Boundaries: Hyperplanes
 
-Suppose we have two classes, denoted by $G = \{0, 1\}$. Linear classification methods produce \emph{linear decision boundaries}, called hyperplanes.
+Linear classification methods assign classes according to the sign of a linear function. Suppose we have two classes $G = {0,1}$. Each observation $\mathbf{x}$ is evaluated through a linear combination of its predictors, and the points where this expression equals zero define the decision boundary (or hyperplane).
 
 In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $\mathbf{x} \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
 
 If a point $\mathbf{x}$ does not satisfy this equality, then $$b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
 
 indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.\
-This sign rule underlies how linear classifiers partition the feature space into distinct class regions.
+
+Plugging any point $\mathbf{x}$ into this expression tells us on which side of the boundary it lies: a positive value corresponds to one class, a negative value to the other, and zero means the point lies exactly on the hyperplane.
 
 \begin{minipage}{0.55\textwidth}
 \textbf{Example $p = 1$.} In one dimension, the hyperplane degenerates into a single point separating two classes along a line:
 $$ b_0 + b_1x = 0 \;\;\Longleftrightarrow\;\; x = -\frac{b_0}{b_1}. $$
-The scalar value $x = -b_0/b_1$ marks the threshold where the predicted class changes.  
-Points to the left or right of this value correspond to opposite signs of the linear combination $b_0 + b_1x$.
+The scalar $x = -b_0/b_1$ is where the linear function crosses zero, i.e. the \emph{decision boundary}. Plugging in values to the left or right yields positive or negative outputs, determining the class. The function’s sign alone decides the classification: points to the left or right of this threshold yield opposite signs of $b_0 + b_1x$, with positive values corresponding to one class and negative values to the other.
 \end{minipage}
 \hfill
 \begin{minipage}{0.4\textwidth}
@@ -1580,8 +1580,9 @@ Points to the left or right of this value correspond to opposite signs of the li
 $$(x_1, x_2) \in \mathbb{R}^2 : \; b_0 + b_1x_1 + b_2x_2 = 0$$
 or equivalently,
 $$ x_2 = -\frac{b_0}{b_2} - \frac{b_1}{b_2}x_1. $$
-The slope $-\frac{b_1}{b_2}$ defines the orientation of the boundary, and the intercept $-\frac{b_0}{b_2}$ determines its position.  
-Points above or below the line correspond to different classes, depending on the sign of the linear combination.
+The slope $-\frac{b_1}{b_2}$ defines the orientation of the boundary, and the intercept $-\frac{b_0}{b_2}$ determines its position.
+
+Any point $(x_1, x_2)$ that satisfies this equation lies on the decision boundary; points above make the linear function positive and belong to one class, those below negative and to the other. In general, a hyperplane in $\mathbb{R}^p$ always has one dimension fewer than the input space.
 \end{minipage}
 \hfill
 \begin{minipage}{0.4\textwidth}
@@ -1590,8 +1591,8 @@ Points above or below the line correspond to different classes, depending on the
 \captionof{figure}{Linear decision boundary in $\mathbb{R}^2$ separating two classes.}\label{fig:hyperplane-2d}
 \end{minipage}
 
-As shown in Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d}, increasing the number of dimensions generalises the concept of a simple threshold to a separating line, plane, or hyperplane.\
-The geometric intuition remains the same: classification decisions depend on which side of the boundary each observation lies.
+Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + \mathbf{b}^\top \mathbf{x}$—that is, on which side of the boundary each observation lies.
+We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
 
 # Logistic Regression
 
