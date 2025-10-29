@@ -1594,6 +1594,169 @@ Any point $(x_1, x_2)$ that satisfies this equation lies on the decision boundar
 Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + \mathbf{b}^\top \mathbf{x}$—that is, on which side of the boundary each observation lies.
 We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
 
+\bigskip
+
+**Example $p = 3$**
+
+When we move to three dimensions, the hyperplane becomes a two-dimensional \emph{plane} in $\mathbb{R}^3$: $$(x_1, x_2, x_3) \in \mathbb{R}^3 : \; b_0 + b_1x_1 + b_2x_2 + b_3x_3 = 0.$$
+This plane divides the three-dimensional feature space into two half-spaces, one for each class.  
+Each additional predictor adds a new dimension to the feature space, while the decision boundary always remains one dimension lower.  
+The geometry is analogous to the regression surface shown earlier in Figure \ref{fig:mlr-3d}, except that here the plane represents a \emph{separating boundary} rather than a fitted surface.
+
+## Linear Methods for Classification
+
+A direct but naive approach to classification is to apply **linear regression** to a binary response, e.g. $G = \{0, 1\}$. By fitting a regression line to class labels treated as numerical values, we can obtain a simple linear decision boundary, but this is usually **not a good idea**, as linear regression is not designed for categorical outcomes.
+
+Many other classification methods, however, also produce **linear decision boundaries**. These boundaries are linear **in the feature space**, corresponding to hyperplanes of the form  
+$$ b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
+
+By augmenting the feature space with transformations such as squares, interactions, or higher powers (e.g. $x_1^2$, $x_1x_2$, $x_2^3$), the model remains linear in this \emph{expanded space}, but its projection onto the original predictor space becomes **non-linear**.  
+Thus, linear classification in a rich feature space can yield flexible, curved decision boundaries in the original variables.
+
+![Linear and piecewise-linear decision boundaries in feature and original spaces.](Images_qmd_ML/ML5_class.png){#fig-linear-classification}
+
+In problems with more than two classes, linear methods produce **piecewise linear decision boundaries**, i.e. separate hyperplanes that divide the feature space into multiple regions, one for each class.
+
+## Linear Discriminant Analysis
+
+### Setup
+
+We aim to classify an observation $Y \in \mathcal{G} = \{1, \ldots, q\}$ given predictors $X = (X_1, \ldots, X_p)$.  
+The idea is to model the **class-conditional densities** of $X$ given the class $Y = j$, denoted $g_j(x)$, and the **marginal class probabilities** $\pi_j = \Pr(Y = j)$ for $j = 1, \ldots, q$.  
+Using Bayes’ theorem, we can express the posterior probability of belonging to class $j$ as $$\Pr(Y = j \mid X = x) = \frac{\Pr(X = x \mid Y = j) \Pr(Y = j)}{\Pr(X = x)}
+\propto g_j(x)\pi_j.$$
+
+This proportionality means that, for classification, we only need to compare the quantities $g_j(x)\pi_j$ across classes.
+
+### Modelling Assumptions
+
+In **Linear Discriminant Analysis (LDA)**:
+
+1. Each class-conditional density $g_j(x)$ is assumed to follow a **multivariate normal distribution**: $$g_j(x) = \frac{1}{(2\pi)^{p/2} (\det \Sigma_j)^{1/2}} 
+   \exp\left\{ -\frac{1}{2}(x - \mu_j)^\top \Sigma_j^{-1} (x - \mu_j) \right\}.$$
+
+2. All classes share the **same covariance matrix**, that is, $\Sigma_j = \Sigma$ for all $j$.
+
+Under these assumptions, the decision boundary between two classes is **linear** in $x$, because the logarithm of the posterior probabilities yields a linear function of $x$.
+
+![Class-conditional normal densities $g_1(x)\pi_1$ and $g_2(x)\pi_2$ under equal covariance assumption.](Images_qmd_ML/ML5_li_disc.png){#fig-lda-gaussians}
+
+@fig-lda-gaussians shows a one-dimensional example with two classes. Each class distribution is modelled by a Gaussian density with its own mean but identical variance.  
+The intersection point between the scaled densities $g_1(x)\pi_1$ and $g_2(x)\pi_2$ corresponds to the **decision boundary**, i.e., the value of $x$ where the posterior probabilities are equal.
+
+## Estimation
+
+In practice, the parameters of LDA are estimated from a training sample $(y_1, \mathbf{x}_1), \ldots, (y_n, \mathbf{x}_n)$.  
+The model includes:
+
+- the **prior class probabilities** $\pi_1, \ldots, \pi_q \in (0, 1)$  
+- the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$  
+- the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$  
+
+We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} \mathbf{1}\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} \mathbf{x}_i \mathbf{1}\{y_i = j\}}{\sum_{i=1}^{n} \mathbf{1}\{y_i = j\}},$$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} \mathbf{1}\{y_i = j\}}{n - q}.$$
+
+These estimators are simple closed forms — no iterative optimisation is needed — which makes LDA **computationally very fast**.  
+Unlike linear regression, we do not use the numerical values of the $y_i$’s, only their class membership.
+
+## Prediction
+
+Given a new observation $\mathbf{x}_0 \in \mathbb{R}^p$, we predict its class by maximising the posterior probability estimated from the training data: $$\hat{y}_0 = \arg\max_{j=1,\ldots,q} \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \arg\max_{j=1,\ldots,q} \log \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0).$$
+
+From the Gaussian model, we have: $$\log \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \log \hat{g}_j(\mathbf{x}_0) + \log \hat{\pi}_j + \text{constant},$$
+
+which expands to $$-\tfrac{1}{2}(\mathbf{x}_0 - \hat{\boldsymbol{\mu}}_j)^{\top} \hat{\boldsymbol{\Sigma}}^{-1} (\mathbf{x}_0 - \hat{\boldsymbol{\mu}}_j) + \log \hat{\pi}_j + \text{constant}.$$
+
+Ignoring terms independent of $j$, this simplifies to a **linear discriminant function**: $$\delta_j(\mathbf{x}_0) = \mathbf{x}_0^{\top}\hat{\boldsymbol{\Sigma}}^{-1}\hat{\boldsymbol{\mu}}_j - \tfrac{1}{2}\hat{\boldsymbol{\mu}}_j^{\top}\hat{\boldsymbol{\Sigma}}^{-1}\hat{\boldsymbol{\mu}}_j + \log \hat{\pi}_j.$$
+
+We assign $\mathbf{x}_0$ to the class with the largest $\delta_j(\mathbf{x}_0)$.
+
+### Geometric interpretation
+
+LDA classifies points based on their **Mahalanobis distance** to each class mean, adjusted by the prior probabilities: $$d_{\Sigma^{-1}}(x, \mu_j) = (x - \mu_j)^{\top}\Sigma^{-1}(x - \mu_j).$$
+
+In geometric terms, the decision boundary lies at points where two discriminant functions are equal, i.e. where the posterior probabilities of the classes coincide.  
+These boundaries are **linear** because $\Sigma$ is common to all classes.
+
+## Decision Boundaries
+
+The **decision boundary** separating two classes $j, m \in \{1, \ldots, q\}$ is the set of all $\mathbf{x} \in \mathbb{R}^p$ such that $$\Pr(Y = j \mid X = \mathbf{x}) = \Pr(Y = m \mid X = \mathbf{x}).$$
+
+This is equivalent to $$\log \Pr(Y = j \mid X = \mathbf{x}) - \log \Pr(Y = m \mid X = \mathbf{x}) = 0.$$
+
+Replacing these probabilities by their Gaussian expressions and the prior class probabilities gives the **decision boundary equation**: $$\log \frac{\pi_j}{\pi_m} - \tfrac{1}{2}(\boldsymbol{\mu}_j + \boldsymbol{\mu}_m)^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) + \mathbf{x}^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) = 0.$$
+
+This is a **linear equation in $\mathbf{x}$**.  
+Hence, the boundaries separating any two classes $j$ and $m$ are **hyperplanes** in $\mathbb{R}^p$ of dimension $p - 1$.  
+For $q > 2$ classes, these hyperplanes together form a **piecewise linear decision boundary**.
+
+## Iris Data Set
+
+To illustrate LDA in practice, we use the classic **Iris data set**, which contains 150 observations of three flower species: *setosa*, *versicolor*, and *virginica*.  Each plant is described by $p = 4$ predictors (sepal length, sepal width, petal length, and petal width), and the response variable $G = \{\textit{setosa}, \textit{versicolor}, \textit{virginica}\}$ indicates the species.
+
+Here, we restrict the analysis to only **two predictors** (sepal length and sepal width) to visualise the classification boundary in two dimensions.  
+After fitting LDA to these two features, we obtain three **piecewise linear decision boundaries**, each separating one species from the others.
+
+![LDA decision regions for the Iris data using two predictors (sepal length and sepal width).](Images_qmd_ML/ML5_iris.png){#fig-lda-iris width="65%"}
+
+In @fig-lda-iris we see that, each colour region represents the set of points assigned to one of the three classes. The black circles correspond to the training observations.  
+As expected from LDA, the boundaries between classes are straight lines — consistent with the linear decision boundaries derived theoretically.  
+Despite using only two features, LDA achieves clear separation between *setosa* and the other two species, while *versicolor* and *virginica* overlap slightly, reflecting their natural similarity in the data.
+
+## Extensions of LDA
+
+The Bayes’ construction used in LDA can be generalised to other models for the class-conditional densities $g_j(x)$: $$\Pr(Y = j \mid X = x) = \frac{\Pr(X = x \mid Y = j)\Pr(Y = j)}{\Pr(X = x)} = \frac{g_j(x)\pi_j}{\sum_{k=1}^{q} g_k(x)\pi_k}.$$
+
+By changing the assumed form of $g_j(x)$, we can obtain more flexible classification models.  
+
+A common extension is **Quadratic Discriminant Analysis (QDA)**, where we still model $g_j(x)$ by a multivariate normal distribution, but allow each class to have its **own covariance matrix** $\boldsymbol{\Sigma}_j$. This relaxation leads to **quadratic decision boundaries** instead of linear ones.
+## Extensions of LDA
+
+There are many ways to extend LDA. The Bayes’ formulation $$\Pr(Y = j \mid X = x) = \frac{\Pr(X = x \mid Y = j)\Pr(Y = j)}{\Pr(X = x)} = \frac{g_j(x)\pi_j}{\sum_{k=1}^{q} g_k(x)\pi_k}$$ can be used with different forms of the class-conditional densities $g_j(x)$.
+
+**Quadratic Discriminant Analysis (QDA)** models each $g_j$ as a multivariate normal distribution but allows for **different covariance matrices** $\boldsymbol{\Sigma}_j$, leading to **quadratic decision boundaries**.
+
+**Mixture models** use combinations of Gaussian components to represent more complex class-conditional densities $g_j(x)$, providing greater flexibility when class distributions are not unimodal.
+
+**Naive Bayes** assumes **conditional independence** between predictors given the class. In this case, $$g_j(x) = \prod_{\ell=1}^{p} g_{j,\ell}(x_\ell),$$ where each feature contributes independently to the overall class likelihood.
+
+When some predictors are **categorical**, such as $X_1$, we can write $$g_j(x) = \Pr(X_1 = x_1 \mid Y = j) g_j(x_2, \ldots, x_p \mid X_1 = x_1, Y = j),$$ where $g_j(x_2, \ldots, x_p \mid X_1 = x_1, Y = j)$ represents the density of the remaining continuous variables.
+
+Finally, **non-parametric approaches** estimate $g_j(x)$ directly from data without assuming any specific parametric form, offering the most flexibility at the cost of greater computational effort.
+
+
+## Iris Data Set: QDA
+
+We again use the **Iris data set** to compare QDA with LDA.  
+The same three classes (*setosa*, *versicolor*, and *virginica*) are modelled using only two predictors: sepal length and sepal width.
+
+Fitting QDA allows each class to have its own covariance structure, producing **curved boundaries** that better adapt to class shapes in the feature space.
+
+![Comparison between LDA (left) and QDA (right) decision regions on the Iris data set.](Images_qmd_ML/ML5_QDAvsLDA.png){#fig-lda-vs-qda}
+
+@fig-lda-vs-qda compares the classification regions obtained with LDA (left) and QDA (right).  
+LDA yields **linear boundaries**, while QDA produces **quadratic, more flexible** ones that better capture non-linear class separation.  
+Although QDA can fit the data more closely, it also increases the risk of overfitting when the number of predictors or classes grows.
+
+## Comments on LDA
+
+LDA is **easy** and **fast to compute**.  
+It also provides estimates of the **posterior class probabilities**: $$\widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \frac{\hat{g}_j(\mathbf{x}_0)\hat{\pi}_j}{\sum_{k=1}^{q} \hat{g}_k(\mathbf{x}_0)\hat{\pi}_k}.$$
+
+In practice, LDA usually performs well and can compete with more complex methods.  
+This is not because the normality assumption is realistic, but because a **linear decision boundary** is often the best the data can support.  
+Moreover, LDA is a **stable estimation method**, meaning that even if the assumed Gaussian model is imperfect, the resulting decision boundary remains robust.
+
+We do not need highly accurate models for the $g_j$ to obtain a good model for the posterior. @fig-comments-lda illustrates this idea.  
+
+On the **left**, the two class-conditional densities $g_1(x)$ and $g_2(x)$ are clearly **non-Gaussian**—the blue density is even bimodal.  
+On the **right**, we see the corresponding **posterior probability** of belonging to the red class.  
+Despite the complex shape of the densities, the posterior remains **smooth and monotonic**, producing a clear linear-like separation.  
+This shows that even if the normality assumption fails, LDA still yields reliable classification boundaries.
+
+![Even with non-Gaussian class densities (left), LDA yields smooth, stable posterior probabilities (right).](Images_qmd_ML/ML5_com_LDA.png){#fig-comments-lda}
+
+
+
 # Logistic Regression
 
 # Image Recognition
