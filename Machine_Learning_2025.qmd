@@ -1801,7 +1801,7 @@ $$\hat{G}(x) =
 \end{figure}
 \end{minipage}
 
-This shows that even a single pixel may carry some information about class membership, but meaningful recognition requires combining all 256 pixel predictors to capture the full spatial structure of each digit. As seen in Figure\~\ref{fig-ML6-op-plot}, logistic regression produces a smooth probability curve separating the two classes based on Pixel 1 intensity.
+This shows that even a single pixel may carry some information about class membership, but meaningful recognition requires combining all 256 pixel predictors to capture the full spatial structure of each digit. As seen in Figure \ref{fig-ML6-op-plot}, logistic regression produces a smooth probability curve separating the two classes based on Pixel 1 intensity.
 
 ## Two-class classification: two predictors
 

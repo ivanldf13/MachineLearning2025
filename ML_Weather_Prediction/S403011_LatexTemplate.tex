@@ -1,0 +1,85 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% S403011 Machine Learning : Latex Template      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Complete the ??? before compiling the document
+\documentclass[a4,a4paper,11pt,english]{article}
+
+% You can add package but not remove any
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Library               %
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{amsthm, amsmath, amsfonts, amssymb, bm, bbm, mathtools}
+\usepackage[authoryear]{natbib}
+\usepackage{enumerate}
+\usepackage{fancyvrb,moreverb,boxedminipage}
+\usepackage{a4}
+\usepackage{xcolor}
+\usepackage{graphicx} % add figures preferably in .eps
+\usepackage{geometry}
+\usepackage{float}
+\usepackage[english]{babel}
+\usepackage[scaled]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks, citecolor=blue, urlcolor=blue]{hyperref}
+
+\textwidth=6.5in
+\textheight=8.2in
+\topmargin=0.0in
+\oddsidemargin=-.1in 
+\baselineskip=12pt
+\headheight=2cm
+\pagestyle{fancy}
+\fancyhf{}
+
+\setlength{\parskip}{3pt}
+\setlength{\parindent}{0pt}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+
+% add team name
+\lhead{GSEM, University of Geneva\\ \textbf{S403011 Machine Learning}\\ Team. ???}
+\rhead{Fall Semester 2025 \\ \textbf{Machine Learning Project}}
+
+% add your own macro here
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macro                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% e.g. the mathematical definition of mean absolute error (mae)
+% \mae is the name of the command
+% [1] is the number of argument the command takes
+% #1 will be replaced by your argument \mae{...}
+\newcommand{\mae}[1]{\frac{1}{n} \sum_{i = 1}^{n} \lvert #1 \rvert}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document              %
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+	% title - add team name
+	 \begin{center}
+	 	\LARGE \textbf{
+	 			S403011 Machine Learning Project: Weather Prediction \\ 
+	 			Team: ???
+ 		}
+ 	\end{center}
+	% add team members with student's number in parenthesis
+	\textbf{Authors: ??? (???), ??? (???), ??? (???)}
+	\par
+	
+	%%%%%%%%%%%%%%%%%%%%%%%%%
+	% write here
+	% you can change the title of this section
+	\section{Introduction}
+	
+	% References
+	%%%%%%%%%%
+	% you can change the style
+	% uncomment to add references from a .bib file
+	%\bibliographystyle{apalike}
+	%\bibliography{???}
+	
+\end{document}
