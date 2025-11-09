@@ -2282,4 +2282,6 @@ Overall, decision trees can approximate complex decision boundaries, while linea
 
 Although individual trees are often unstable and limited in accuracy, **combining many trees** (through methods such as **bagging**, **random forests**, or **boosting**) leads to more powerful and reliable predictive models.
 
+# Bagging
+
 # 

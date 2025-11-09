@@ -133,11 +133,11 @@ In the next section, we see how random forests address this limitation by introd
 #TODO add this foot ntoe_ the specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features.
 ```
 
-
 ## Bagging: correlated trees
 
 -   In bagging, each tree is trained on a bootstrap dataset that is drawn **with replacement** from the original training data. Because these bootstrap samples overlap substantially, the trees share **many common observations**.
 -   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity. Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
+
 ```{r}
 #TODO include this as a footnote: Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity — that is, makes the resulting groups more homogeneous.
 # In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
@@ -150,6 +150,7 @@ They all split early on similar variables (Thal, Ca, Oldpeak), showing that even
 
 Such correlation limits the benefit of averaging in bagging: even though we combine many trees, if they make **similar errors**, the ensemble’s variance does not decrease as much as expected.\
 This motivates the next step, i.e., **random forests**, which introduce randomness in feature selection at each split to decorrelate the trees and achieve greater variance reduction.
+
 ```{r}
 #TODO but if we add randomness to then reduce the variance, isnt it a bit working twice?
 ```
@@ -193,7 +194,7 @@ As shown in @fig-heart-oob, the **out-of-bag (OOB) error rate** decreases rapidl
 -   A **random forest classifier**, which extends bagging by randomly selecting a subset of predictors at each split (`max_features="sqrt"`).
 
 Each model is trained incrementally (`warm_start=True`) from 3 to 600 trees, and the **OOB score** (an internal cross-validation estimate) is tracked at every step.\
-The **random forest** (orange line)  achieves a lower OOB error than bagging (blue line) because random feature selection reduces tree correlation, leading to lower variance and improved generalisation.\
+The **random forest** (orange line) achieves a lower OOB error than bagging (blue line) because random feature selection reduces tree correlation, leading to lower variance and improved generalisation.\
 This improvement arises because random feature selection decorrelates the trees, reducing the ensemble’s overall variance.
 
 \begin{minipage}{0.55\textwidth}
@@ -334,3 +335,178 @@ This technique provides a useful diagnostic tool:
 -   It also offers limited interpretability despite the ensemble’s overall “black-box” nature, giving insights into what drives the model’s predictions.
 
 Thus, pixel-level variable importance visualisation bridges the gap between **performance** and **explainability**, showing how random forests internally differentiate complex visual classes.
+
+# Boosting
+
+## Boosting for trees
+
+Boosting builds upon the idea of bagging but reverses its focus. In **bagging**, we use many **unbiased**, high-variance models (deep trees) and reduce their variance through averaging. Each tree is grown independently on a bootstrap sample of the data, and their predictions are averaged to form a stable, low-variance model.
+
+**Boosting**, in contrast, aims to reduce the **bias** of the model. Instead of combining many deep, independent trees, it combines many **weak**, biased learners (typically shallow trees) that individually have low variance. These trees are not grown independently but **sequentially**: each new tree focuses on the parts of the data that the previous ones predicted poorly.
+
+In other words:
+
+-   Bagging: reduces **variance** by averaging large, independent trees.
+
+-   Boosting: reduces **bias** by adding small trees that correct previous errors.
+
+-   Each tree in boosting learns from the **residuals** of the preceding model, gradually improving performance.
+
+-   This sequential correction makes boosting a form of *iterative learning*, where each step targets what remains unexplained.
+
+## Boosting algorithm for regression trees
+
+The boosting algorithm formalises this process for regression trees. It builds the model step by step, with each new tree improving upon the errors of the last. Before starting, we fix three tuning parameters:
+
+-   **Number of repetitions** $B \in \mathbb{N}$: the number of trees (iterations).
+-   **Number of splits** $d \in \mathbb{N}$: the depth of each tree, controlling its complexity.
+-   **Shrinkage parameter** $\lambda \in (0,1)$: a learning rate that controls how strongly each tree contributes to the model.
+
+Given a training set $(x_i, y_i)$, $i = 1, \ldots, n$, the algorithm proceeds as follows:
+
+1.  **Initialisation**: start with a null model and set the initial residuals to the observed outcomes: $$\hat{f}(x) = 0, \quad r_i = y_i. $$ This means the model initially predicts zero for all observations.
+
+2.  **Iterative fitting** For $b = 1, \ldots, B$:
+
+    - Fit a regression tree $\hat{f}^b$ with $d$ splits to the data $(x_i, r_i)$. Each tree now tries to explain the residuals — the part of $y_i$ that remains unexplained by the model so far.
+    - Update the model by adding a *shrunken* version of this tree: $$ \hat{f}(x) \leftarrow \hat{f}(x) + \lambda \hat{f}^b(x). $$ The shrinkage factor $\lambda$ prevents overfitting by slowing down the learning process.
+    - Update the residuals to reflect the remaining error after adding the new tree: $$ r_i \leftarrow r_i - \lambda \hat{f}^b(x_i). $$ Residuals that remain large indicate regions where the model still performs poorly, guiding the next tree to focus on those points.
+
+3.  **Final model** After $B$ iterations, the boosted model is the sum of all the shrunken trees: $$ \hat{f}(x) = \sum_{b=1}^{B} \lambda \hat{f}^b(x). $$
+    This model captures complex patterns by successively correcting its own mistakes — an effect that makes boosting powerful, yet prone to overfitting if $B$ is too large.
+
+In summary, boosting performs **slow learning** through small, sequential updates. While each tree alone is a poor predictor, together they form a strong model that reduces bias and achieves high accuracy when the tuning parameters are chosen carefully.
+
+
+## Tuning and learning rate in boosting
+
+Boosting can be understood as a form of **slow learning**, since it builds the model step by step using many small trees that gradually improve $\hat{f}$ in regions where it performs poorly. Each tree makes only a small correction to the current model, focusing on residuals that remain large. Over successive iterations, these corrections accumulate into a powerful ensemble.
+
+The **shrinkage parameter** $\lambda$ further slows this process, controlling how much each new tree contributes. A smaller $\lambda$ makes learning more gradual, allowing the algorithm to fit a wider variety of tree shapes to the residuals and avoid overfitting. This mechanism ensures that improvement happens progressively and in diverse parts of the predictor space.
+
+Boosting has three key **tuning parameters**:
+
+- **(a) Number of trees $B$**: determines how many iterations the algorithm performs.  
+  Unlike bagging and random forests, boosting can overfit if $B$ becomes too large, although this typically happens slowly. The optimal $B$ is chosen via cross-validation to stop learning before overfitting begins.
+
+- **(b) Shrinkage parameter $\lambda$**: typically a small positive number (e.g. 0.01 or 0.001).  
+  It controls the *learning rate* of the algorithm. Smaller values imply slower learning but often lead to better generalisation, requiring more trees for good performance.
+
+- **(c) Number of splits $d$**: controls the complexity of each individual tree.  
+  When $d = 1$, each tree is a **stump**, i.e. a single split. Such simple trees usually work surprisingly well because boosting reduces bias sequentially, making deep trees unnecessary.
+
+Boosting can also be applied to **classification** problems, although the algorithm’s formulation is slightly more complex than for regression.
+
+## Hitters data: boosting
+
+To illustrate the behaviour of boosting, consider its application to the **Hitters** dataset, where the goal is to predict baseball players’ salaries. The plots below show the **test error** as a function of the number of boosting iterations $B$ for different values of the shrinkage parameter $\lambda$ and tree depth $d$.
+
+![Test error as a function of the number of boosting iterations $B$ for different values of $\lambda$ and tree depths $d=1,4,8$.](Images_qmd_ML/ML8_boosting_hitters.png){#fig-boosting-hitters width=110%}
+
+When $\lambda = 0.1$, the model learns very quickly, and the test error drops sharply but also rises again soon, which is a sign of **overfitting**. A small $\lambda$ (e.g. 0.01 or 0.005) slows learning, resulting in a more gradual decrease of the test error that remains low over a broader range of $B$. This makes model selection via cross-validation more stable.
+
+With **stumps** ($d=1$), the model initially underfits, but increasing the depth to $d=4$ allows it to reach lower test errors comparable to those of bagging and random forests. Further increasing $d$ (e.g. to $8$) offers little benefit and can even worsen performance, as overfitting begins earlier.
+
+In practice, a **small learning rate** (around 0.01) and **moderately shallow trees** (e.g. $d=4$) tend to yield the best trade-off between bias reduction and generalisation. Boosting thus provides a flexible yet controlled way to improve predictive performance through slow, sequential learning.
+
+
+# Support Vector Machines: Maximal Margin Classifier
+
+**Support Vector Machines (SVM)** represent a geometric approach to classification.  
+Unlike LDA or logistic regression, which model statistical relationships between $Y$ and $\mathbf{X}$, SVMs make **no distributional assumptions**. They aim instead to find a **decision boundary** — a hyperplane — that separates classes in the feature space.
+
+A **hyperplane** in $\mathbb{R}^p$ is defined as the set of all $\mathbf{x}$ satisfying the linear equation  
+$$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$  
+This boundary divides the predictor space into two half-spaces. For any observation $\mathbf{z}$, the function $f(\mathbf{z}) = \beta_0 + \beta_1 z_1 + \cdots + \beta_p z_p$ indicates its position relative to the hyperplane: points with $f(\mathbf{z}) > 0$ belong to one class, and those with $f(\mathbf{z}) < 0$ to the other. Points exactly on the hyperplane satisfy $f(\mathbf{z}) = 0$.
+
+The vector $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_p)$ is called the **normal vector** because it is orthogonal to the hyperplane. Its direction determines the orientation of the separating boundary, and its length is usually normalised to one to ensure a unique parametrisation. The intercept $\beta_0$ shifts the hyperplane along the direction of $\boldsymbol{\beta}$ without changing its orientation.
+
+To build intuition:
+- Points with $|f(\mathbf{z})|$ large are far from the boundary.  
+- Points with $f(\mathbf{z}) \approx 0$ lie close to it and are more uncertain.  
+Thus, the magnitude $|f(\mathbf{z})|$ can be interpreted as the **distance** from $\mathbf{z}$ to the hyperplane.
+
+Now consider a binary classification problem with classes labelled $y_i \in \{-1, +1\}$.  
+A hyperplane **separates** the training data if it assigns positive values of $f(\mathbf{x}_i)$ to all observations with $y_i = +1$ and negative values to all with $y_i = -1$. Formally, $$ y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) > 0, \quad \text{for all } i = 1, \ldots, n. $$  
+If such a hyperplane exists, there are infinitely many possible ones, each perfectly separating the two classes but differing in position.
+
+The **Maximal Margin Classifier (MMC)** resolves this ambiguity by choosing the separating hyperplane that maximises the **margin**, defined as the smallest distance between the hyperplane and any training observation. Denoting this distance by $M$, the optimisation problem is: $$ \max_{\beta_0, \boldsymbol{\beta}, M} \; M \quad \text{s.t.} \quad \|\boldsymbol{\beta}\| = 1, \; y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) \geq M \ \text{for all } i. $$  
+This ensures all observations lie at least $M$ units away from the separating boundary, yielding the widest possible margin.
+
+The observations that lie exactly at this minimal distance, i.e., those that satisfy $y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) = M$, called the **support vectors**. They define the position of the maximal margin hyperplane. Small changes to these points can shift the boundary, whereas non-support points have no effect.
+
+Although conceptually elegant, the MMC has two key **limitations**:
+1. It is **unstable**, as it depends heavily on the few support vectors near the boundary.  
+2. It only works when the classes are **linearly separable**. In most real-world data, perfect separation is impossible, motivating more flexible extensions such as the **Support Vector Classifier**, which allows for a *soft* margin.
+
+SVMs therefore build upon this geometric idea, gradually introducing relaxation and nonlinearity to handle more complex data structures while maintaining the same underlying optimisation principle.
+
+## Hyperplanes: construction
+
+A **hyperplane** in $\mathbb{R}^p$ is defined by the equation  
+$$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$  
+This represents a $(p-1)$-dimensional flat surface that divides the feature space into two half-spaces.
+
+The vector $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_p)$ is called the **normal vector**, as it is **orthogonal** to the hyperplane. Its direction indicates the orientation of the separating boundary, while the intercept $\beta_0$ determines its distance from the origin.  
+
+To ensure a unique parametrisation, we usually normalise the normal vector so that $\|\boldsymbol{\beta}\| = 1$. Without this constraint, scaling both $\beta_0$ and $\boldsymbol{\beta}$ by the same constant would produce the same hyperplane but different parameter values.
+
+For any point $\mathbf{z} \in \mathbb{R}^p$, the signed distance from the hyperplane is given by $|\beta_0 + \beta_1 z_1 + \cdots + \beta_p z_p|$.  
+- If this value is **positive**, $\mathbf{z}$ lies on one side of the hyperplane.  
+- If it is **negative**, $\mathbf{z}$ lies on the opposite side.  
+- If it equals **zero**, $\mathbf{z}$ lies exactly on the hyperplane.  
+
+As shown in @fig-hyperplane, the **blue line** represents the hyperplane in $\mathbb{R}^2$, while the **red arrow** depicts the normal vector that is orthogonal to it. The absolute value of the linear function corresponds to the **distance** between each point and the hyperplane, capturing how far an observation lies from the separating boundary.
+
+
+![A hyperplane (blue) in $\mathbb{R}^2$ with its normal vector (red) orthogonal to it. The absolute value of the linear function gives the distance of each point from the hyperplane.](Images_qmd_ML/ML8_hyperplane.png){#fig-hyperplane width=40%}
+
+## Separating hyperplanes
+
+We now focus on the simplest SVM setting: two classes, denoted by $\mathcal{G} = \{-1, +1\}$.  
+Given training data $(x_1, y_1), \ldots, (x_n, y_n)$ with $y_i \in \{-1, +1\}$, we say that a **hyperplane is separating** if it correctly classifies all observations according to $$\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip} > 0 \ \text{if } y_i = +1, \quad
+\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip} < 0 \ \text{if } y_i = -1.$$
+
+These two inequalities can be written more compactly as $$ y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) > 0, \quad i = 1, \ldots, n. $$
+
+This expression captures both cases simultaneously: if $y_i = +1$, the term remains positive, while if $y_i = -1$, it reverses sign to ensure that the point lies on the opposite side of the hyperplane.  
+
+A separating hyperplane therefore divides the feature space so that all points of one class lie on one side and all points of the other class lie on the opposite side. When such a hyperplane exists, there are **infinitely many** possible separating boundaries, each producing zero training error but potentially different generalisation properties.
+
+As illustrated in @fig-separating, several hyperplanes can perfectly separate the same data. The plot on the left shows multiple valid separating lines, all achieving perfect classification, while the right panel depicts one such decision boundary dividing the feature space into two regions corresponding to the two classes.
+
+![Different possible separating hyperplanes for linearly separable data.](Images_qmd_ML/ML8_separating.png){#fig-separating width=90%}
+
+## Maximal margin classifier
+
+When a separating hyperplane exists, it defines a **natural classifier** for new data points. The function $f(x_0)$ tells us on which side of the hyperplane a point $x_0$ lies: if it is positive, we assign the class $+1$, and if negative, the class $-1$. The **magnitude** of this value indicates how far the point lies from the boundary.
+
+The **margin** represents the smallest distance between the training data and the separating hyperplane. The **Maximal Margin Classifier (MMC)** selects the hyperplane that maximises this margin, thereby creating the **widest possible gap** between the two classes. A wider margin leads to a more robust classifier, as small changes in the data are less likely to alter the decision boundary.
+
+\begin{minipage}{0.55\textwidth}
+Only the observations lying exactly on the margin determine the boundary. These are known as \textbf{support vectors} because they “hold” the hyperplane in place. If one of them moves, the hyperplane shifts as well. Points further from the margin have no influence on its position.
+
+The MMC is obtained by solving a convex quadratic optimisation problem that efficiently identifies the separating hyperplane with the largest margin.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML8_max_margin.png}
+\caption{MMC: the optimal hyperplane (solid line) maximises the distance to the nearest training points of either class, defining the margin (dashed lines).}
+\label{fig-max-margin}
+\end{figure}
+\end{minipage}
+
+## Comments and limitations
+
+The optimisation problem behind the **maximal margin classifier** is a **convex quadratic programme**, which guarantees that the global optimum can be found efficiently.
+
+However, as seen in Figure \ref{fig-max-margin}, only a few observations (the **support vectors**) determine the position of the separating hyperplane. Slightly moving one of these support vectors alters the optimal boundary, while moving other observations has no effect at all. This dependence on just a few critical points makes the classifier **sensitive** and potentially **unstable**.
+
+In practice, this instability is compounded by another limitation: **most datasets are not perfectly linearly separable**. As illustrated in Figure \ref{fig-max-margin}, the maximal margin classifier only works when a hyperplane can fully separate the classes. When such perfect separation is impossible, the optimisation problem has no feasible solution.  
+
+These challenges motivate the next step, i.e., the **Support Vector Classifier**, which introduces a *soft margin* allowing for some classification errors while maintaining the geometric intuition of maximising the margin.
+
+
+#
