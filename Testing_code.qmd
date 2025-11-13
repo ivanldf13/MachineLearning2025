@@ -69,7 +69,7 @@ Bagging therefore reduces variance through model aggregation while preserving th
 -   The remaining one-third (≈ 37%) of the observations not used to fit a given bagged model are referred to as the **out-of-bag observations**.
 -   We can predict the response for the $i$th observation using all models $\hat{f}^{*b}$ with $b \in I_{x_i} = \{ b = 1, \dots, B : (x_i, y_i) \notin Z^{*b} \}$, i.e. the models for which the observation was OOB. This yields around $B/3$ predictions for the $i$th observation, which we average: $$ \text{Err}_{\hat{f}_{\text{bag}}}(x_i) = \frac{1}{|I_{x_i}|} \sum_{b \in I_{x_i}} (y_i - \hat{f}^{*b}(x_i))^2.$$ In other words, this is *the mean of the squared prediction errors made by all the models* $b$ in $I_{x_i}$ (the models for which $x_i$ was OOB).
 -   The average over all $n$ observations gives the overall OOB error estimate: $$ \text{Err}_{\hat{f}_{\text{bag}}} = \frac{1}{n} \sum_{i=1}^{n} \text{Err}_{\hat{f}_{\text{bag}}}(x_i). $$ *On average, how well does the bagged model generalise to unseen data?*
--   For large $B$, this estimator can be shown to be equivalent to the Leave-One-Out Cross-Validation (LOOCV) estimator — but in bagging, it comes for free.
+-   For large $B$, this estimator can be shown to be equivalent to the Leave-One-Out Cross-Validation (LOOCV) estimator, but in bagging, it comes for free.
 
 The OOB error provides an internal validation mechanism without requiring an explicit test set, making it especially efficient for ensemble methods such as Random Forests.
 
