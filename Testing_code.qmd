@@ -508,4 +508,73 @@ In practice, this instability is compounded by another limitation: **most datase
 
 These challenges motivate the next step, i.e., the **Support Vector Classifier**, which introduces a *soft margin* allowing for some classification errors while maintaining the geometric intuition of maximising the margin.
 
+# Support Vector Machines: Support Vector Classifier
+
+## Support vector classifier
+
+The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
+
+We introduce slack variables $\xi_i \ge 0$ for training observations $(\mathbf{x}_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x}_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
+
+Here, the parameter $C>0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). Points with $\xi_i = 0$ are on or outside the margin, $0 < \xi_i \le 1$ lie inside the margin but remain correctly classified, and $\xi_i > 1$ are misclassified. As $C \to \infty$, we recover a hard margin (when separable); smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points — the support vectors.
+
+Algorithmically:
+
+1\. Choose $C$ (for instance, via cross-validation).\
+2. Solve the convex quadratic programme above.\
+3. Form the decision function $\hat{f}(\mathbf{x}) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x})$, supported by training points with non-zero Lagrange multipliers (the support vectors).
+
+Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
+
+![Hard- versus soft-margin solutions on the same dataset.](Images_qmd_ML/ML9_SVC.png){#fig-ML9_SVC width="80%"}
+
+## Mathematical formulation of the support vector classifier
+
+The soft-margin formulation can also be expressed as a maximisation problem. We aim to find the largest possible margin $M$ while allowing controlled violations through slack variables $\epsilon_i \ge 0$.
+
+![Soft-margin classifier with slack variables $\epsilon_i$ and total budget $b$.](Images_qmd_ML/ML9_SVC_s2.png){#fig-ML9_SVC_s2 width="25%" fig-align="center"}
+
+The optimisation problem is: $$\max_{\beta_0,\ldots,\beta_p,\ \epsilon_1,\ldots,\epsilon_n} \ M$$ subject to $$\sum_{j=1}^{p} \beta_j^2 = 1, \quad 
+y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) \ge M(1 - \epsilon_i),$$ $$\epsilon_i \ge 0, \quad 
+\sum_{i=1}^{n} \epsilon_i \le b.$$
+
+Each $\epsilon_i$ quantifies how much observation $i$ violates the margin constraint:
+
+-   $\epsilon_i = 0$: the observation lies on or outside the margin (correctly classified).
+-   $0 < \epsilon_i \le 1$: the observation lies inside the margin but is still correctly classified.
+-   $\epsilon_i > 1$: the observation is misclassified, on the wrong side of the separating hyperplane.
+
+The constant $b > 0$ acts as a *tuning* or *regularisation* parameter that sets the total “budget” of margin violations across all $n$ observations. A larger $b$ allows more flexibility—useful for noisy or non-separable data—while a smaller $b$ enforces stricter separation with fewer violations.
+
+Here, the *support vectors* are the observations that either lie exactly on the margin or violate it (i.e. those for which $\epsilon_i > 0$). Only these points determine the position and orientation of the separating hyperplane — all other observations, being further from the decision boundary, have no influence on the classifier.
+
+Consequently, the regularisation parameter $b$ indirectly controls the number of support vectors and hence the complexity of the model. A smaller $b$ (stricter margin) limits violations, reducing the number of support vectors and yielding a simpler, higher-bias but lower-variance model. Conversely, a larger $b$ allows more margin violations, increasing the number of support vectors and producing a more flexible, lower-bias but higher-variance classifier.
+
+## Tuning parameter $b$
+
+The regularisation constant $b$ plays a central role in controlling the flexibility of the support vector classifier. It sets the total “budget” of margin violations permitted across all training observations, and therefore determines the number of support vectors used to define the decision boundary.
+
+![Effect of the tuning parameter $b$ on the margin width and classifier flexibility.](Images_qmd_ML/ML9_tunning_p_b.png){#fig-ML9_tunning_p_b fig-align="center" width="50%"}
+
+As illustrated in Figure @fig-ML9_tunning_p_b, increasing or decreasing $b$ directly influences the width of the margin and the bias–variance characteristics of the model:
+
+-   **Large** $b$ allows more violations, leading to **wider margins** and a **higher-bias, lower-variance** classifier. The decision boundary becomes smoother and less sensitive to individual observations.
+-   **Small** $b$ enforces fewer violations, producing **tighter margins** and a **lower-bias, higher-variance** classifier. The boundary fits the training data more closely but risks overfitting.
+
+The optimal value of $b$ is typically chosen through **cross-validation**, balancing the trade-off between margin width and classification accuracy on unseen data.
+
+## Limitations of the support vector classifier
+
+Although the support vector classifier is a powerful method for constructing linear decision boundaries, it has an important limitation: it can only produce *linear* separation in the feature space.
+
+![Limitation of the support vector classifier: poor performance with non-linear class boundaries.](Images_qmd_ML/ML9_limitations.png){#fig-ML9_limitations width="85%" fig-align="center"}
+
+As shown in Figure @fig-ML9_limitations, when the true decision boundary is non-linear, a linear classifier—such as the support vector classifier—fails to capture the complex shape that separates the two classes. In such cases:
+
+-   A **linear decision boundary** performs poorly if the data are not linearly separable in the feature space $(X_1, \ldots, X_p)$.
+-   One might try to **enlarge the feature space**, for example by adding polynomial terms such as $X_1^2, X_2^2, \ldots$, and then apply a linear classifier in this higher-dimensional space.
+-   However, enlarging the feature space dramatically increases dimensionality, and the resulting **computational cost** can become infeasible for large datasets.
+
+This limitation motivates the next step: introducing **non-linear decision boundaries** through the use of kernels, which implicitly map the data into a higher-dimensional space without the need to compute the expanded features explicitly.
+
 # 
