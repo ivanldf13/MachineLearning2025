@@ -577,4 +577,199 @@ As shown in Figure @fig-ML9_limitations, when the true decision boundary is non-
 
 This limitation motivates the next step: introducing **non-linear decision boundaries** through the use of kernels, which implicitly map the data into a higher-dimensional space without the need to compute the expanded features explicitly.
 
+# Support Vector Machines
+
+## Support Vector Machines
+
+Support Vector Machines (SVMs) generalise the support vector classifier to allow **non-linear decision boundaries**. They achieve this by enlarging the feature space — but in an *automatic* way, without explicitly constructing new variables as in manual feature engineering.
+
+In the support vector classifier, we used the decision function$$ f(\mathbf{x}) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations:$$
+\hat{G}(\mathbf{x}) =
+\begin{cases}
++1 & \text{if } f(\mathbf{x}) > 0, \\
+-1 & \text{if } f(\mathbf{x}) < 0.
+\end{cases}
+$$
+
+A deep mathematical result shows that the optimal separating function can be rewritten as$$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^n \alpha_i y_i \langle \mathbf{x}, \mathbf{x}_i \rangle, $$ where each $\alpha_i$ is a parameter associated with training observation $i$, and $\langle \mathbf{x}, \mathbf{z} \rangle = \sum_{j=1}^p x_j z_j$ denotes the **inner product** between two feature vectors.
+
+Only a small subset of training points have $\alpha_i \ne 0$; these correspond to the **support vectors** that determine the decision boundary. All other points do not influence the classifier.
+
+The inner product $\langle \mathbf{x}, \mathbf{z} \rangle$ can be interpreted as a **similarity measure**: it is large when two vectors point in similar directions (highly correlated) and small when they are nearly orthogonal. This observation motivates the idea of **replacing** the inner product with a more general similarity function $K(\mathbf{x}, \mathbf{z})$, called a **kernel**.
+
+By doing so, the Support Vector Machine retains the same structure as the support vector classifier but gains the ability to create **non-linear decision boundaries** in the original predictor space.
+
+## The Kernel Trick
+
+Support Vector Machines classify observations using a function that is, in general, *non-linear* in the original feature space:\
+$$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^{n} \alpha_i y_i K(\mathbf{x}, \mathbf{x}_i), $$ where $K(\mathbf{x}, \mathbf{z})$ is a *(positive definite)* **kernel function** measuring the similarity between two feature vectors $\mathbf{x}, \mathbf{z} \in \mathbb{R}^p$.
+
+By replacing the inner product $\langle \mathbf{x}, \mathbf{z} \rangle$ with a kernel $K(\mathbf{x}, \mathbf{z})$, the SVM effectively **enlarges the feature space implicitly** — without ever computing the higher-dimensional representation explicitly.\
+This elegant idea is known as the **kernel trick**.
+
+-   With the **linear kernel**, $K(\mathbf{x}, \mathbf{z}) = \langle \mathbf{x}, \mathbf{z} \rangle$, we recover the standard support vector classifier.
+-   With **non-linear kernels**, the classifier defines curved and flexible decision boundaries in the original predictor space while remaining linear in the (implicit) high-dimensional feature space.
+
+![Illustration of the kernel trick: the SVM implicitly enlarges the feature space to achieve non-linear decision boundaries.](Images_qmd_ML/ML9_kernel_trick.png){#fig-ML9_kernel_trick fig-align="center" width="70%"}
+
+As seen in @fig-ML9_kernel_trick, mapping the data into a higher-dimensional space allows a simple linear boundary in that space to correspond to a **non-linear boundary** in the original feature space — the essence of the kernel trick.
+
+## The Kernel Trick: Examples
+
+Support Vector Machines can use different kernels to implicitly map the data into higher (even infinite) dimensional spaces, enabling highly flexible decision boundaries.
+
+### The Polynomial Kernel
+
+The **polynomial kernel** is defined as\
+$$ K(\mathbf{x}, \mathbf{z}) = \left( 1 + \gamma \sum_{j=1}^{p} x_j z_j \right)^d, $$ where $\gamma$ is a scaling parameter and $d$ is the degree of the polynomial.
+
+This kernel corresponds to fitting a **support vector classifier in a higher-dimensional space** that includes all polynomial terms up to degree $d$.\
+In the code, this is specified as `svm = SVC(kernel='poly', degree=d, gamma=gamma)`.\
+The parameter $\gamma$ controls the **scale** of the transformation and hence the flexibility of the decision boundary.
+
+-   Larger $\gamma$ and higher $d$ produce more flexible, curved boundaries that adapt to complex patterns.
+-   Smaller $\gamma$ or lower $d$ result in smoother, more regular decision surfaces.
+
+### The Radial (Gaussian) Kernel
+
+The **radial basis function (RBF)** or **Gaussian kernel** is defined as $$ K(\mathbf{x}, \mathbf{z}) = \exp \left( -\gamma \sum_{j=1}^{p} (x_j - z_j)^2 \right), $$ where $\gamma > 0$ determines how quickly similarity decays with distance.
+
+This kernel corresponds to fitting a **support vector classifier in an infinite-dimensional feature space**, since the associated basis functions are infinitely many.\
+In the code, it is specified with `kernel='rbf'` inside `svm = SVC(kernel='rbf', gamma=gamma)`, allowing $\gamma$ to control how local or global the decision surface becomes.
+
+-   Large values of $\gamma$ make the kernel highly localised: only nearby observations influence the classification, producing **flexible, non-linear** decision boundaries.
+-   Small values of $\gamma$ yield smoother, more global fits, where distant points still contribute, resulting in **wider margins** and more stable boundaries.
+
+![Polynomial and radial kernels producing different decision boundaries.](Images_qmd_ML/ML9_k_t_examples.png){#fig-ML9_k_t_examples width="90%" fig-align="center"}
+
+As seen in @fig-ML9_k_t_examples, the **left-hand plot** based on the polynomial kernel captures some curvature but remains relatively smooth, while the **right-hand plot**, using the radial kernel, displays a highly adaptive boundary that separates non-linear patterns effectively.\
+This demonstrates how the choice of kernel and the tuning of $\gamma$ determine the **locality** and **flexibility** of the Support Vector Machine.
+
+## Comments on Support Vector Machines
+
+Support Vector Machines (SVMs) are a **powerful and flexible tool** for classification, capable of learning both linear and non-linear decision boundaries through the use of kernels.
+
+Although the underlying mathematics are complex, the **kernel trick** allows us to apply SVMs without needing to explicitly compute the high-dimensional feature mappings. In practice, fitting an SVM simply requires computing the pairwise similarities $$ K(\mathbf{x}_i, \mathbf{x}_j) $$ for all distinct pairs of training observations $(i, j)$.
+
+A wide variety of kernels have been developed, but even the **standard choices**, such as the linear, polynomial, and radial basis (Gaussian) kernels—typically perform very well across a broad range of applications.
+
+For **multi-class problems**, SVMs can be extended using:
+
+\- **One-versus-one classification**, where a separate classifier is trained for each pair of classes; or\
+- **One-versus-all classification**, where each classifier distinguishes one class from all the others.
+
+For further discussion and examples, see Chapter 9 of *An Introduction to Statistical Learning (ISL)*.
+
+## Support Vector Machines in Python
+
+The following Python example fits Support Vector Machines on the *Iris* dataset using an **RBF (radial basis function) kernel**. Only the first two features (“sepal length” and “sepal width”) are used so that the resulting decision boundaries can be visualised in two dimensions.
+
+The code iterates over three values of the tuning parameter $\gamma$ — 0.1, 1, and 20 — each time fitting an SVM model and plotting its resulting decision boundary.
+
+![Decision boundaries of radial-kernel SVMs on the Iris dataset for different $\gamma$ values.](Images_qmd_ML/ML9_SVM_py_1.png){#fig-ML9_SVM_py_1 width="90%" fig-align="center"}
+
+In the code, the line `svm = SVC(C=1, kernel='rbf', gamma=gamma)` creates an SVM classifier with the specified $\gamma$, and the subsequent loop visualises the corresponding decision boundaries.
+
+Each subplot in @fig-ML9_SVM_py_1 illustrates how $\gamma$ controls the **locality** and **flexibility** of the model:
+
+-   In the **left-hand plot** ($\gamma = 0.1$), the kernel is *broad and global*: similarities decay slowly, so many training points influence each decision. The resulting boundary is smooth and less adaptive, i.e., a **high-bias, low-variance** model.
+-   In the **middle plot** ($\gamma = 1$), the decision surface adapts more closely to the data while preserving a reasonable margin. This corresponds to a **balanced bias–variance trade-off**.
+-   In the **right-hand plot** ($\gamma = 20$), the kernel is *highly localised*: only nearby points affect predictions. The decision boundary becomes extremely wiggly, indicating **low bias but high variance** and the risk of overfitting.
+
+This example highlights the **bias–variance trade-off** governed by $\gamma$: smaller values yield smoother, more generalisable boundaries, whereas larger values produce complex, locally adaptive ones.
+
+### Effect of the Cost Parameter
+
+In the next example, the SVM is again fitted on the *Iris* dataset using the **radial basis function (RBF) kernel**, this time fixing $\gamma = 20$ and varying the **cost parameter** $C$ (the inverse of the margin budget).
+
+The parameter $C$ determines how strongly misclassifications are penalised during training:
+
+-   **Small** $C$ allows more margin violations (a *larger budget*) leading to a smoother, more regularised decision boundary.
+-   **Large** $C$ penalises violations heavily (a *smaller budget*) yielding a tighter boundary that fits the training data more closely.
+
+![Decision boundaries for different values of the cost parameter $C$.](Images_qmd_ML/ML9_SVM_py_2.png){#fig-ML9_SVM_py_2 fig-align="center" width="75%"}
+
+As seen in @fig-ML9_SVM_py_2, the **left-hand plot** with $C = 0.1$ results in a wider margin that tolerates a few misclassified points but generalises better. In contrast, the **right-hand plot** with $C = 20$ shows a much tighter boundary that fits almost all training data points correctly but risks overfitting.
+
+This again illustrates the **bias–variance trade-off**: smaller $C$ increases bias but reduces variance, while larger $C$ decreases bias at the expense of higher variance.
+
+### Model Selection by Cross-validation
+
+In this final example, an SVM with a **radial basis function (RBF) kernel** is tuned automatically using **cross-validation**.\
+Instead of choosing the parameters $\gamma$ and $C$ manually, a grid search is performed over a predefined range of values, and the model is evaluated with $k$-fold cross-validation to identify the best-performing combination.
+
+![Optimal decision boundary obtained by tuning the parameters $C$ and $\gamma$ via cross-validation.](Images_qmd_ML/ML9_SVM_py_3.png){#fig-ML9_SVM_py_3 fig-align="center" width="40%"}
+
+As illustrated in @fig-ML9_SVM_py_3, the selected parameters ($C = 1.2$, $\gamma = 5$ in this case) yield a decision boundary that balances **flexibility** and **smoothness**. Compared with the earlier examples:
+
+-   The boundary is less rigid than with a small $\gamma$ or small $C$, avoiding underfitting.
+-   It is also less wiggly than with excessively large values, preventing overfitting.
+
+This process demonstrates the value of **cross-validation** for model selection: it systematically explores combinations of hyperparameters to achieve the best trade-off between bias and variance, ensuring robust generalisation on unseen data.
+
+## Digit Classification with SVMs
+
+We now return to the **digit classification** problem introduced earlier (see Figure @fig-ML6-digit-class).\
+Support Vector Machines are applied here to classify handwritten digits using a **One-Versus-One** scheme, where one binary classifier is trained for each pair of digits.\
+We compare SVMs using **linear**, **polynomial**, and **radial (Gaussian)** kernels. The tuning parameter $C$ was selected by **10-fold cross-validation** to optimise test accuracy.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Training and test data:}  
+\begin{itemize}
+\tightlist
+\item Training data $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_n, y_n)$, $n = 7290$, are used for model fitting and parameter tuning.  
+  \begin{itemize}
+  \tightlist
+  \item Predictors $\mathbf{x}_i$ are greyscale pixel intensities of each image $\in \mathbb{R}^p$.  
+  \item Outcomes $y_i$ correspond to the true digit labels $\in \{0, 1, \ldots, 9\}$.
+  \end{itemize}
+\item Test data $(\hat{\mathbf{x}}_1, \hat{y}_1), \ldots, (\hat{\mathbf{x}}_m, \hat{y}_m)$, $m = 2006$, are used only for evaluating predictive performance.
+\end{itemize}
+
+\smallskip
+\textbf{Models compared:}  
+\begin{itemize}
+\tightlist
+\item \textbf{linreg:} direct linear regression.  
+\item \textbf{LDA1:} LDA based on the raw pixel values $x_i$.  
+\item \textbf{LDA2:} LDA based on $x_i$ and their squares $x_i^2$.  
+\item \textbf{QDA:} Quadratic Discriminant Analysis with a separate covariance matrix per class.  
+\item \textbf{log:} multinomial logistic regression.  
+\item \textbf{log-ridge:} logistic regression with ridge penalty.  
+\item \textbf{log-lasso:} logistic regression with lasso penalty.  
+\item \textbf{RF:} random forest.  
+\item \textbf{linear SVM:} support vector classifier with a linear kernel.  
+\item \textbf{radial SVM:} support vector machine with an RBF kernel.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\textbf{Training and test errors (\%)}  
+\begin{tabular}{lcc}
+\hline
+Method & Training & Test \\
+\hline
+linreg & 7.6 & 13.1 \\
+LDA1 & 6.2 & 11.5 \\
+LDA2 & 3.9 & 10.2 \\
+QDA & 1.8 & 13.5 \\
+log & 0.01 & 11.1 \\
+log-ridge & 4.1 & 9.0 \\
+log-lasso & 2.7 & 8.8 \\
+RF & 0.0 & 5.9 \\
+linear SVM & 1.5 & 6.5 \\
+radial SVM & 0.6 & 5.4 \\
+\hline
+\end{tabular}
+\end{center}
+\end{minipage}
+
+\smallskip
+
+The results show that both **linear** and **radial** SVMs perform extremely well, with the **radial kernel** achieving the lowest test error (5.4%).\
+This demonstrates the flexibility of kernel-based SVMs in modelling complex, non-linear decision boundaries, even in high-dimensional spaces like image pixels.
+
+As seen throughout this lecture, the **kernel trick** allows SVMs to implicitly map data into richer feature spaces without explicitly constructing new variables, resulting in powerful and computationally efficient classifiers.
+
 # 

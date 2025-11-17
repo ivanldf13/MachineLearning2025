@@ -32,8 +32,6 @@ editor: source
 
 Machine learning aims at programming a computer to learn from information (Data) to perform a task (Prediction, etc.) in an optimal way in terms of a performance measure (Loss Function).
 
-Recent success of machine learning due to advances in its main ingredients:
-
 1.  Data availability: huge growth due to automation, digitalization, web applications.
 
 2.  Computing power: significant increase thanks to GPU computing, parallelization, etc.
