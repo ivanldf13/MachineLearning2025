@@ -411,11 +411,11 @@ In practice, a **small learning rate** (around 0.01) and **moderately shallow tr
 
 # Support Vector Machines: Maximal Margin Classifier
 
-**Support Vector Machines (SVM)** represent a geometric approach to classification. Unlike LDA or logistic regression, which model statistical relationships between $Y$ and $\mathbf{X}$, SVMs make **no distributional assumptions**. They aim instead to find a **decision boundary** (a hyperplane) that separates classes in the feature space.
+**Support Vector Machines (SVM)** represent a geometric approach to classification. Unlike LDA or logistic regression, which model statistical relationships between $Y$ and $X$, SVMs make **no distributional assumptions**. They aim instead to find a **decision boundary** (a hyperplane) that separates classes in the feature space.
 
-A **hyperplane** in $\mathbb{R}^p$ is defined as the set of all $\mathbf{x}$ satisfying the linear equation\
-$$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$\
-This boundary divides the predictor space into two half-spaces. For any observation $\mathbf{z}$, the function $f(\mathbf{z}) = \beta_0 + \beta_1 z_1 + \cdots + \beta_p z_p$ indicates its position relative to the hyperplane: points with $f(\mathbf{z}) > 0$ belong to one class, and those with $f(\mathbf{z}) < 0$ to the other. Points exactly on the hyperplane satisfy $f(\mathbf{z}) = 0$.
+A **hyperplane** in $\mathbb{R}^p$ is defined as the set of all $x$ satisfying the linear equation $$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$
+
+This boundary divides the predictor space into two half-spaces. For any observation $z$, the function $z = \beta_0 + \beta_1 z_1 + \cdots + \beta_p z_p$ indicates its position relative to the hyperplane: points with $f(\mathbf{z}) > 0$ belong to one class, and those with $f(\mathbf{z}) < 0$ to the other. Points exactly on the hyperplane satisfy $f(\mathbf{z}) = 0$.
 
 The vector $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_p)$ is called the **normal vector** because it is orthogonal to the hyperplane. Its direction determines the orientation of the separating boundary, and its length is usually normalised to one to ensure a unique parametrisation. The intercept $\beta_0$ shifts the hyperplane along the direction of $\boldsymbol{\beta}$ without changing its orientation.
 
@@ -426,11 +426,10 @@ To build intuition:
 -   Thus, the magnitude $|f(\mathbf{z})|$ can be interpreted as the **distance** from $\mathbf{z}$ to the hyperplane.
 
 Now consider a binary classification problem with classes labelled $y_i \in \{-1, +1\}$.\
-A hyperplane **separates** the training data if it assigns positive values of $f(\mathbf{x}_i)$ to all observations with $y_i = +1$ and negative values to all with $y_i = -1$. Formally, $$ y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) > 0, \quad \text{for all } i = 1, \ldots, n. $$\
+A hyperplane **separates** the training data if it assigns positive values of $f(x_i)$ to all observations with $y_i = +1$ and negative values to all with $y_i = -1$. Formally, $$ y_i (\beta_0 + {\beta}^\top {x}_i) > 0, \quad \text{for all } i = 1, \ldots, n. $$\
 If such a hyperplane exists, there are infinitely many possible ones, each perfectly separating the two classes but differing in position.
 
-The **Maximal Margin Classifier (MMC)** resolves this ambiguity by choosing the separating hyperplane that maximises the **margin**, defined as the smallest distance between the hyperplane and any training observation. Denoting this distance by $M$, the optimisation problem is: $$ \max_{\beta_0, \boldsymbol{\beta}, M} \; M \quad \text{s.t.} \quad \|\boldsymbol{\beta}\| = 1, \; y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) \geq M \ \text{for all } i. $$\
-This ensures all observations lie at least $M$ units away from the separating boundary, yielding the widest possible margin.
+The **Maximal Margin Classifier (MMC)** resolves this ambiguity by choosing the separating hyperplane that **maximises** the **margin**, defined as the smallest distance between the hyperplane and any training observation. Denoting this distance by $M$, the optimisation problem is: $$ \max_{\beta_0, \boldsymbol{\beta}, M} \; M \quad \text{s.t.} \quad \|\boldsymbol{\beta}\| = 1, \; y_i (\beta_0 + {\beta}^\top {x}_i) \geq M \ \text{for all } i. $$ This ensures all observations lie at least $M$ units away from the separating boundary, yielding the widest possible margin.
 
 The observations that lie exactly at this minimal distance, i.e., those that satisfy $y_i (\beta_0 + \boldsymbol{\beta}^\top \mathbf{x}_i) = M$, called the **support vectors**. They define the position of the maximal margin hyperplane. Small changes to these points can shift the boundary, whereas non-support points have no effect.
 
@@ -443,9 +442,7 @@ SVMs therefore build upon this geometric idea, gradually introducing relaxation 
 
 ## Hyperplanes: construction
 
-A **hyperplane** in $\mathbb{R}^p$ is defined by the equation\
-$$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$\
-This represents a $(p-1)$-dimensional flat surface that divides the feature space into two half-spaces.
+A **hyperplane** in $\mathbb{R}^p$ is defined by the equation $$ \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p = 0. $$ This represents a $(p-1)$-dimensional flat surface that divides the feature space into two half-spaces.
 
 The vector $\boldsymbol{\beta} = (\beta_1, \ldots, \beta_p)$ is called the **normal vector**, as it is **orthogonal** to the hyperplane. Its direction indicates the orientation of the separating boundary, while the intercept $\beta_0$ determines its distance from the origin.
 
@@ -510,23 +507,63 @@ These challenges motivate the next step, i.e., the **Support Vector Classifier**
 
 # Support Vector Machines: Support Vector Classifier
 
-## Support vector classifier
+## Support Vector Classifier
 
 The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
 
-We introduce slack variables $\xi_i \ge 0$ for training observations $(\mathbf{x}_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x}_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
+We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}{x}_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
 
-Here, the parameter $C>0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). Points with $\xi_i = 0$ are on or outside the margin, $0 < \xi_i \le 1$ lie inside the margin but remain correctly classified, and $\xi_i > 1$ are misclassified. As $C \to \infty$, we recover a hard margin (when separable); smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points — the support vectors.
+Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, The parameter C tells the model how much it should care about violations of the margin (i.e. large $\xi_i$ values). The $\xi_i$ variables don’t set the margin; instead, they measure how much each point violates the margin constraint. $C$ controls tolerance, $\xi_i$ measures actual violations and $beta$ determines the margin width.
+
+The positions of points are as follows:
+
+-   **Points with** $\xi_i = 0$: on or outside the margin.
+-   **Points with** $0 < \xi_i \le 1$: Inside the margin but correctly classified.
+-   **Points with** $\xi_i > 1$: Misclassified.
+
+As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points, i.e., the support vectors.
 
 Algorithmically:
 
-1\. Choose $C$ (for instance, via cross-validation).\
-2. Solve the convex quadratic programme above.\
-3. Form the decision function $\hat{f}(\mathbf{x}) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{x})$, supported by training points with non-zero Lagrange multipliers (the support vectors).
+1.  Choose $C$ (for instance, via cross-validation).
+2.  Solve the convex quadratic programme above.
+3.  Form the decision function $\hat{f}({x}) = \mathrm{sign}(\beta_0 + {\beta}^{\top}{x})$, supported by training points with non-zero Lagrange multipliers (the support vectors).
 
 Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
 
 ![Hard- versus soft-margin solutions on the same dataset.](Images_qmd_ML/ML9_SVC.png){#fig-ML9_SVC width="80%"}
+
+# Support Vector Machines: Support Vector Classifier
+
+## Support Vector Classifier
+
+The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
+
+We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem:
+$$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}x_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
+
+Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, the parameter $C$ determines how strongly the model penalises violations of the margin (i.e., large $\xi_i$ values). The variables $\xi_i$ do not set the margin; instead, they measure how much each observation violates the margin constraint.  
+$C$ controls *tolerance*, $\xi_i$ measures *actual violations*, and $\boldsymbol{\beta}$ determines the *margin width*.
+
+The positions of points are as follows:
+
+- **Points with** $\xi_i = 0$: on or outside the margin.  
+- **Points with** $0 < \xi_i \le 1$: inside the margin but correctly classified.  
+- **Points with** $\xi_i > 1$: misclassified.
+
+As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points — the *support vectors*.
+
+Algorithmically:
+
+1. Choose $C$ (for instance, via cross-validation).  
+2. Solve the convex quadratic programme above.  
+3. Form the decision function $\hat{f}(x) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}x)$, supported by training points with non-zero Lagrange multipliers (the support vectors).
+
+Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
+
+As seen in @fig-ML9_SVC, the **left-hand plot** shows a *hard-margin* classifier, which separates all points perfectly but produces a narrow margin that is sensitive to outliers.  
+The **right-hand plot** illustrates the *soft-margin* classifier: some points are allowed inside or even beyond the margin (those with $\xi_i > 0$), resulting in a wider margin and a more stable decision boundary that generalises better.
+
 
 ## Mathematical formulation of the support vector classifier
 
@@ -583,13 +620,11 @@ This limitation motivates the next step: introducing **non-linear decision bound
 
 Support Vector Machines (SVMs) generalise the support vector classifier to allow **non-linear decision boundaries**. They achieve this by enlarging the feature space — but in an *automatic* way, without explicitly constructing new variables as in manual feature engineering.
 
-In the support vector classifier, we used the decision function$$ f(\mathbf{x}) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations:$$
-\hat{G}(\mathbf{x}) =
+In the support vector classifier, we used the decision function $$f(x) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations: $$ \hat{G}(x) =
 \begin{cases}
-+1 & \text{if } f(\mathbf{x}) > 0, \\
--1 & \text{if } f(\mathbf{x}) < 0.
-\end{cases}
-$$
++1 & \text{if } f(x) > 0, \\
+-1 & \text{if } f(x) < 0.
+\end{cases} $$
 
 A deep mathematical result shows that the optimal separating function can be rewritten as$$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^n \alpha_i y_i \langle \mathbf{x}, \mathbf{x}_i \rangle, $$ where each $\alpha_i$ is a parameter associated with training observation $i$, and $\langle \mathbf{x}, \mathbf{z} \rangle = \sum_{j=1}^p x_j z_j$ denotes the **inner product** between two feature vectors.
 
