@@ -511,79 +511,57 @@ These challenges motivate the next step, i.e., the **Support Vector Classifier**
 
 The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
 
-We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}{x}_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
+We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}x_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
 
-Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, The parameter C tells the model how much it should care about violations of the margin (i.e. large $\xi_i$ values). The $\xi_i$ variables don’t set the margin; instead, they measure how much each point violates the margin constraint. $C$ controls tolerance, $\xi_i$ measures actual violations and $beta$ determines the margin width.
-
-The positions of points are as follows:
-
--   **Points with** $\xi_i = 0$: on or outside the margin.
--   **Points with** $0 < \xi_i \le 1$: Inside the margin but correctly classified.
--   **Points with** $\xi_i > 1$: Misclassified.
-
-As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points, i.e., the support vectors.
-
-Algorithmically:
-
-1.  Choose $C$ (for instance, via cross-validation).
-2.  Solve the convex quadratic programme above.
-3.  Form the decision function $\hat{f}({x}) = \mathrm{sign}(\beta_0 + {\beta}^{\top}{x})$, supported by training points with non-zero Lagrange multipliers (the support vectors).
-
-Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
-
-![Hard- versus soft-margin solutions on the same dataset.](Images_qmd_ML/ML9_SVC.png){#fig-ML9_SVC width="80%"}
-
-# Support Vector Machines: Support Vector Classifier
-
-## Support Vector Classifier
-
-The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
-
-We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem:
-$$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}x_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
-
-Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, the parameter $C$ determines how strongly the model penalises violations of the margin (i.e., large $\xi_i$ values). The variables $\xi_i$ do not set the margin; instead, they measure how much each observation violates the margin constraint.  
+Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, the parameter $C$ determines how strongly the model penalises violations of the margin (i.e., large $\xi_i$ values). The variables $\xi_i$ do not set the margin; instead, they measure how much each observation violates the margin constraint.\
 $C$ controls *tolerance*, $\xi_i$ measures *actual violations*, and $\boldsymbol{\beta}$ determines the *margin width*.
 
 The positions of points are as follows:
 
-- **Points with** $\xi_i = 0$: on or outside the margin.  
-- **Points with** $0 < \xi_i \le 1$: inside the margin but correctly classified.  
-- **Points with** $\xi_i > 1$: misclassified.
+-   **Points with** $\xi_i = 0$: on or outside the margin.
+-   **Points with** $0 < \xi_i \le 1$: inside the margin but correctly classified.
+-   **Points with** $\xi_i > 1$: misclassified.
 
 As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points — the *support vectors*.
 
 Algorithmically:
 
-1. Choose $C$ (for instance, via cross-validation).  
-2. Solve the convex quadratic programme above.  
-3. Form the decision function $\hat{f}(x) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}x)$, supported by training points with non-zero Lagrange multipliers (the support vectors).
+1.  Choose $C$ (for instance, via cross-validation).
+2.  Solve the convex quadratic programme above.
+3.  Form the decision function $\hat{f}(x) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}x)$, supported by training points with non-zero Lagrange multipliers (the support vectors).
 
 Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
 
-As seen in @fig-ML9_SVC, the **left-hand plot** shows a *hard-margin* classifier, which separates all points perfectly but produces a narrow margin that is sensitive to outliers.  
-The **right-hand plot** illustrates the *soft-margin* classifier: some points are allowed inside or even beyond the margin (those with $\xi_i > 0$), resulting in a wider margin and a more stable decision boundary that generalises better.
+![Hard- versus soft-margin solutions on the same dataset.](Images_qmd_ML/ML9_SVC.png){#fig-ML9_SVC width="80%"}
 
+As seen in @fig-ML9_SVC, the **left-hand plot** shows the *maximal margin classifier*, which fits the training data perfectly but results in a narrow margin that is highly sensitive to outliers. Even one mislabelled point could completely change the orientation of the separating hyperplane.
+
+The **right-hand plot** depicts the *support vector classifier*, where some points are allowed to lie inside or even beyond the margin (those with $\xi_i > 0$). This flexibility leads to a wider margin and a more stable decision boundary.\
+The support vectors (the points closest to or inside the margin) determine this boundary, while all other points play no direct role in its position.
 
 ## Mathematical formulation of the support vector classifier
 
-The soft-margin formulation can also be expressed as a maximisation problem. We aim to find the largest possible margin $M$ while allowing controlled violations through slack variables $\epsilon_i \ge 0$.
+The soft-margin formulation can also be expressed as a maximisation problem. We aim to find the largest possible margin $M$ while allowing controlled violations through slack variables $\xi_i \ge 0$.
 
-![Soft-margin classifier with slack variables $\epsilon_i$ and total budget $b$.](Images_qmd_ML/ML9_SVC_s2.png){#fig-ML9_SVC_s2 width="25%" fig-align="center"}
+![Soft-margin classifier with slack variables $\xi_i$ and total budget $b$.](Images_qmd_ML/ML9_SVC_s2.png){#fig-ML9_SVC_s2 width="25%" fig-align="center"}
 
-The optimisation problem is: $$\max_{\beta_0,\ldots,\beta_p,\ \epsilon_1,\ldots,\epsilon_n} \ M$$ subject to $$\sum_{j=1}^{p} \beta_j^2 = 1, \quad 
-y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) \ge M(1 - \epsilon_i),$$ $$\epsilon_i \ge 0, \quad 
-\sum_{i=1}^{n} \epsilon_i \le b.$$
+The optimisation problem is: $$\max_{\beta_0,\ldots,\beta_p,\ \xi_1,\ldots,\xi_n} \ M$$ subject to $$\sum_{j=1}^{p} \beta_j^2 = 1, \quad 
+y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) \ge M(1 - \xi_i),$$ $$\xi_i \ge 0, \quad 
+\sum_{i=1}^{n} \xi_i \le b.$$
 
-Each $\epsilon_i$ quantifies how much observation $i$ violates the margin constraint:
+As illustrated in @fig-ML9_SVC_s2, the soft-margin classifier allows some points to fall inside or even beyond the margin, depending on their corresponding $\xi_i$ values.\
+Each $\xi_i$ quantifies how much observation $i$ violates the margin constraint:
 
--   $\epsilon_i = 0$: the observation lies on or outside the margin (correctly classified).
--   $0 < \epsilon_i \le 1$: the observation lies inside the margin but is still correctly classified.
--   $\epsilon_i > 1$: the observation is misclassified, on the wrong side of the separating hyperplane.
+-   $\xi_i = 0$: the observation lies on or outside the margin (correctly classified).
+-   $0 < \xi_i \le 1$: the observation lies inside the margin but is still correctly classified.
+-   $\xi_i > 1$: the observation is misclassified, on the wrong side of the separating hyperplane.
 
-The constant $b > 0$ acts as a *tuning* or *regularisation* parameter that sets the total “budget” of margin violations across all $n$ observations. A larger $b$ allows more flexibility—useful for noisy or non-separable data—while a smaller $b$ enforces stricter separation with fewer violations.
+In @fig-ML9_SVC_s2, the points exactly on the margin correspond to $\xi_i = 0$, while those inside the shaded margin regions have $0 < \xi_i \le 1$.\
+Points that cross the decision boundary entirely (on the wrong side) represent $\xi_i > 1$ and contribute most to the violation term in the optimisation.
 
-Here, the *support vectors* are the observations that either lie exactly on the margin or violate it (i.e. those for which $\epsilon_i > 0$). Only these points determine the position and orientation of the separating hyperplane — all other observations, being further from the decision boundary, have no influence on the classifier.
+The constant $b > 0$ acts as a *tuning* or *regularisation* parameter that sets the total “budget” of margin violations across all $n$ observations. A larger $b$ allows more flexibility, useful for noisy or non-separable data, while a smaller $b$ enforces stricter separation with fewer violations.
+
+Here, the *support vectors* are the observations that either lie exactly on the margin or violate it (i.e. those for which $\xi_i > 0$). Only these points determine the position and orientation of the separating hyperplane ; all other observations, being further from the decision boundary, have no influence on the classifier.
 
 Consequently, the regularisation parameter $b$ indirectly controls the number of support vectors and hence the complexity of the model. A smaller $b$ (stricter margin) limits violations, reducing the number of support vectors and yielding a simpler, higher-bias but lower-variance model. Conversely, a larger $b$ allows more margin violations, increasing the number of support vectors and producing a more flexible, lower-bias but higher-variance classifier.
 
@@ -606,7 +584,7 @@ Although the support vector classifier is a powerful method for constructing lin
 
 ![Limitation of the support vector classifier: poor performance with non-linear class boundaries.](Images_qmd_ML/ML9_limitations.png){#fig-ML9_limitations width="85%" fig-align="center"}
 
-As shown in Figure @fig-ML9_limitations, when the true decision boundary is non-linear, a linear classifier—such as the support vector classifier—fails to capture the complex shape that separates the two classes. In such cases:
+As shown in @fig-ML9_limitations, when the true decision boundary is non-linear, a linear classifier (such as the support vector classifier) fails to capture the complex shape that separates the two classes. In such cases:
 
 -   A **linear decision boundary** performs poorly if the data are not linearly separable in the feature space $(X_1, \ldots, X_p)$.
 -   One might try to **enlarge the feature space**, for example by adding polynomial terms such as $X_1^2, X_2^2, \ldots$, and then apply a linear classifier in this higher-dimensional space.
@@ -620,26 +598,21 @@ This limitation motivates the next step: introducing **non-linear decision bound
 
 Support Vector Machines (SVMs) generalise the support vector classifier to allow **non-linear decision boundaries**. They achieve this by enlarging the feature space — but in an *automatic* way, without explicitly constructing new variables as in manual feature engineering.
 
-In the support vector classifier, we used the decision function $$f(x) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations: $$ \hat{G}(x) =
-\begin{cases}
-+1 & \text{if } f(x) > 0, \\
--1 & \text{if } f(x) < 0.
-\end{cases} $$
+In the support vector classifier, we used the decision function $$f(x) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations: $$ \hat{G}(x) =\begin{cases} +1 & \text{if } f(x) > 0, \\ -1 & \text{if } f(x) < 0. \end{cases} $$
 
-A deep mathematical result shows that the optimal separating function can be rewritten as$$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^n \alpha_i y_i \langle \mathbf{x}, \mathbf{x}_i \rangle, $$ where each $\alpha_i$ is a parameter associated with training observation $i$, and $\langle \mathbf{x}, \mathbf{z} \rangle = \sum_{j=1}^p x_j z_j$ denotes the **inner product** between two feature vectors.
+A deep mathematical result shows that the optimal separating function can be rewritten as $$ f({x}) = \beta_0 + \sum_{i=1}^n \alpha_i y_i \langle {x}, {x}_i \rangle, $$ where each $\alpha_i$ is a parameter associated with training observation $i$, and $\langle \mathbf{x}, \mathbf{z} \rangle = \sum_{j=1}^p x_j z_j$ denotes the **inner product** between two feature vectors.
 
 Only a small subset of training points have $\alpha_i \ne 0$; these correspond to the **support vectors** that determine the decision boundary. All other points do not influence the classifier.
 
-The inner product $\langle \mathbf{x}, \mathbf{z} \rangle$ can be interpreted as a **similarity measure**: it is large when two vectors point in similar directions (highly correlated) and small when they are nearly orthogonal. This observation motivates the idea of **replacing** the inner product with a more general similarity function $K(\mathbf{x}, \mathbf{z})$, called a **kernel**.
+The inner product $\langle {x}, {z} \rangle$ can be interpreted as a **similarity measure**: it is large when two vectors point in similar directions (highly correlated) and small when they are nearly orthogonal. This observation motivates the idea of **replacing** the inner product with a more general similarity function $K(\mathbf{x}, \mathbf{z})$, called a **kernel**.
 
 By doing so, the Support Vector Machine retains the same structure as the support vector classifier but gains the ability to create **non-linear decision boundaries** in the original predictor space.
 
 ## The Kernel Trick
 
-Support Vector Machines classify observations using a function that is, in general, *non-linear* in the original feature space:\
-$$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^{n} \alpha_i y_i K(\mathbf{x}, \mathbf{x}_i), $$ where $K(\mathbf{x}, \mathbf{z})$ is a *(positive definite)* **kernel function** measuring the similarity between two feature vectors $\mathbf{x}, \mathbf{z} \in \mathbb{R}^p$.
+Support Vector Machines classify observations using a function that is, in general, *non-linear* in the original feature space: $$ f(\mathbf{x}) = \beta_0 + \sum_{i=1}^{n} \alpha_i y_i K(\mathbf{x}, \mathbf{x}_i), $$ where $K(\mathbf{x}, \mathbf{z})$ is a *(positive definite)* **kernel function** measuring the similarity between two feature vectors $\mathbf{x}, \mathbf{z} \in \mathbb{R}^p$.
 
-By replacing the inner product $\langle \mathbf{x}, \mathbf{z} \rangle$ with a kernel $K(\mathbf{x}, \mathbf{z})$, the SVM effectively **enlarges the feature space implicitly** — without ever computing the higher-dimensional representation explicitly.\
+By replacing the inner product $\langle \mathbf{x}, \mathbf{z} \rangle$ with a kernel $K(\mathbf{x}, \mathbf{z})$, the SVM effectively **enlarges the feature space implicitly**, without ever computing the higher-dimensional representation explicitly.\
 This elegant idea is known as the **kernel trick**.
 
 -   With the **linear kernel**, $K(\mathbf{x}, \mathbf{z}) = \langle \mathbf{x}, \mathbf{z} \rangle$, we recover the standard support vector classifier.
@@ -647,7 +620,7 @@ This elegant idea is known as the **kernel trick**.
 
 ![Illustration of the kernel trick: the SVM implicitly enlarges the feature space to achieve non-linear decision boundaries.](Images_qmd_ML/ML9_kernel_trick.png){#fig-ML9_kernel_trick fig-align="center" width="70%"}
 
-As seen in @fig-ML9_kernel_trick, mapping the data into a higher-dimensional space allows a simple linear boundary in that space to correspond to a **non-linear boundary** in the original feature space — the essence of the kernel trick.
+As seen in @fig-ML9_kernel_trick, mapping the data into a higher-dimensional space allows a simple linear boundary in that space to correspond to a **non-linear boundary** in the original feature space, i.e., the essence of the kernel trick.
 
 ## The Kernel Trick: Examples
 
@@ -655,8 +628,7 @@ Support Vector Machines can use different kernels to implicitly map the data int
 
 ### The Polynomial Kernel
 
-The **polynomial kernel** is defined as\
-$$ K(\mathbf{x}, \mathbf{z}) = \left( 1 + \gamma \sum_{j=1}^{p} x_j z_j \right)^d, $$ where $\gamma$ is a scaling parameter and $d$ is the degree of the polynomial.
+The **polynomial kernel** is defined as $$ K(\mathbf{x}, \mathbf{z}) = \left( 1 + \gamma \sum_{j=1}^{p} x_j z_j \right)^d, $$ where $\gamma$ is a scaling parameter and $d$ is the degree of the polynomial.
 
 This kernel corresponds to fitting a **support vector classifier in a higher-dimensional space** that includes all polynomial terms up to degree $d$.\
 In the code, this is specified as `svm = SVC(kernel='poly', degree=d, gamma=gamma)`.\
@@ -677,8 +649,7 @@ In the code, it is specified with `kernel='rbf'` inside `svm = SVC(kernel='rbf',
 
 ![Polynomial and radial kernels producing different decision boundaries.](Images_qmd_ML/ML9_k_t_examples.png){#fig-ML9_k_t_examples width="90%" fig-align="center"}
 
-As seen in @fig-ML9_k_t_examples, the **left-hand plot** based on the polynomial kernel captures some curvature but remains relatively smooth, while the **right-hand plot**, using the radial kernel, displays a highly adaptive boundary that separates non-linear patterns effectively.\
-This demonstrates how the choice of kernel and the tuning of $\gamma$ determine the **locality** and **flexibility** of the Support Vector Machine.
+As seen in @fig-ML9_k_t_examples, the **left-hand plot** based on the polynomial kernel captures some curvature but remains relatively smooth, while the **right-hand plot**, using the radial kernel, displays a highly adaptive boundary that separates non-linear patterns effectively. This demonstrates how the choice of kernel and the tuning of $\gamma$ determine the **locality** and **flexibility** of the Support Vector Machine.
 
 ## Comments on Support Vector Machines
 
@@ -686,7 +657,7 @@ Support Vector Machines (SVMs) are a **powerful and flexible tool** for classifi
 
 Although the underlying mathematics are complex, the **kernel trick** allows us to apply SVMs without needing to explicitly compute the high-dimensional feature mappings. In practice, fitting an SVM simply requires computing the pairwise similarities $$ K(\mathbf{x}_i, \mathbf{x}_j) $$ for all distinct pairs of training observations $(i, j)$.
 
-A wide variety of kernels have been developed, but even the **standard choices**, such as the linear, polynomial, and radial basis (Gaussian) kernels—typically perform very well across a broad range of applications.
+A wide variety of kernels have been developed, but even the **standard choices**, such as the linear, polynomial, and radial basis (Gaussian) kernels, typically perform very well across a broad range of applications.
 
 For **multi-class problems**, SVMs can be extended using:
 
@@ -699,7 +670,7 @@ For further discussion and examples, see Chapter 9 of *An Introduction to Statis
 
 The following Python example fits Support Vector Machines on the *Iris* dataset using an **RBF (radial basis function) kernel**. Only the first two features (“sepal length” and “sepal width”) are used so that the resulting decision boundaries can be visualised in two dimensions.
 
-The code iterates over three values of the tuning parameter $\gamma$ — 0.1, 1, and 20 — each time fitting an SVM model and plotting its resulting decision boundary.
+The code iterates over three values of the tuning parameter $\gamma$ ( 0.1, 1, and 20) each time fitting an SVM model and plotting its resulting decision boundary.
 
 ![Decision boundaries of radial-kernel SVMs on the Iris dataset for different $\gamma$ values.](Images_qmd_ML/ML9_SVM_py_1.png){#fig-ML9_SVM_py_1 width="90%" fig-align="center"}
 
