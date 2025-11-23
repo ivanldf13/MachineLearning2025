@@ -788,11 +788,22 @@ In our view, neural networks are simply mathematical models that are very good a
 
 ## Single hidden layer neural network for regression
 
-We now introduce the simplest neural network architecture for a quantitative response $Y$. As in previous regression methods, we start from $p$ original predictors $X = (X_1,\dots,X_p)^\top$ and would like to build a flexible model for $Y$. The key idea of a single hidden layer neural network is to construct $m$ new intermediate variables, called hidden units or hidden neurons, which play the role of automatically engineered features.
+We now introduce the simplest neural network architecture for a quantitative response $Y$. As in previous regression methods, we start from $p$ original predictors $X = (X_1,\dots,X_p)^\top$ and would like to build a flexible model for $Y$. The key idea of a single hidden layer neural network is to construct $m$ new intermediate variables, called hidden units or hidden neurons $Z_j$, which play the role of automatically engineered features.
 
-Each hidden unit $Z_j$ is obtained in two steps. First, we form a linear combination of the inputs with its own intercept, $$ Z_j^{\text{lin}} = b_j^{(1)} + w_j^{(1)\top} X, \quad j = 1,\dots,m, $$ where $w_j^{(1)} = (w_{j1}^{(1)},\dots,w_{jp}^{(1)})^\top \in \mathbb{R}^p$ is the weight vector attached to the $j$-th hidden unit and $b_j^{(1)} \in \mathbb{R}$ is its bias (an intercept term inside this inner linear model; it is unrelated to the “bias” from the bias–variance trade-off). The weights measure how strongly each original predictor $X_k$ influences the hidden unit, and correspond to the arrows from the input nodes to a given hidden node in the network diagram.
+Each hidden unit $Z_j$ is obtained in two clear steps:
 
-Second, we apply a non-linear activation function $g:\mathbb{R}\to\mathbb{R}$ to this linear combination, which yields $$ Z_j = g\big(b_j^{(1)} + w_j^{(1)\top} X\big), \quad j = 1,\dots,m. $$ This function $g$ is exactly where the non-linearity of the model is introduced: if $g$ were the identity, the hidden units would just be linear functions of $X$ and the overall model would remain linear. By choosing a non-linear $g$ (such as a sigmoid or ReLU, discussed later), we obtain transformed features $Z_1,\dots,Z_m$ that can capture complex relationships in the data. Importantly, the number $m$ of hidden units does not need to equal $p$; it is a modelling choice that controls how rich this intermediate representation is.
+1. **Linear combination of the inputs.** We first compute a linear predictor
+   $$ Z_j^{\text{lin}} = b_j^{(1)} + w_j^{(1)\top} X, \quad j = 1,\dots,m, $$
+   where
+   - $w_j^{(1)} = (w_{j1}^{(1)},\dots,w_{jp}^{(1)})^\top \in \mathbb{R}^p$ is the weight vector of the $j$-th hidden unit,
+   - $b_j^{(1)} \in \mathbb{R}$ is its bias (an intercept term inside this inner linear model; it is unrelated to the “bias” from the bias–variance trade-off),
+   - $Z_j^{\text{lin}}$ is therefore a standard linear combination of the original predictors.  
+   The weights measure how strongly each original predictor $X_k$ influences the hidden unit and correspond to the arrows from the input nodes to a given hidden node in the network diagram.
+
+2. **Non-linear activation.** We then apply a non-linear activation function $g:\mathbb{R}\to\mathbb{R}$ to this linear predictor,
+   $$ Z_j = g\big(b_j^{(1)} + w_j^{(1)\top} X\big), \quad j = 1,\dots,m. $$
+   This function $g$ is exactly where the non-linearity of the model is introduced: if $g$ were the identity, the hidden units would just be linear functions of $X$ and the overall model would remain linear. By choosing a non-linear $g$ (such as a sigmoid or ReLU, discussed later), we obtain transformed features $Z_1,\dots,Z_m$ that can capture complex relationships in the data. Importantly, the number $m$ of hidden units does not need to equal $p$; it is a modelling choice that controls how rich this intermediate representation is.
+
 
 \begin{minipage}{0.55\textwidth}
 In summary, the first step of a single hidden layer neural network for regression takes the original predictors in the input layer and maps them to $m$ hidden units via linear combinations plus a non-linear activation. Each hidden neuron collects signals from all input variables, weighs them according to its own weight vector, adds a bias, and then fires through $g$. These hidden units form a new set of features that will then be combined in a second step to model the response $Y$, as we will see next. The overall structure is sketched in Figure \ref{fig-single-hlnn}.
@@ -881,7 +892,7 @@ For a new input $x_0 \in \mathbb{R}^p$ we then apply the Bayes classifier by pre
 
 The architecture in @fig-class-hlnn implements exactly this computation: the hidden layer builds non-linear features with ReLU, and the $q$ output nodes apply softmax to produce class probabilities.
 
-Deep Learning: Deep Neural Networks
+# Deep Learning: Deep Neural Networks
 
 ## Deep neural networks
 
