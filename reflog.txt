@@ -1,0 +1,49 @@
+ba3fe9b HEAD@{0}: commit: Pipeline with cyclical features, One DS and all methods working properly
+487770e HEAD@{1}: commit: Allez
+22c479f HEAD@{2}: commit: Added new file with the cyclical features
+044ecab HEAD@{3}: commit: Updated Gitignore
+4b9915c HEAD@{4}: reset: moving to origin/main
+e14e759 HEAD@{5}: commit: Let's try again
+25f17e9 HEAD@{6}: commit: Update .gitignore to exclude model files
+70a23ce HEAD@{7}: commit: Models semm to converge and be saved. Added a week 10 topics
+4b9915c HEAD@{8}: commit: Added code to save the models and a file to run all the models at once
+21ab7e5 HEAD@{9}: commit: Commented some code chunks
+40e1156 HEAD@{10}: commit: Pipeline one DS all methods improved. Added other files
+9b17192 HEAD@{11}: commit: Deleted the first scalling, left the one inside the pipeline
+fad3dfb HEAD@{12}: commit: Pipeline One DS all methods clean and working. Added few other files to the folder
+8a1a100 HEAD@{13}: commit: Project file works but not givving better results. Notes files updated
+d10c7ac HEAD@{14}: commit: Added SVM Classifier and SVMs issues, no explanation edits
+4854000 HEAD@{15}: commit: Seems to work
+aa4a381 HEAD@{16}: commit: updated the imputation chunk
+fba56d9 HEAD@{17}: commit: added a chunk with only one dataset and PCA Y/N at the end of onlu one DS. Added also the following seminars
+1d22457 HEAD@{18}: commit: Analys of Components fixed on only one DS file
+169d1a0 HEAD@{19}: commit: Document streamlined
+e84f6fb HEAD@{20}: commit: PCA only one DS seems to work, with upload included.
+6137c3f HEAD@{21}: commit: Added a test file for the PCA and added Luca's file
+c2c5df8 HEAD@{22}: commit: Added the gridsearch for the models
+723ac17 HEAD@{23}: commit: Added the import fuctions missing
+ab7ddf7 HEAD@{24}: commit: Weather prediction file edited, it seems it works
+6b586eb HEAD@{25}: commit: Added Week 9 material and edited a bit project file
+8cb5b7f HEAD@{26}: commit: Added missing exercises, started with modelling for the project
+12db9b3 HEAD@{27}: commit: Edited a few things +
+6e2baec HEAD@{28}: commit: Improved the Missing values analysis, correlation, and predictor transformation and added the new datasets
+6f8a0d0 HEAD@{29}: commit: Explained Boosting and SVM topics
+aabc2b9 HEAD@{30}: commit: Reviewed LDA and LQDtopic with transcript
+edf14ae HEAD@{31}: commit: Updated the ML prompt.docx
+c910e8e HEAD@{32}: commit: Added Boosting and SVM topics, no review
+36ea16e HEAD@{33}: commit: Small changes on project and added few lecture files
+217d4e2 HEAD@{34}: commit: Updated project file and added 8th week lecture materials
+523553f HEAD@{35}: commit: Added some EDA stuff
+b8c8742 HEAD@{36}: commit: .
+f975cd6 HEAD@{37}: commit: Continued with the Weather project, added a couple of things on missing values, outliers and standardisation
+939b9ce HEAD@{38}: commit: Started with the EDA
+392dc3e HEAD@{39}: commit: Changes prior class
+e464229 HEAD@{40}: commit: Added .ipynb file
+1332678 HEAD@{41}: commit: Added Weather Project files and edited a bit Notes .qmd
+646e91c HEAD@{42}: commit: Added the whole LDA & QDA chapter, no edits
+a9c42a1 HEAD@{43}: commit: Improved what was written on LDA
+7c3809d HEAD@{44}: commit: Some editing
+9f79b57 HEAD@{45}: commit: Added Random forest to testing.qmd prior editing
+284cd50 HEAD@{46}: commit: Added Bagging chapter, prior explanations
+729a274 HEAD@{47}: commit: Added material 7th week
+a91c4b3 HEAD@{48}: commit: Testing .qmd added
