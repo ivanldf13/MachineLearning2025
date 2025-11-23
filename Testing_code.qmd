@@ -241,9 +241,7 @@ Random forests can be understood as an **adaptive weighted nearest-neighbours me
 
 -   Thus, for each tree, the prediction for $x_0$ is associated with one or more “neighbouring” training observations $x_i$, analogous to **nearest-neighbour methods** — except that here, *proximity is defined by the structure of the tree*, not by Euclidean distance.
 
--   Each observation $x_i$ contributes to the final prediction with a weight $w_i$ proportional to how often it appears in the same terminal node as $x_0$ across the ensemble. Formally, the random forest prediction is
-
-    $$ \hat{y}_0 = \sum_{i=1}^{n} w_i y_i, \quad \text{where } w_i \ge 0 $$
+-   Each observation $x_i$ contributes to the final prediction with a weight $w_i$ proportional to how often it appears in the same terminal node as $x_0$ across the ensemble. Formally, the random forest prediction is $$ \hat{y}_0 = \sum_{i=1}^{n} w_i y_i, \quad \text{where } w_i \ge 0 $$
 
     and $w_i$ represents the **fraction of trees** where $x_i$ and $x_0$ fall into the same leaf.
 
@@ -778,4 +776,157 @@ This demonstrates the flexibility of kernel-based SVMs in modelling complex, non
 
 As seen throughout this lecture, the **kernel trick** allows SVMs to implicitly map data into richer feature spaces without explicitly constructing new variables, resulting in powerful and computationally efficient classifiers.
 
+# Deep learning: Single hidden layer neural networks
+
+## Neural networks
+
+In this part of the course we turn to **deep learning** and, in particular, to neural networks. We start from the most basic architecture, the **single hidden layer neural network**, and then move on to deeper models.
+
+Neural networks have attracted a lot of attention in recent years and are often presented as almost magical tools that can solve any prediction problem. Our goal here is to **demystify** them and treat a (deep) neural network for what it is: a **highly flexible, non-linear prediction method**, comparable to methods you already know, such as random forests or support vector machines.
+
+In our view, neural networks are simply mathematical models that are very good at prediction. They can be used for **regression**, when $Y$ is quantitative, and for **classification**, when $Y$ takes a finite number of classes. We will use the single hidden layer neural network as the basic building block to understand how these models are constructed and why they work well.
+
+## Single hidden layer neural network for regression
+
+We now introduce the simplest neural network architecture for a quantitative response $Y$. As in previous regression methods, we start from $p$ original predictors $X = (X_1,\dots,X_p)^\top$ and would like to build a flexible model for $Y$. The key idea of a single hidden layer neural network is to construct $m$ new intermediate variables, called hidden units or hidden neurons, which play the role of automatically engineered features.
+
+Each hidden unit $Z_j$ is obtained in two steps. First, we form a linear combination of the inputs with its own intercept, $$ Z_j^{\text{lin}} = b_j^{(1)} + w_j^{(1)\top} X, \quad j = 1,\dots,m, $$ where $w_j^{(1)} = (w_{j1}^{(1)},\dots,w_{jp}^{(1)})^\top \in \mathbb{R}^p$ is the weight vector attached to the $j$-th hidden unit and $b_j^{(1)} \in \mathbb{R}$ is its bias (an intercept term inside this inner linear model; it is unrelated to the “bias” from the bias–variance trade-off). The weights measure how strongly each original predictor $X_k$ influences the hidden unit, and correspond to the arrows from the input nodes to a given hidden node in the network diagram.
+
+Second, we apply a non-linear activation function $g:\mathbb{R}\to\mathbb{R}$ to this linear combination, which yields $$ Z_j = g\big(b_j^{(1)} + w_j^{(1)\top} X\big), \quad j = 1,\dots,m. $$ This function $g$ is exactly where the non-linearity of the model is introduced: if $g$ were the identity, the hidden units would just be linear functions of $X$ and the overall model would remain linear. By choosing a non-linear $g$ (such as a sigmoid or ReLU, discussed later), we obtain transformed features $Z_1,\dots,Z_m$ that can capture complex relationships in the data. Importantly, the number $m$ of hidden units does not need to equal $p$; it is a modelling choice that controls how rich this intermediate representation is.
+
+\begin{minipage}{0.55\textwidth}
+In summary, the first step of a single hidden layer neural network for regression takes the original predictors in the input layer and maps them to $m$ hidden units via linear combinations plus a non-linear activation. Each hidden neuron collects signals from all input variables, weighs them according to its own weight vector, adds a bias, and then fires through $g$. These hidden units form a new set of features that will then be combined in a second step to model the response $Y$, as we will see next. The overall structure is sketched in Figure \ref{fig-single-hlnn}.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML10_single_HLNN.png}
+\caption{Single hidden layer neural network: inputs $X_1,\dots,X_p$ are linearly combined and passed through an activation function to form hidden units $Z_1,\dots,Z_m$.}
+\label{fig-single-hlnn}
+\end{figure}
+\end{minipage}
+
+## Single hidden layer neural network for regression (output layer)
+
+Once we have constructed the hidden units, we collect them in the vector $Z = (Z_1,\dots,Z_m)^\top$. In the regression setting we have a single quantitative output $Y$, so we now need to combine these $m$ hidden neurons into a model for $Y$. We do this in exactly the same spirit as before: we take a linear combination of the hidden units and add an intercept, and optionally apply a further function $h$ to this result, writing $$ \hat{f}(X) = h\big( b^{(2)} + w^{(2)\top} Z \big), $$ where $w^{(2)} = (w^{(2)}_1,\dots,w^{(2)}_m)^\top \in \mathbb{R}^m$ are the second-layer weights and $b^{(2)} \in \mathbb{R}$ is the second-layer bias.
+
+In regression we typically choose $h$ to be the identity function, so the final model is simply a linear regression on the hidden units, $$ \hat{f}(X) = b^{(2)} + w^{(2)\top} Z. $$ Intuitively, each hidden neuron $Z_j$ has already applied a non-linear transformation to the original inputs through the activation function $g$. The output neuron now just mixes these transformed features linearly. Because there is only one output neuron in regression, there is only one weight vector $w^{(2)}$ and one bias $b^{(2)}$, in contrast to the many weight vectors and biases in the hidden layer. The full network for regression therefore consists of two stacked linear models separated by the non-linear activation function $g$: first from $X$ to $Z$, then from $Z$ to $Y$.
+
+![Single hidden layer neural network for regression: the hidden units $Z_1,\dots,Z_m$ are combined linearly in the output neuron to produce the prediction for $Y$.](Images_qmd_ML/ML10_single_HLNN_2.png)
+
+## Single hidden layer neural network for regression (output layer)
+
+Once we have constructed the hidden units, we collect them in the vector $Z = (Z_1,\dots,Z_m)^\top$. In the regression setting we have a single quantitative output $Y$, so we now need to combine these $m$ hidden neurons into a model for $Y$. We do this in exactly the same spirit as before: we take a linear combination of the hidden units and add an intercept, and optionally apply a further function $h$ to this result, writing $$ \hat{f}(X) = h\big( b^{(2)} + w^{(2)\top} Z \big), $$ where $w^{(2)} = (w^{(2)}_1,\dots,w^{(2)}_m)^\top \in \mathbb{R}^m$ are the second-layer weights and $b^{(2)} \in \mathbb{R}$ is the second-layer bias.
+
+In regression we typically choose $h$ to be the identity function, so the final model is simply a linear regression on the hidden units, $$ \hat{f}(X) = b^{(2)} + w^{(2)\top} Z. $$ Intuitively, each hidden neuron $Z_j$ has already applied a non-linear transformation to the original inputs through the activation function $g$. The output neuron now just mixes these transformed features linearly. Because there is only one output neuron in regression, there is only one weight vector $w^{(2)}$ and one bias $b^{(2)}$, in contrast to the many weight vectors and biases in the hidden layer.
+
+@fig-single-hlnn-2 visualises this whole process: the green nodes on the left represent the original predictors $X_1,\dots,X_p$ (input layer), the blue nodes in the middle are the hidden units $Z_1,\dots,Z_m$, and the red node on the right is the output $Y$. The arrows correspond to the weights in the two layers: first-layer weights from $X$ to $Z$, and second-layer weights from $Z$ to $Y$. Reading the diagram from left to right therefore mirrors exactly the two-step computation of the model $\hat{f}(X)$.
+
+![Single hidden layer neural network for regression: the hidden units $Z_1,\dots,Z_m$ are combined linearly in the output neuron to produce the prediction for $Y$.](Images_qmd_ML/ML10_single_HLNN_2.png){#fig-single-hlnn-2}
+
+## Biological motivation and notation
+
+Artificial neural networks are loosely inspired by how neurons in the brain work, but only at a very high level. A biological neuron receives signals through its dendrites, combines them in the cell body, and, if the overall activation is large enough, sends an output impulse along its axon, as shown on the left of @fig-bio-motivation.
+
+The artificial neuron on the right of @fig-bio-motivation mirrors this structure in mathematical form. The inputs $x_1, x_2,\dots$ correspond to incoming signals, each weighted by a connection strength $w_i$ and summed together with a bias $b$. This sum is passed through an activation function $f(\cdot)$, which determines the output “firing” of the neuron. This loose analogy explains the biological terminology (neurons, activation, firing) used for what are, in the end, purely mathematical models.
+
+![Biological neuron (left) and artificial neuron (right): loose analogy behind the terminology of neural networks.](Images_qmd_ML/ML10_bio.png){#fig-bio-motivation}
+
+## Activation functions in the hidden layer
+
+In matrix notation we can collect the $m$ hidden units into the vector $$ Z = g\big(b^{(1)} + W^{(1)} X\big) \in \mathbb{R}^m, $$ where $W^{(1)} \in \mathbb{R}^{m \times p}$ contains the weights of the connections from the $p$ inputs to the $m$ hidden units, $b^{(1)} \in \mathbb{R}^m$ is the vector of biases, and $g$ is applied componentwise to this vector.
+
+The choice of activation function $g$ is crucial. A traditional choice is the **sigmoid function** $$ \sigma(x) = \exp(x)/(1 + \exp(x)), $$ which smoothly squashes any real input to a value between 0 and 1, as shown in the left panel of @fig-activation-plot. In modern neural networks, the default is usually the **rectified linear unit (ReLU)**, $$ \text{ReLU}(x) = \max\{0,x\}, $$ displayed in the right panel of @fig-activation-plot. ReLU leaves positive inputs unchanged and sets negative inputs to zero, which leads to simpler gradients and often faster, more stable training in deep networks.
+
+![Sigmoid activation (left) and ReLU activation (right) as typical choices for the hidden layer non-linearity.](Images_qmd_ML/ML10_3.png){#fig-activation-plot}
+
+## Activation functions in the hidden layer
+
+In matrix notation we can collect the $m$ hidden units into the vector $$ Z = g\big(b^{(1)} + W^{(1)} X\big) \in \mathbb{R}^m, $$ where $W^{(1)} \in \mathbb{R}^{m \times p}$ contains the weights of the connections from the $p$ inputs to the $m$ hidden units, $b^{(1)} \in \mathbb{R}^m$ is the vector of biases, and $g$ is applied componentwise to this vector.
+
+The choice of activation function $g$ is crucial. A traditional choice is the **sigmoid function** $$ \sigma(x) = \exp(x)/(1 + \exp(x)), $$ which smoothly squashes any real input to a value between 0 and 1, as shown in the left panel of @fig-activation-plot. In modern neural networks, the default is usually the **rectified linear unit (ReLU)**, $$ \text{ReLU}(x) = \max\{0,x\}, $$ displayed in the right panel of @fig-activation-plot. ReLU leaves positive inputs unchanged and sets negative inputs to zero, which leads to simpler gradients and often faster, more stable training in deep networks.
+
+![Sigmoid activation (left) and ReLU activation (right) as typical choices for the hidden layer non-linearity.](Images_qmd_ML/ML10_3.png){#fig-activation-plot}
+
+## Single hidden layer neural network for regression
+
+In regression, the output layer function $h$ is typically just the identity $h(z) = z$, so the network prediction is a linear combination of the hidden units, $$ \hat{f}(X) = b^{(2)} + w^{(2)\top} Z. $$
+
+If we now use ReLU in the hidden layer, the hidden vector is $$ Z = \max\{0,\, b^{(1)} + W^{(1)} X\}, $$ where the max is applied componentwise. Plugging this expression for $Z$ into the output layer gives a compact formula for the whole single hidden layer neural network, $$ \hat{f}(X) = b^{(2)} + w^{(2)\top} \max\{0,\, b^{(1)} + W^{(1)} X\}. $$
+
+The diagram in @fig-single-hlnn-2 summarises this computation visually: the inputs $X_1,\dots,X_p$ are first transformed by the ReLU hidden layer into $Z_1,\dots,Z_m$, and these hidden activations are then combined linearly in the single output neuron to produce the prediction for $Y$.
+
+## Single hidden layer neural network for classification
+
+If the output is qualitative with $q$ classes $Y \in \mathcal{G} = \{1,\dots,q\}$, we want the network to produce $q$ class probabilities, one for each class. This is achieved by using $q$ output neurons, each representing the probability of a particular class.
+
+The hidden layer is unchanged and is still given in matrix form by
+$$ Z = g\big(b^{(1)} + W^{(1)} X\big), $$
+where $Z \in \mathbb{R}^m$ is the vector of hidden activations. In the output layer we now use a **weight matrix** $W^{(2)} \in \mathbb{R}^{q \times m}$ and a **bias vector** $b^{(2)} \in \mathbb{R}^q$. For each class $i = 1,\dots,q$, the network computes
+$$ \hat{f}_i(X) = h_i\big(b^{(2)}_i + w^{(2)\top}_i Z\big), $$
+where $w^{(2)}_i$ is the $i$-th row of $W^{(2)}$ and $h_i$ is an output function that will be chosen to turn this linear combination into a valid probability (softmax will be introduced next).
+
+The architecture in @fig-class-hlnn visualises this: the green nodes represent the original predictors, the blue nodes are the shared hidden layer $Z_1,\dots,Z_m$, and the red output nodes $Y_1,\dots,Y_q$ compute the $q$ class probabilities by applying their own functions $h_i$ to different linear combinations of the same hidden activations.
+
+![Single hidden layer neural network for classification: one output neuron per class, each modelling a class probability.](Images_qmd_ML/ML10_class.png){#fig-class-hlnn}
+
+## Single hidden layer neural network for classification
+
+For classification we keep the same hidden layer as before, typically with ReLU activation $g(x) = \max\{0,x\}$. The difference lies in the output layer: instead of a single output, we now want $q$ class probabilities. The output functions $h_i$ are chosen to be the **softmax** functions. Given $q$ input scores $x_1,\dots,x_q$, the $i$-th softmax component is $$ h_i(x_1,\dots,x_q) = \text{softmax}(x_1,\dots,x_q)_i = \frac{\exp(x_i)}{\sum_{j=1}^q \exp(x_j)}, \quad i = 1,\dots,q. $$
+
+This is exactly the same softmax function used in multinomial logistic regression. With ReLU in the hidden layer and softmax in the output layer, the single hidden layer neural network directly models the **posterior probabilities** $$ \hat{f}_i(X) = \Pr(Y = i \mid X) = \text{softmax}\!\big(b^{(2)} + W^{(2)} \max\{0,\, b^{(1)} + W^{(1)} X\}\big)_i, \quad i = 1,\dots,q. $$
+
+For a new input $x_0 \in \mathbb{R}^p$ we then apply the Bayes classifier by predicting the class with the largest estimated probability, $$ \hat{G}(x_0) = \hat{y}_0 = \arg\max_{i=1,\dots,q} \hat{f}_i(x_0). $$
+
+The architecture in @fig-class-hlnn implements exactly this computation: the hidden layer builds non-linear features with ReLU, and the $q$ output nodes apply softmax to produce class probabilities.
+
+Deep Learning: Deep Neural Networks
+
+## Deep neural networks
+
+A deep neural network is a neural network with **multiple hidden layers** between the input and the output layer. Instead of transforming the inputs $X$ into a single hidden layer and then directly into the output, we now pass the information through a sequence of hidden layers, each building on the previous one.
+
+Formally, we denote by $Z^{(1)},\dots,Z^{(M)}$ the hidden layers, where $M$ is the number of hidden layers. The first hidden layer is constructed as $$ Z^{(1)} = g_1\big(b^{(1)} + W^{(1)} X\big), $$ where $W^{(1)}$ and $b^{(1)}$ are the weights and biases from the input to the first hidden layer, and $g_1$ is an activation function such as ReLU. Each subsequent hidden layer takes the previous hidden layer as input, $$ Z^{(2)} = g_2\big(b^{(2)} + W^{(2)} Z^{(1)}\big),\dots,\; Z^{(M)} = g_M\big(b^{(M)} + W^{(M)} Z^{(M-1)}\big). $$
+
+From the last hidden layer we still need to produce the outputs. For $q$ outputs (for example $q$ classes in classification), we use $$ \hat{f}_i(X) = h_i\big(b^{(M+1)} + W^{(M+1)} Z^{(M)}\big), \quad i = 1,\dots,q, $$ where $W^{(M+1)}$ and $b^{(M+1)}$ are the weights and biases from the last hidden layer to the output layer, and $h_i$ is the output function (identity for regression, softmax components for classification).
+
+The network in @fig-dnn-arch visualises this construction: the green nodes are the input predictors, the blue nodes are the successive hidden layers $Z^{(1)},Z^{(2)},Z^{(3)}$, and the red output nodes $Y_1,Y_2$ are obtained by applying a final linear transformation and output functions to the last hidden layer.
+
+![Deep neural network with several hidden layers between input and output: each hidden layer applies a linear transformation followed by a non-linear activation to the previous layer.](Images_qmd_ML/ML10_DNN.png){#fig-dnn-arch}
+
+## The architecture of deep neural networks
+
+The **depth** of a neural network is the total number of layers, counting both hidden layers and the output layer (and sometimes also the input layer, depending on convention). For each layer, the **width** is the number of neurons in that layer. Together, depth and width largely determine the **architecture** of a deep neural network.
+
+In practice there can be additional architectural choices, such as restricting which neurons are connected, or forcing some weights to be shared across different parts of the network (as in convolutional neural networks). A good architecture is usually found by combining prior experience with systematic comparison via cross-validation: we try several candidate depths and widths and keep the one that generalises best to new data.
+
+The network shown in @fig-dnn-arch is an example of such an architecture: it has one input layer, three hidden layers of different widths, and an output layer with two neurons, each representing one response.
+
+## Comments on deep neural networks
+
+In deep neural networks the default choice for all activation functions is usually the ReLU, $$ g_j(x) = \max\{0,x\},\ j = 1,\dots,M, $$ because it is simple, cheap to evaluate, and works well in practice for many hidden layers.
+
+For regression problems we typically have a single output ($q = 1$) and use the identity in the output layer, $$ h(z) = z, $$ so the network returns a real-valued prediction. For classification, the output functions $h_i$ are the softmax components, which turn the final layer scores into class probabilities.
+
+The hidden layers act as **feature extractors**: each layer transforms the representation from the previous one, gradually extracting higher-level patterns in the data. The first hidden layer, which is directly connected to the inputs, is particularly important for interpretation and visualisation of what features the network is learning.
+
+Deep networks are **highly flexible**: with enough neurons they can approximate any continuous function on $\mathbb{R}^p$ to arbitrary accuracy (under mild assumptions). However, this flexibility comes at a cost. They contain **many parameters**, so fitting them is computationally expensive and there is a serious risk of overfitting. In practice, choosing and training a good architecture relies on experience plus careful use of validation and regularisation.
+
+## A simple example: digit classification
+
+To see what these architectures look like in practice, consider a small digits data set where each image is represented by $p = 256$ grey-scale pixels. Each digit like those in @fig-ML6-digit-class is flattened into a vector $X \in \mathbb{R}^{256}$ that we feed into a deep neural network.
+
+We take a **fully connected** network with $M = 3$ hidden layers, each containing 256 neurons, and an output layer with 10 neurons (one for each digit 0–9). The structure is shown in @fig-ML10-digit-class: every neuron in one layer is connected to every neuron in the next one, so the information from each pixel can, in principle, influence every hidden unit and every output.
+
+Even this “simple” architecture already has a large number of parameters. Each hidden layer has $(256 + 1) \times 256 = 257 \times 256$ weights and biases, and the output layer has $(256 + 1) \times 10 = 2570$ parameters. Altogether this is roughly $$ 3 \times 257 \times 256 + 257 \times 10 \approx 200\,000 $$ parameters to estimate. This example illustrates both the expressive power of deep networks and why training them is computationally demanding and prone to overfitting if not properly regularised.
+
+![Example images of handwritten digits used as inputs to the network.](Images_qmd_ML/ML6_digit_class.png){#fig-ML6-digit-class}
+
+![Fully connected deep neural network with three hidden layers of width 256 for digit classification.](Images_qmd_ML/ML10_digit_class.png){#fig-ML10-digit-class}
+
+
+
 # 
+
+
