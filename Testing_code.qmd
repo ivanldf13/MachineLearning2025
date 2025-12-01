@@ -858,7 +858,7 @@ In matrix notation we can collect the $m$ hidden units into the vector $$ Z = g\
 
 The choice of activation function $g$ is crucial. A traditional choice is the **sigmoid function** $$ \sigma(x) = \exp(x)/(1 + \exp(x)), $$ which smoothly squashes any real input to a value between 0 and 1, as shown in the left panel of @fig-activation-plot. In modern neural networks, the default is usually the **rectified linear unit (ReLU)**, $$ \text{ReLU}(x) = \max\{0,x\}, $$ displayed in the right panel of @fig-activation-plot. ReLU leaves positive inputs unchanged and sets negative inputs to zero, which leads to simpler gradients and often faster, more stable training in deep networks.
 
-![Sigmoid activation (left) and ReLU activation (right) as typical choices for the hidden layer non-linearity.](Images_qmd_ML/ML10_3.png){#fig-activation-plot width=70%}
+![Sigmoid activation (left) and ReLU activation (right) as typical choices for the hidden layer non-linearity.](Images_qmd_ML/ML10_3.png){#fig-activation-plot width="70%"}
 
 ## Single hidden layer neural network for regression
 
@@ -872,17 +872,13 @@ The diagram in @fig-single-hlnn-2 summarises this computation visually: the inpu
 
 If the output is qualitative with $q$ classes $Y \in \mathcal{G} = \{1,\dots,q\}$, we want the network to produce $q$ class probabilities, one for each class. This is achieved by using $q$ output neurons, each representing the probability of a particular class.
 
-The hidden layer is unchanged and is still given in matrix form by $$ Z = g\big(b^{(1)} + W^{(1)} X\big), $$ where $Z \in \mathbb{R}^m$ is the vector of hidden activations. In the output layer we now use a weight matrix $W^{(2)} \in \mathbb{R}^{q \times m}$ and a bias vector $b^{(2)} \in \mathbb{R}^q$. For each class $i = 1,\dots,q$, the network first computes a score
-$$ s_i(X) = b^{(2)}_i + w^{(2)\top}_i Z, $$
-where $w^{(2)}_i$ is the $i$-th row of $W^{(2)}$.
+The hidden layer is unchanged and is still given in matrix form by $$ Z = g\big(b^{(1)} + W^{(1)} X\big), $$ where $Z \in \mathbb{R}^m$ is the vector of hidden activations. In the output layer we now use a weight matrix $W^{(2)} \in \mathbb{R}^{q \times m}$ and a bias vector $b^{(2)} \in \mathbb{R}^q$. For each class $i = 1,\dots,q$, the network first computes a score $$ s_i(X) = b^{(2)}_i + w^{(2)\top}_i Z, $$ where $w^{(2)}_i$ is the $i$-th row of $W^{(2)}$.
 
 To turn these scores into probabilities we choose the output functions $h_i$ to be the **softmax** components. Given $q$ input scores $x_1,\dots,x_q$, the $i$-th softmax component is $$ h_i(x_1,\dots,x_q) = \text{softmax}(x_1,\dots,x_q)_i = \frac{\exp(x_i)}{\sum_{j=1}^q \exp(x_j)}, \quad i = 1,\dots,q. $$
 
-This is exactly the same softmax function used in multinomial logistic regression. With ReLU in the hidden layer and softmax in the output layer, the single hidden layer neural network directly models the posterior probabilities
-$$ \hat{f}_i(X) = \Pr(Y = i \mid X) = \text{softmax}\!\big(b^{(2)} + W^{(2)} \max\{0,\, b^{(1)} + W^{(1)} X\}\big)_i, \quad i = 1,\dots,q. $$
+This is exactly the same softmax function used in multinomial logistic regression. With ReLU in the hidden layer and softmax in the output layer, the single hidden layer neural network directly models the posterior probabilities $$ \hat{f}_i(X) = \Pr(Y = i \mid X) = \text{softmax}\!\big(b^{(2)} + W^{(2)} \max\{0,\, b^{(1)} + W^{(1)} X\}\big)_i, \quad i = 1,\dots,q. $$
 
-For a new input $x_0 \in \mathbb{R}^p$ we then apply the Bayes classifier by predicting the class with the largest estimated probability,
-$$ \hat{G}(x_0) = \hat{y}_0 = \arg\max_{i=1,\dots,q} \hat{f}_i(x_0). $$
+For a new input $x_0 \in \mathbb{R}^p$ we then apply the Bayes classifier by predicting the class with the largest estimated probability, $$ \hat{G}(x_0) = \hat{y}_0 = \arg\max_{i=1,\dots,q} \hat{f}_i(x_0). $$
 
 The architecture in @fig-class-hlnn visualises this: the green nodes represent the original predictors, the blue nodes are the shared hidden layer $Z_1,\dots,Z_m$, and the red output nodes $Y_1,\dots,Y_q$ compute the $q$ class probabilities by applying softmax to different linear combinations of the same hidden activations.
 
@@ -954,33 +950,26 @@ For now, the question is how we can improve an initial model using gradient desc
 
 **Gradient descent for neural networks**
 
-1. Start with an arbitrary initial value $\theta^{(0)}$.
-2. For iterations $i=1,2,\dots$:
-   1. Compute the gradient (derivative) of the loss at the current parameters,
-      $$\nabla_\theta J(\theta^{(i-1)})=\left.\frac{\partial J(\theta)}{\partial \theta}\right|_{\theta=\theta^{(i-1)}}.$$
-   2. Update the parameters with learning rate $\alpha>0$,
-      $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
-3. Stop when a suitable stopping criterion is satisfied (for example, after a fixed number of iterations or when the loss stops improving).
+1.  Start with an arbitrary initial value $\theta^{(0)}$.
+2.  For iterations $i=1,2,\dots$:
+    1.  Compute the gradient (derivative) of the loss at the current parameters, $$\nabla_\theta J(\theta^{(i-1)})=\left.\frac{\partial J(\theta)}{\partial \theta}\right|_{\theta=\theta^{(i-1)}}.$$
+    2.  Update the parameters with learning rate $\alpha>0$, $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
+3.  Stop when a suitable stopping criterion is satisfied (for example, after a fixed number of iterations or when the loss stops improving).
 
 Intuitively, each step looks at the current model, asks in which direction in parameter space $J(\theta)$ decreases fastest, and moves a small distance in that direction. The lecturer emphasises that this algorithm itself is standard; what is specific to neural networks is how we obtain the gradient efficiently for such a complex model. Thus, all we really need in order to fit a neural network by gradient descent are the gradients $\nabla_\theta J(\theta)$, which will be provided by the backpropagation algorithm.
 
 ## Computing the gradient: back-propagation
 
-In the sequel we focus on **regression**; the classification case is entirely analogous but uses the cross-entropy loss instead of the squared error. For regression with squared loss, the gradient of the total loss at some parameter vector $\theta$ can be written as a sum over the training samples,
-$$\nabla_\theta J(\theta)=\sum_{i=1}^n \nabla_\theta\big(f_\theta(x_i)-y_i\big)^2.$$
-This expression says that the overall direction in which we should move $\theta$ is obtained by adding up the contributions of each individual training example.
+In the sequel we focus on **regression**; the classification case is entirely analogous but uses the cross-entropy loss instead of the squared error. For regression with squared loss, the gradient of the total loss at some parameter vector $\theta$ can be written as a sum over the training samples, $$\nabla_\theta J(\theta)=\sum_{i=1}^n \nabla_\theta\big(f_\theta(x_i)-y_i\big)^2.$$ This expression says that the overall direction in which we should move $\theta$ is obtained by adding up the contributions of each individual training example.
 
-Because the gradient is a sum, we can look at a **single** training pair $(x,y)$ and study its loss contribution
-$$L(\theta)=\big(f_\theta(x)-y\big)^2.$$
-If we understand how to differentiate this one-sample loss with respect to all parameters, then the full gradient is just the sum of these single-sample gradients. This is exactly the viewpoint that underlies back-propagation and, later, stochastic and mini-batch gradient descent.
+Because the gradient is a sum, we can look at a **single** training pair $(x,y)$ and study its loss contribution $$L(\theta)=\big(f_\theta(x)-y\big)^2.$$ If we understand how to differentiate this one-sample loss with respect to all parameters, then the full gradient is just the sum of these single-sample gradients. This is exactly the viewpoint that underlies back-propagation and, later, stochastic and mini-batch gradient descent.
 
 Back-propagation is simply a way of computing $\nabla_\theta L(\theta)$ efficiently by exploiting the **chain rule** of calculus. The neural network takes $x$, pushes it through a sequence of linear transformations and non-linear activations, and finally produces the prediction $f_\theta(x)$. This whole computation is a long composition of simple functions. The chain rule tells us how the derivative of such a composition factors into the product of simpler derivatives.
 
 Recall the chain rule for two functions $f$ and $g$. If we define $h(x)=f(g(x))$, then $$\left.\frac{\partial h(x)}{\partial x}\right|_{x=x_0}
 =\left.\frac{\partial f(z)}{\partial z}\right|_{z=g(x_0)}
 \cdot
-\left.\frac{\partial g(x)}{\partial x}\right|_{x=x_0}.$$
-In short-hand notation, if we set $z=g(x)$, this becomes $$\frac{\partial h}{\partial x}=\frac{\partial h}{\partial z}\cdot\frac{\partial z}{\partial x}.$$
+\left.\frac{\partial g(x)}{\partial x}\right|_{x=x_0}.$$ In short-hand notation, if we set $z=g(x)$, this becomes $$\frac{\partial h}{\partial x}=\frac{\partial h}{\partial z}\cdot\frac{\partial z}{\partial x}.$$
 
 The key idea for back-propagation is to apply this rule repeatedly along the layers of the network, but **from the output back to the input**. We first differentiate the loss with respect to the final output $f_\theta(x)$, then propagate this derivative backwards through the last layer, then through the previous layer, and so on, each time multiplying by the relevant local derivative. In this way we reuse intermediate quantities and avoid recomputing the same derivatives many times. This is what makes back-propagation an efficient method for obtaining the gradients needed in gradient descent for neural networks.
 
@@ -988,21 +977,17 @@ The key idea for back-propagation is to apply this rule repeatedly along the lay
 
 To compute the gradient for a given parameter vector $\theta$ it is convenient to look at one training pair $(x,y)$ at a time. We fix a single input vector $x=(x_1,\dots,x_p)$ and its target $y$, together with the current weights and biases collected in $\theta$. For this fixed $\theta$ we first run a **forward pass** through the network in order to know the activation value of every hidden neuron and the final prediction.
 
-Starting from the input layer, the activations of the hidden units are computed exactly as in the definition of the network. For a single hidden layer with activation function $g$ this means  
-$$z=g\big(b^{(1)}+W^{(1)}x\big),$$
-where $W^{(1)}$ and $b^{(1)}$ are the weights and biases of the first layer and $z$ collects the hidden activations. The output neuron then combines these hidden activations linearly to form the prediction
-$$\hat{y}=f_\theta(x)=b^{(2)}+w^{(2)\top}z.$$
+Starting from the input layer, the activations of the hidden units are computed exactly as in the definition of the network. For a single hidden layer with activation function $g$ this means\
+$$z=g\big(b^{(1)}+W^{(1)}x\big),$$ where $W^{(1)}$ and $b^{(1)}$ are the weights and biases of the first layer and $z$ collects the hidden activations. The output neuron then combines these hidden activations linearly to form the prediction $$\hat{y}=f_\theta(x)=b^{(2)}+w^{(2)\top}z.$$
 
-Conceptually, the forward pass in @fig-backprop-forward takes the fixed input $x$ (green nodes on the left), pushes it through the hidden layer (blue nodes $z_1,z_2$), and produces the output $\hat{y}$ (red node). We then compare $\hat{y}$ with the true target $y$ (green node on the right) and evaluate the loss
-$$L(\theta)=(\hat{y}-y)^2.$$
-In deeper networks the same idea applies: we repeatedly apply “linear transformation + non-linearity” from layer to layer until we reach the output. All these intermediate quantities (the activations in each layer and the prediction) will then be reused in the backward pass to compute the gradients efficiently via the chain rule.
+Conceptually, the forward pass in @fig-backprop-forward takes the fixed input $x$ (green nodes on the left), pushes it through the hidden layer (blue nodes $z_1,z_2$), and produces the output $\hat{y}$ (red node). We then compare $\hat{y}$ with the true target $y$ (green node on the right) and evaluate the loss $$L(\theta)=(\hat{y}-y)^2.$$ In deeper networks the same idea applies: we repeatedly apply “linear transformation + non-linearity” from layer to layer until we reach the output. All these intermediate quantities (the activations in each layer and the prediction) will then be reused in the backward pass to compute the gradients efficiently via the chain rule.
 
-**Summary of the forward pass for one sample $(x,y)$ (as in @fig-backprop-forward):**
+**Summary of the forward pass for one sample** $(x,y)$ (as in @fig-backprop-forward):
 
-- Fix the input vector $x=(x_1,\dots,x_p)$, the target $y$ and the current parameters $\theta$.
-- Compute the hidden activations by propagating $x$ through the first layer: $z=g\big(b^{(1)}+W^{(1)}x\big)$.
-- Compute the network prediction at the output layer: $\hat{y}=b^{(2)}+w^{(2)\top}z$.
-- Evaluate the loss contribution of this sample: $L(\theta)=(\hat{y}-y)^2$.
+-   Fix the input vector $x=(x_1,\dots,x_p)$, the target $y$ and the current parameters $\theta$.
+-   Compute the hidden activations by propagating $x$ through the first layer: $z=g\big(b^{(1)}+W^{(1)}x\big)$.
+-   Compute the network prediction at the output layer: $\hat{y}=b^{(2)}+w^{(2)\top}z$.
+-   Evaluate the loss contribution of this sample: $L(\theta)=(\hat{y}-y)^2$.
 
 These forward computations provide all the activations that back-propagation will differentiate with respect to the parameters in the backward pass.
 
@@ -1010,9 +995,7 @@ These forward computations provide all the activations that back-propagation wil
 
 ## Back-propagation
 
-From the forward pass we know that, for a single hidden layer,
-$$z=g\big(b^{(1)}+W^{(1)}x\big),\qquad \hat{y}=f_\theta(x)=b^{(2)}+w^{(2)\top}z,\qquad L(\theta)=(\hat{y}-y)^2.$$
-Here $z$ contains the hidden activations, $\hat{y}$ is the prediction for the fixed input $x$, and $L(\theta)$ is the squared-error loss for this one training pair, exactly as in @fig-backprop-forward.
+From the forward pass we know that, for a single hidden layer, $$z=g\big(b^{(1)}+W^{(1)}x\big),\qquad \hat{y}=f_\theta(x)=b^{(2)}+w^{(2)\top}z,\qquad L(\theta)=(\hat{y}-y)^2.$$ Here $z$ contains the hidden activations, $\hat{y}$ is the prediction for the fixed input $x$, and $L(\theta)$ is the squared-error loss for this one training pair, exactly as in @fig-backprop-forward.
 
 To obtain the **gradient**, we differentiate $L(\theta)$ with respect to **all parameters** in the network, starting from the output layer and moving backwards.
 
@@ -1020,57 +1003,32 @@ To obtain the **gradient**, we differentiate $L(\theta)$ with respect to **all p
 
 Suppose the output-layer weight vector is $w^{(2)}=(w^{(2)}_1,w^{(2)}_2)$ as in @fig-backprop-forward. We first look at $\partial L/\partial w^{(2)}_1$, i.e. how much the loss changes if we slightly change the connection from hidden unit $z_1$ to the output.
 
-Back-propagation applies the **chain rule**:
-$$\frac{\partial L}{\partial w^{(2)}_1}
-=\frac{\partial L}{\partial \hat{y}}\cdot\frac{\partial \hat{y}}{\partial w^{(2)}_1}.$$
-For the squared loss $L(\theta)=(\hat{y}-y)^2$ we have
-$$\frac{\partial L}{\partial\hat{y}}=2(\hat{y}-y),$$
-which is just (twice) the prediction error. Since the output is linear in the hidden activations,
-$$\hat{y}=b^{(2)}+w^{(2)\top}z=b^{(2)}+w^{(2)}_1z_1+w^{(2)}_2z_2,$$
-we obtain
-$$\frac{\partial\hat{y}}{\partial w^{(2)}_1}=z_1.$$
-Putting these pieces together gives
-$$\frac{\partial L}{\partial w^{(2)}_1}=2(\hat{y}-y)\,z_1.$$
-By the same argument,
-$$\frac{\partial L}{\partial w^{(2)}_2}=2(\hat{y}-y)\,z_2,$$
-and in general
-$$\frac{\partial L}{\partial w^{(2)}_i}=2(\hat{y}-y)\,z_i.$$
+Back-propagation applies the **chain rule**: $$\frac{\partial L}{\partial w^{(2)}_1}
+=\frac{\partial L}{\partial \hat{y}}\cdot\frac{\partial \hat{y}}{\partial w^{(2)}_1}.$$ For the squared loss $L(\theta)=(\hat{y}-y)^2$ we have $$\frac{\partial L}{\partial\hat{y}}=2(\hat{y}-y),$$ which is just (twice) the prediction error. Since the output is linear in the hidden activations, $$\hat{y}=b^{(2)}+w^{(2)\top}z=b^{(2)}+w^{(2)}_1z_1+w^{(2)}_2z_2,$$ we obtain $$\frac{\partial\hat{y}}{\partial w^{(2)}_1}=z_1.$$ Putting these pieces together gives $$\frac{\partial L}{\partial w^{(2)}_1}=2(\hat{y}-y)\,z_1.$$ By the same argument, $$\frac{\partial L}{\partial w^{(2)}_2}=2(\hat{y}-y)\,z_2,$$ and in general $$\frac{\partial L}{\partial w^{(2)}_i}=2(\hat{y}-y)\,z_i.$$
 
 Thus each gradient component at the output layer is the product of an **error term** $(\hat{y}-y)$ at the red node and the corresponding **hidden activation** $z_i$ at the blue node in @fig-backprop-forward.
 
 ### First-layer weights
 
-We now move one step further back and compute derivatives with respect to the **first-layer weights**. Focus first on a single weight $w^{(1)}_{11}$, which connects input $x_1$ to hidden unit $z_1$ in @fig-backprop-forward. Along this path the loss depends on $w^{(1)}_{11}$ via
-$$w^{(1)}_{11}\;\longrightarrow\;z_1\;\longrightarrow\;\hat{y}\;\longrightarrow\;L,$$
-so the chain rule gives
-$$\frac{\partial L}{\partial w^{(1)}_{11}}
+We now move one step further back and compute derivatives with respect to the **first-layer weights**. Focus first on a single weight $w^{(1)}_{11}$, which connects input $x_1$ to hidden unit $z_1$ in @fig-backprop-forward. Along this path the loss depends on $w^{(1)}_{11}$ via $$w^{(1)}_{11}\;\longrightarrow\;z_1\;\longrightarrow\;\hat{y}\;\longrightarrow\;L,$$ so the chain rule gives $$\frac{\partial L}{\partial w^{(1)}_{11}}
 =\frac{\partial L}{\partial \hat{y}}\cdot\frac{\partial \hat{y}}{\partial z_1}\cdot\frac{\partial z_1}{\partial w^{(1)}_{11}}.$$
 
-We already know $\partial L/\partial\hat{y}=2(\hat{y}-y)$. The second factor is the sensitivity of the output to the hidden unit:
-$$\frac{\partial \hat{y}}{\partial z_1}=w^{(2)}_1,$$
-because $\hat{y}=b^{(2)}+w^{(2)}_1z_1+w^{(2)}_2z_2$. For the third factor we use the definition of the hidden activation,
-$$z_1=g\big(b^{(1)}_1+w^{(1)\top}_1 x\big),$$
-where $w^{(1)}_1$ is the row of $W^{(1)}$ corresponding to hidden unit $z_1$. Differentiating with respect to $w^{(1)}_{11}$ yields
-$$\frac{\partial z_1}{\partial w^{(1)}_{11}}
+We already know $\partial L/\partial\hat{y}=2(\hat{y}-y)$. The second factor is the sensitivity of the output to the hidden unit: $$\frac{\partial \hat{y}}{\partial z_1}=w^{(2)}_1,$$ because $\hat{y}=b^{(2)}+w^{(2)}_1z_1+w^{(2)}_2z_2$. For the third factor we use the definition of the hidden activation, $$z_1=g\big(b^{(1)}_1+w^{(1)\top}_1 x\big),$$ where $w^{(1)}_1$ is the row of $W^{(1)}$ corresponding to hidden unit $z_1$. Differentiating with respect to $w^{(1)}_{11}$ yields $$\frac{\partial z_1}{\partial w^{(1)}_{11}}
 =g'\big(b^{(1)}_1+w^{(1)\top}_1 x\big)\,x_1.$$
 
-Combining the three factors we obtain the explicit formula from the slide:
-$$\frac{\partial L}{\partial w^{(1)}_{11}}
+Combining the three factors we obtain the explicit formula from the slide: $$\frac{\partial L}{\partial w^{(1)}_{11}}
 =2(\hat{y}-y)\cdot w^{(2)}_1\cdot g'\big(b^{(1)}_1+w^{(1)\top}_1 x\big)\,x_1.$$
 
-Exactly the same logic applies to any first-layer weight $w^{(1)}_{ij}$, which connects input $x_j$ to hidden unit $z_i$. Along the path
-$$w^{(1)}_{ij}\;\longrightarrow\;z_i\;\longrightarrow\;\hat{y}\;\longrightarrow\;L$$
-we obtain
-$$\frac{\partial L}{\partial w^{(1)}_{ij}}
+Exactly the same logic applies to any first-layer weight $w^{(1)}_{ij}$, which connects input $x_j$ to hidden unit $z_i$. Along the path $$w^{(1)}_{ij}\;\longrightarrow\;z_i\;\longrightarrow\;\hat{y}\;\longrightarrow\;L$$ we obtain $$\frac{\partial L}{\partial w^{(1)}_{ij}}
 =\frac{\partial L}{\partial \hat{y}}\cdot\frac{\partial \hat{y}}{\partial z_i}\cdot\frac{\partial z_i}{\partial w^{(1)}_{ij}}
 =2(\hat{y}-y)\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)\,x_j.$$
 
 This formula shows the typical **back-propagation structure** for a hidden-layer weight:
 
-- an error term $2(\hat{y}-y)$ coming from the output layer,
-- multiplied by the weight $w^{(2)}_i$ that connects hidden unit $z_i$ to the output,
-- multiplied by the derivative of the activation $g'$ evaluated at the hidden pre-activation $b^{(1)}_i+w^{(1)\top}_i x$,
-- multiplied by the input $x_j$ to that hidden unit.
+-   an error term $2(\hat{y}-y)$ coming from the output layer,
+-   multiplied by the weight $w^{(2)}_i$ that connects hidden unit $z_i$ to the output,
+-   multiplied by the derivative of the activation $g'$ evaluated at the hidden pre-activation $b^{(1)}_i+w^{(1)\top}_i x$,
+-   multiplied by the input $x_j$ to that hidden unit.
 
 In words, the error at the output node is propagated backwards through the network, scaled at each step by the relevant weights and activation derivatives. This is precisely why the algorithm is called **back-propagation** and why it efficiently provides gradients for all parameters using only local computations along the graph in @fig-backprop-forward.
 
@@ -1078,45 +1036,31 @@ In words, the error at the output node is propagated backwards through the netwo
 
 The formulas we obtained for the weight derivatives can be written more compactly by introducing **error terms** (often called *deltas*).
 
-For the output-layer weights we had
-$$\frac{\partial L}{\partial w^{(2)}_i}=2(\hat{y}-y)\,z_i.$$
-We now define a single scalar
-$$\delta^{(2)}=2(\hat{y}-y),$$
-which is the error at the output neuron for the current parameters $\theta$. Then
-$$\frac{\partial L}{\partial w^{(2)}_i}=\delta^{(2)}z_i.$$
+For the output-layer weights we had $$\frac{\partial L}{\partial w^{(2)}_i}=2(\hat{y}-y)\,z_i.$$ We now define a single scalar $$\delta^{(2)}=2(\hat{y}-y),$$ which is the error at the output neuron for the current parameters $\theta$. Then $$\frac{\partial L}{\partial w^{(2)}_i}=\delta^{(2)}z_i.$$
 
-For the first-layer weights we found
-$$\frac{\partial L}{\partial w^{(1)}_{ij}}
-=2(\hat{y}-y)\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)\,x_j.$$
-We now define, for each hidden unit $i$,
-$$\delta^{(1)}_i
-=2(\hat{y}-y)\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big),$$
-so that
-$$\frac{\partial L}{\partial w^{(1)}_{ij}}=\delta^{(1)}_i x_j.$$
+For the first-layer weights we found $$\frac{\partial L}{\partial w^{(1)}_{ij}}
+=2(\hat{y}-y)\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)\,x_j.$$ We now define, for each hidden unit $i$, $$\delta^{(1)}_i
+=2(\hat{y}-y)\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big),$$ so that $$\frac{\partial L}{\partial w^{(1)}_{ij}}=\delta^{(1)}_i x_j.$$
 
-The quantities $\delta^{(2)}$ and $\delta^{(1)}_i$ are the **errors** associated with the output neuron and the $i$-th hidden neuron, respectively. They satisfy the simple relationship
-$$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big),$$
-which is exactly the expression on the slide: the error at a hidden node is the error at the next layer, multiplied by the connecting weight and by the derivative of the activation at that node.
+The quantities $\delta^{(2)}$ and $\delta^{(1)}_i$ are the **errors** associated with the output neuron and the $i$-th hidden neuron, respectively. They satisfy the simple relationship $$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big),$$ which is exactly the expression on the slide: the error at a hidden node is the error at the next layer, multiplied by the connecting weight and by the derivative of the activation at that node.
 
-For the ReLU activation $g(x)=\max\{0,x\}$ we have
-$$g'(x)=\mathbf{1}\{x>0\},$$
-so the hidden error $\delta^{(1)}_i$ is either zero (if the neuron is inactive) or proportional to $\delta^{(2)}w^{(2)}_i$ (if the neuron is active).
+For the ReLU activation $g(x)=\max\{0,x\}$ we have $$g'(x)=\mathbf{1}\{x>0\},$$ so the hidden error $\delta^{(1)}_i$ is either zero (if the neuron is inactive) or proportional to $\delta^{(2)}w^{(2)}_i$ (if the neuron is active).
 
 ### Two-pass back-propagation algorithm
 
 With this delta notation, back-propagation is implemented as a **two-pass algorithm**:
 
-1. **Forward pass.**  
-   Compute all hidden activations $z_i$ and the prediction $\hat{y}$ for the current $\theta$, then evaluate the loss $L(\theta)=(\hat{y}-y)^2$.
+1.  **Forward pass.**\
+    Compute all hidden activations $z_i$ and the prediction $\hat{y}$ for the current $\theta$, then evaluate the loss $L(\theta)=(\hat{y}-y)^2$.
 
-2. **Backward pass.**  
-   - Compute the output error $\delta^{(2)}=2(\hat{y}-y)$.  
-   - Use the recursion  
-     $$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)$$  
-     to obtain the hidden errors $\delta^{(1)}_i$.  
-   - Finally compute the gradients
-     $$\frac{\partial L}{\partial w^{(2)}_i}=\delta^{(2)}z_i,\qquad
-       \frac{\partial L}{\partial w^{(1)}_{ij}}=\delta^{(1)}_i x_j.$$
+2.  **Backward pass.**
+
+    -   Compute the output error $\delta^{(2)}=2(\hat{y}-y)$.\
+    -   Use the recursion\
+        $$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)$$\
+        to obtain the hidden errors $\delta^{(1)}_i$.\
+    -   Finally compute the gradients $$\frac{\partial L}{\partial w^{(2)}_i}=\delta^{(2)}z_i,\qquad
+          \frac{\partial L}{\partial w^{(1)}_{ij}}=\delta^{(1)}_i x_j.$$
 
 The equations for the derivatives with respect to the biases are analogous: each bias gradient is just the corresponding delta (for the neuron it belongs to). In deeper networks, the same pattern repeats layer by layer: errors are first computed at the output, then **back-propagated** through the network using formulas of the form above, and the gradients with respect to all weights and biases follow from these deltas.
 
@@ -1124,61 +1068,142 @@ The equations for the derivatives with respect to the biases are analogous: each
 
 The delta notation extends directly from a single hidden layer to **deep networks** with many hidden layers. In a network with hidden layers $Z^{(1)},\dots,Z^{(M)}$ and output $\hat{y}$, we have an error vector $\delta^{(m)}$ at each hidden layer $m=1,\dots,M$ and an output error $\delta^{(M+1)}$ at the last layer. Back-propagation computes these errors starting from the output and then propagating them backwards through the layers, exactly as we did for the single hidden layer.
 
-As illustrated in @fig-backprop-advantages, each blue hidden layer has its own error vector $\delta^{(m)}$. The recursion has always the same structure: the error at layer $m$ is obtained from the error at layer $m+1$ by multiplying with the corresponding weight matrix and the derivative of the activation function at that layer. Once all $\delta^{(m)}$ have been computed, the gradients with respect to all weights and biases follow from simple local formulas such as
-$$\frac{\partial L}{\partial w^{(m)}_{ij}}=\delta^{(m)}_i a^{(m-1)}_j,$$
-where $a^{(m-1)}_j$ is the activation coming into layer $m$ (for $m=1$ this is just the input $x_j$).
+As illustrated in @fig-backprop-advantages, each blue hidden layer has its own error vector $\delta^{(m)}$. The recursion has always the same structure: the error at layer $m$ is obtained from the error at layer $m+1$ by multiplying with the corresponding weight matrix and the derivative of the activation function at that layer. Once all $\delta^{(m)}$ have been computed, the gradients with respect to all weights and biases follow from simple local formulas such as $$\frac{\partial L}{\partial w^{(m)}_{ij}}=\delta^{(m)}_i a^{(m-1)}_j,$$ where $a^{(m-1)}_j$ is the activation coming into layer $m$ (for $m=1$ this is just the input $x_j$).
 
 Back-propagation has several important advantages:
 
-- It is **very efficient**: the same forward activations and backward error terms $\delta^{(m)}$ are reused many times when computing the gradients, so the cost of obtaining all partial derivatives is only a small constant factor larger than a single forward pass.
-- Only **local derivatives** are needed at each node: we never differentiate the full composition explicitly, but only the activation function at that node and the local linear transformation. This locality makes the algorithm easy to implement for a wide range of architectures.
-- The computations at different neurons and different training examples are **embarrassingly parallel**, so back-propagation can be implemented very efficiently on GPUs and other parallel hardware.
+-   It is **very efficient**: the same forward activations and backward error terms $\delta^{(m)}$ are reused many times when computing the gradients, so the cost of obtaining all partial derivatives is only a small constant factor larger than a single forward pass.
+-   Only **local derivatives** are needed at each node: we never differentiate the full composition explicitly, but only the activation function at that node and the local linear transformation. This locality makes the algorithm easy to implement for a wide range of architectures.
+-   The computations at different neurons and different training examples are **embarrassingly parallel**, so back-propagation can be implemented very efficiently on GPUs and other parallel hardware.
 
 In summary, back-propagation scales well to deep neural networks precisely because it organises gradient computation into local, reusable pieces: forward activations $a^{(m)}$ and backward errors $\delta^{(m)}$ that flow through the layered structure in @fig-backprop-advantages.
 
 ![Back-propagation in a deep network: each hidden layer has its own error vector $\delta^{(m)}$, which is propagated backwards from the output to the input layer.](Images_qmd_ML/ML11_advantages.png){#fig-backprop-advantages width="80%" fig-align="center"}
 
-
 ## Batch optimisation
 
-Recall from the gradient descent section that the loss for regression is
-$$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$
-so its gradient is the sum of the per-sample gradients
-$$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$
-Back-propagation gives us exactly these single-sample gradients: for each training pair $(x_i,y_i)$ we can run a forward pass, compute the loss, and then a backward pass to obtain $\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2$.
+Recall from the gradient descent section that the loss for regression is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$ so its gradient is the sum of the per-sample gradients $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$ Back-propagation gives us exactly these single-sample gradients: for each training pair $(x_i,y_i)$ we can run a forward pass, compute the loss, and then a backward pass to obtain $\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2$.
 
 To improve the error function $J(\theta)$ we now have two options; the first one is **batch optimisation** (the classical setting in the script):
 
-- For each update step we use the **whole training set** $(x_1,y_1),\dots,(x_n,y_n)$.
-- We compute all per-sample gradients via back-propagation and sum them to obtain the exact gradient $\nabla_\theta J(\theta)$ as in the formula above.
-- We then take a gradient descent step
-  $$\theta\leftarrow\theta-\alpha\,\nabla_\theta J(\theta),$$
-  where $\alpha>0$ is the learning rate.
+-   For each update step we use the **whole training set** $(x_1,y_1),\dots,(x_n,y_n)$.
+-   We compute all per-sample gradients via back-propagation and sum them to obtain the exact gradient $\nabla_\theta J(\theta)$ as in the formula above.
+-   We then take a gradient descent step $$\theta\leftarrow\theta-\alpha\,\nabla_\theta J(\theta),$$ where $\alpha>0$ is the learning rate.
 
 This procedure is simply **standard gradient descent** applied to neural networks: every step moves the parameters in the direction of the *true* gradient based on all observations. The advantage is that each update uses the most accurate possible information about how $J(\theta)$ changes. The drawback, emphasised in the video, is computational: when $n$ is large, each step requires running back-propagation over the full dataset, which can be very slow. This motivates mini-batch and stochastic variants discussed on the following slides.
 
 ## Stochastic gradient descent
 
-For regression the loss is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$
-so the exact gradient needed for gradient descent is $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$
-In batch optimisation we use **all** $n$ training samples to compute this gradient before each update. As highlighted in the script, when $n$ is very large (millions or billions of examples), a single full gradient step already becomes prohibitively slow.
+For regression the loss is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$ so the exact gradient needed for gradient descent is $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$ In batch optimisation we use **all** $n$ training samples to compute this gradient before each update. As highlighted in the script, when $n$ is very large (millions or billions of examples), a single full gradient step already becomes prohibitively slow.
 
 To make learning feasible we approximate this gradient using much smaller **mini-batches**.
 
 ### Mini-batch optimisation and stochastic gradient descent
 
-* Randomly shuffle the training data and split it into $\frac{n}{m}$ **mini-batches** of size $m$, where $m\ll n$ (typically from $1$ to a few hundred).
-* In each step, stochastic gradient descent picks one mini-batch
-  ${(x^{(1)},y^{(1)}),\dots,(x^{(m)},y^{(m)})}$
-  and uses only these $m$ examples to approximate the full gradient: $$\nabla_\theta J(\theta)\approx\sum_{i=1}^m\nabla_\theta\big(y^{(i)}-\hat f_\theta(x^{(i)})\big)^2.$$
-* We then update the parameters using this **stochastic** gradient: $$\theta\leftarrow\theta-\alpha\sum_{i=1}^m\nabla_\theta\big(y^{(i)}-\hat f_\theta(x^{(i)})\big)^2.$$
+-   Randomly shuffle the training data and split it into $\frac{n}{m}$ **mini-batches** of size $m$, where $m\ll n$ (typically from $1$ to a few hundred).
+-   In each step, stochastic gradient descent picks one mini-batch ${(x^{(1)},y^{(1)}),\dots,(x^{(m)},y^{(m)})}$ and uses only these $m$ examples to approximate the full gradient: $$\nabla_\theta J(\theta)\approx\sum_{i=1}^m\nabla_\theta\big(y^{(i)}-\hat f_\theta(x^{(i)})\big)^2.$$
+-   We then update the parameters using this **stochastic** gradient: $$\theta\leftarrow\theta-\alpha\sum_{i=1}^m\nabla_\theta\big(y^{(i)}-\hat f_\theta(x^{(i)})\big)^2.$$
 
 Each mini-batch therefore gives a **noisy estimate** of the true gradient. A single step is not optimal, but it is very fast to compute, and by taking many such steps we still move, on average, in a good descent direction.
 
 ### Intuition and comparison with batch optimisation
 
-* Mini-batch optimisation takes **many small, cheap steps** that are only approximately optimal but can be computed very quickly.
-* Batch optimisation takes **few very accurate steps**, but each requires a pass over all $n$ samples and is therefore much slower and often infeasible for large datasets.
-* In modern applications, many training samples are **similar or redundant** (for example, similar images). Using a mini-batch discards little information while dramatically reducing computation.
-* A **training epoch** is one full sweep over the training set: each observation has appeared in at least one mini-batch update. In practice we run several epochs, letting these noisy updates gradually decrease $J(\theta)$ as the parameters $\theta$ are refined.
+-   Mini-batch optimisation takes **many small, cheap steps** that are only approximately optimal but can be computed very quickly.
+-   Batch optimisation takes **few very accurate steps**, but each requires a pass over all $n$ samples and is therefore much slower and often infeasible for large datasets.
+-   In modern applications, many training samples are **similar or redundant** (for example, similar images). Using a mini-batch discards little information while dramatically reducing computation.
+-   A **training epoch** is one full sweep over the training set: each observation has appeared in at least one mini-batch update. In practice we run several epochs, letting these noisy updates gradually decrease $J(\theta)$ as the parameters $\theta$ are refined.
 
+# Deep learning: Regularization for neural networks
+
+## Parameter initialization
+
+Fitting deep neural networks is a difficult task and the underlying optimisation theory is still not fully understood. In practice, many of the rules used in training are heuristic and require a certain amount of engineering experience. One of the first engineering choices is how to initialise the parameters and preprocess the inputs.
+
+It is usually advisable to standardise all input features so that they have mean zero and unit variance. This ensures that the different coordinates of $x$ are on a comparable scale, which is particularly important when we later apply regularisation: otherwise some inputs would be implicitly penalised more than others simply because they are measured in larger units.
+
+Since the loss $J(\theta)$ is non-convex, the starting values $\theta^{(0)}$ can have a strong influence on the final solution reached by gradient descent.
+
+-   The weights and biases are typically initialised as small random values sampled from a normal or uniform distribution. This breaks symmetry between neurons so that they do not all learn the same features.
+-   If the starting weights are too small, signals can quickly shrink to (almost) zero as they are propagated through many layers, making learning extremely slow or causing gradients to vanish.
+-   If the starting weights are too large, activations and gradients can explode during the forward and backward passes, leading to numerical instability and divergence.
+
+Good initialisation therefore aims for a middle ground: random weights that are large enough to avoid losing signal, but small enough to prevent exploding values. Modern schemes such as Xavier or He initialisation formalise this idea by choosing the variance of the initial weights as a function of the layer width, but the basic principle is the same as in this slide.
+
+## Parameter initialization
+
+Fitting deep neural networks is a difficult task and, as the professor stresses, “an art and an area of research in itself”. The loss $J(\theta)$ is highly non-convex, with many local minima and no closed-form solution for the optimal parameters. Gradient descent will therefore not find **the** global minimum, but just “slides down” to some local minimum near the starting point $\theta^{(0)}$. This is why the initial parameters can strongly influence which solution we end up with and how quickly we get there.
+
+Because of this, there are a few practical rules of thumb:
+
+-   It is usually advisable to **standardise the inputs** to have mean zero and standard deviation one. Then all predictors are on a comparable scale and are “treated equally”, which is particularly important once we add regularisation: the penalty no longer depends on arbitrary units of measurement.
+
+-   Since $J(\theta)$ is non-convex, the **starting values** $\theta^{(0)}$ can have a strong impact on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima.
+
+-   In practice, **weights and biases** are typically initialised as **small random values**, sampled from a normal or uniform distribution centred at zero. Small weights mean that, at the beginning of training, the network behaves almost linearly and activations stay in a reasonable range.
+
+-   If starting weights are **too small**, signals can quickly die out when they are multiplied layer after layer, so information from the input is lost as it propagates through the network. Choosing weights that are a bit larger helps to avoid “losing the signal” during forward and back-propagation.
+
+-   If starting weights are **too large**, the opposite happens: activations and gradients can blow up as they are repeatedly multiplied along the layers, leading to **exploding values** and unstable training.
+
+In modern deep learning there are more sophisticated initialisation schemes (such as Xavier or He initialisation), but they follow the same basic idea: start from random weights that are neither too small nor too large, so that information and gradients can flow through the network without vanishing or exploding, while remembering that, in a non-convex landscape, the chosen starting point matters.
+
+## Regularisation
+
+Typically, a deep neural network has **far too many parameters**. If we really drove gradient descent all the way to the *global* minimum of the training loss $J(\theta)$, the network would usually **overfit**: it would adapt to noise and idiosyncrasies in the training set instead of learning a pattern that generalises. The transcript stresses this point: because the model is so flexible, the issue is not “Can we fit the data?” but “Can we keep the fit from becoming too wiggly and unstable on new data?”.
+
+To make the network more **robust** and to improve its **generalisation performance**, we add **regularisation**. The basic idea is to gently discourage very large weights. Large weights correspond to sharp, highly sensitive decision boundaries; small weights correspond to smoother, more stable functions.
+
+### Parameter penalties
+
+Exactly as in ridge and lasso regression, we modify the objective and minimise a **penalised loss** $$J_{\text{reg}}(\theta) = J(\theta) + \alpha,\Omega(\theta),$$ where $\alpha>0$ is a tuning parameter and $\Omega(\theta)$ is a penalty term that measures the overall size of the parameters. A common choice is an $\ell_2$-type penalty on the weights $$\Omega(\theta) = \sum_{i,j,m} \big(w^{(m)}*{ij}\big)^2,$$ i.e. we sum the squares of all weights $w^{(m)}*{ij}$ across all layers $m$ (often biases are excluded or penalised more weakly). Other norms, such as an $\ell_1$ penalty, are also possible and behave similarly to the lasso by encouraging sparsity in the weights.
+
+Intuitively:
+
+-   $J(\theta)$ wants to fit the **training data** well.
+-   $\Omega(\theta)$ wants the **weights to stay small**, keeping the network simple.
+-   $\alpha$ balances these two forces: large $\alpha$ means *more regularisation* (simpler networks, higher bias, lower variance); small $\alpha$ means *less regularisation* (more flexible networks, lower bias, higher variance).
+
+The interpretation is therefore the same as for regularised linear models: we trade off data fit and model complexity. In practice, $\alpha$ is chosen by **cross-validation**, looking for the value that gives the lowest validation error rather than the lowest training error.
+
+## Dropout
+
+Dropout is a regularisation method in which the **network architecture changes at every gradient step**. Instead of always using the full network, we temporarily “thin” it during training.
+
+Before each forward pass and its corresponding back-propagation, **every non-output neuron is independently switched off with some probability** $q \in [0,1]$. If a neuron is dropped out, its activation is set to zero and none of its outgoing connections contribute in that update. Typical choices are:
+
+- hidden units: $q \approx 0.5$ (each hidden neuron is kept with probability $1-q = 0.5$),
+- input units: $q \approx 0.2$ (each input feature is kept with probability $0.8$).
+
+In practice, dropout means that at each step we sample a slightly different **sub-network** from the full architecture shown in @fig-dropout. In that figure you see all hidden units $z^{(1)},z^{(2)},z^{(3)}$ active; with dropout, some of these blue neurons and some green input units would be “greyed out” (set to zero) for the current mini-batch, so only the remaining paths from inputs to outputs are used in that update.
+
+As the lecturer explains in the script, training with dropout is similar to training a large **ensemble** of many related networks that all share parameters:
+
+- neurons cannot **co-adapt** too strongly, because any particular neighbour might disappear at the next step;
+- the model becomes more **robust**, since a good prediction must be supported by many alternative paths through the network, not by a single fragile connection.
+
+At test time we use the **full network without dropout**, but rescale activations (or equivalently the weights) so that the average activity matches what the network saw during training. In effect, dropout behaves like an inexpensive, built-in ensemble method that regularises deep networks and improves generalisation.
+
+![Dropout during training: in each update step, some non-output neurons are randomly removed, so a different thinned network is used at every iteration.](Images_qmd_ML/ML11_regulariation.png){#fig-dropout width="80%" fig-align="center"}
+
+## Dropout
+
+Dropout is a regularisation method in which the **network structure itself changes at every gradient step**. Instead of always using the full network, we temporarily “thin” it during training.
+
+Before each forward pass (and its corresponding back-propagation), **every non-output neuron is independently dropped with some probability** $q\in[0,1]$. If a neuron is dropped, its activation is set to zero and none of its outgoing connections are used in that update. Typical choices are:
+
+- hidden units: $q \approx 0.5$ (each hidden neuron is kept with probability $1-q = 0.5$),
+- input units: $q \approx 0.2$ (each input feature is kept with probability $0.8$).
+
+In @fig-dropout you can see this “thinning” visually: some input and hidden units are coloured in grey, meaning they are dropped for this step, while the blue units stay active and form the sub-network that actually propagates information from $X_1,\dots,X_4$ to the two responses $Y_1,Y_2$.
+
+This procedure **robustifies the fitting**: because a unit cannot rely on a specific neighbour (that neighbour might be dropped in the next iteration), it must learn to be useful **on its own**, independent of any particular combination of other units. The script emphasises that this forces the network to distribute information more evenly and avoids fragile “co-adaptations” where a small set of neurons only works well together.
+
+A helpful way to think about dropout is as a form of **bagging**:
+
+- At each training step we sample a different sub-network (by dropping a random subset of units).
+- We fit all these thinned networks **in parallel in time**, sharing parameters where units survive.
+- At test time, we use the **full network without dropout**, but rescale activations/weights so that the expected output matches the average over all those sampled sub-networks.
+
+So the final predictor behaves like an **ensemble** that combines the fitted weights with the **dropout probabilities**: it is as if we averaged the predictions of many related networks that saw different subsets of neurons. This ensemble view explains why dropout is such an effective regulariser in deep learning.
+
+![Dropout during training: at each update a random subset of input and hidden units (grey) is dropped, and only the remaining blue sub-network is used to propagate the signal and update the parameters.](Images_qmd_ML/ML11_regularisation_2.png){#fig-dropout width="85%" fig-align="center"}
