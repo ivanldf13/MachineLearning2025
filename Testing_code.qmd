@@ -1117,55 +1117,51 @@ Each mini-batch therefore gives a **noisy estimate** of the true gradient. A sin
 
 ## Parameter initialization
 
-Fitting deep neural networks is a difficult task and, as the professor stresses, “an art and an area of research in itself”. The loss \(J(\theta)\) is highly non-convex, with many local minima and no closed-form solution for the optimal parameters, so gradient descent will typically not find **the** global minimum, but just slide down to some local minimum near the starting point \(\theta^{(0)}\). 
+Fitting deep neural networks is a difficult task and, as the professor stresses, “an art and an area of research in itself”. The loss $J(\theta)$ is highly non-convex, with many local minima and no closed-form solution for the optimal parameters, so gradient descent will typically not find **the** global minimum, but just slide down to some local minimum near the starting point $\theta^{(0)}$.
 
 Because of this, the way we **initialise** the parameters already acts as a first form of regularisation:
 
-- It is usually advisable to **standardise the inputs** so that each predictor has mean zero and standard deviation one. Then all coordinates of \(x=(x_1,\dots,x_p)\) are on a comparable scale and are “treated equally”, which matters especially once we add explicit regularisation. :contentReference[oaicite:2]{index=2}  
+-   It is usually advisable to **standardise the inputs** so that each predictor has mean zero and standard deviation one. Then all coordinates of $x=(x_1,\dots,x_p)$ are on a comparable scale and are “treated equally”, which matters especially once we add explicit regularisation. 
 
-- Since \(J(\theta)\) is non-convex, the **starting values** \(\theta^{(0)}\) can have a strong influence on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima, some of which generalise better than others.   
+-   Since $J(\theta)$ is non-convex, the **starting values** $\theta^{(0)}$ can have a strong influence on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima, some of which generalise better than others.
 
-- A general recommendation in the script is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.   
+-   A general recommendation in the script is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.
 
-  - If the initial weights are **too large**, then in the forward pass repeated linear combinations make activations **explode**: values become huge, the initial predictions are extremely poor, and we may never reach a “reasonable” region of parameter space.  
-  - If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn. :contentReference[oaicite:5]{index=5}  
+    -   If the initial weights are **too large**, then in the forward pass repeated linear combinations make activations **explode**: values become huge, the initial predictions are extremely poor, and we may never reach a “reasonable” region of parameter space.
+    -   If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn. 
 
 Good initialisation therefore aims for a **compromise**: small random weights that are large enough to keep some signal flowing through the layers, but small enough to avoid exploding activations and gradients. Modern schemes (e.g. Xavier, He) formalise this idea by choosing the variance of the initial weights as a function of the layer width, but the basic intuition is exactly the one explained in the video.
 
 ## Regularisation
 
-Deep neural networks have **a huge number of parameters**. If we simply ran gradient descent all the way to (a) minimum of the training loss \(J(\theta)\), the training error would become extremely small, but we would usually **overfit**: the model would adapt to noise and idiosyncrasies of the training set, and its **prediction error** on new data would be poor.   
+Deep neural networks have **a huge number of parameters**. If we simply ran gradient descent all the way to (a) minimum of the training loss $J(\theta)$, the training error would become extremely small, but we would usually **overfit**: the model would adapt to noise and idiosyncrasies of the training set, and its **prediction error** on new data would be poor.
 
 Regularisation explicitly **prevents overfitting**: we sacrifice some training fit in order to improve the **generalisation error** (test error). The script presents several complementary tools:
 
 ### Parameter penalties
 
-As in ridge and lasso regression, we can add a **penalty term** to the loss and minimise the **penalised objective**
-$$J_{\text{reg}}(\theta)=J(\theta)+\alpha\Omega(\theta),$$
-where \(\alpha>0\) is a tuning parameter and \(\Omega(\theta)\) measures the overall size of the parameters. :contentReference[oaicite:7]{index=7}  
+As in ridge and lasso regression, we can add a **penalty term** to the loss and minimise the **penalised objective** $$J_{\text{reg}}(\theta)=J(\theta)+\alpha\Omega(\theta),$$ where $\alpha>0$ is a tuning parameter and $\Omega(\theta)$ measures the overall size of the parameters. 
 
-A common choice is an \(\ell_2\)-type penalty on the weights:
-$$\Omega(\theta)=\sum_{m,i,j}\big(w^{(m)}_{ij}\big)^2,$$
-i.e. we sum the squared values of all weights \(w^{(m)}_{ij}\) over all layers \(m\) and connections \((i,j)\); often biases are excluded or penalised more weakly. This **shrinks the weights towards zero** and makes the network less “wiggly”, in exactly the same spirit as ridge regression. One can also use an \(\ell_1\) penalty to encourage sparsity, but in neural nets we typically care less about exact zero coefficients than we did in lasso, because individual weights have no simple interpretation. :contentReference[oaicite:8]{index=8}  
+A common choice is an $\ell_2$-type penalty on the weights: $$\Omega(\theta)=\sum_{m,i,j}\big(w^{(m)}_{ij}\big)^2,$$ i.e. we sum the squared values of all weights $w^{(m)}_{ij}$ over all layers $m$ and connections $(i,j)$; often biases are excluded or penalised more weakly. This **shrinks the weights towards zero** and makes the network less “wiggly”, in exactly the same spirit as ridge regression. One can also use an $\ell_1$ penalty to encourage sparsity, but in neural nets we typically care less about exact zero coefficients than we did in lasso, because individual weights have no simple interpretation. 
 
 Interpretation:
 
-- \(J(\theta)\) wants to **fit the training data** as well as possible.  
-- \(\Omega(\theta)\) wants the **weights to stay small**, keeping the model simple.  
-- \(\alpha\) balances these two forces: large \(\alpha\) means strong regularisation (simpler networks, higher bias, lower variance); small \(\alpha\) means weak regularisation (very flexible networks, lower bias, higher variance).
+-   $J(\theta)$ wants to **fit the training data** as well as possible.
+-   $\Omega(\theta)$ wants the **weights to stay small**, keeping the model simple.
+-   $\alpha$ balances these two forces: large $\alpha$ means strong regularisation (simpler networks, higher bias, lower variance); small $\alpha$ means weak regularisation (very flexible networks, lower bias, higher variance).
 
-As in other regularised models, \(\alpha\) is typically chosen by **validation or cross-validation**, looking at the behaviour of the **validation error**, not the training error.   
+As in other regularised models, $\alpha$ is typically chosen by **validation or cross-validation**, looking at the behaviour of the **validation error**, not the training error.
 
 ## Dropout
 
-Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**. :contentReference[oaicite:10]{index=10}  
+Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**. 
 
-Before each forward pass (and the corresponding back-propagation), **every non-output neuron is independently dropped with some probability** \(q\in[0,1]\):
+Before each forward pass (and the corresponding back-propagation), **every non-output neuron is independently dropped with some probability** $q\in[0,1]$:
 
-- for hidden units, a typical choice is \(q\approx0.5\) (so each hidden neuron is kept with probability \(0.5\));  
-- for input units, a smaller probability is used, e.g. \(q\approx0.2\) (each input feature is kept with probability \(0.8\)). :contentReference[oaicite:11]{index=11}  
+-   for hidden units, a typical choice is $q\approx0.5$ (so each hidden neuron is kept with probability $0.5$);
+-   for input units, a smaller probability is used, e.g. $q\approx0.2$ (each input feature is kept with probability $0.8$). 
 
-If a unit is dropped, its activation is set to zero and none of its outgoing weights contribute in that update. In that gradient step we pretend that the network **never had** those grey units. We compute the gradient only on the **reduced network**, and only the weights belonging to currently active connections are updated.   
+If a unit is dropped, its activation is set to zero and none of its outgoing weights contribute in that update. In that gradient step we pretend that the network **never had** those grey units. We compute the gradient only on the **reduced network**, and only the weights belonging to currently active connections are updated.
 
 In @fig-dropout-structure you see this visually: the grey input and hidden units are dropped for the current step, while the blue units form the “thinned” network that actually propagates the signal from the inputs to the outputs.
 
@@ -1173,10 +1169,10 @@ In @fig-dropout-structure you see this visually: the grey input and hidden units
 
 This procedure **robustifies the fitting**:
 
-- Each weight that is updated must learn to work **independently of particular neighbours**, because some of those neighbours might vanish in the next iteration.  
-- The network cannot rely on a single fragile pathway; useful information must be distributed across many different paths through the network.   
+-   Each weight that is updated must learn to work **independently of particular neighbours**, because some of those neighbours might vanish in the next iteration.
+-   The network cannot rely on a single fragile pathway; useful information must be distributed across many different paths through the network.
 
-The script then makes a clear analogy to **bagging / random forests**: if we look at the input layer, dropout means some predictors (say \(X_3\)) are simply not used in that step, just like in random forests we exclude some variables in individual trees. Over many gradient steps, we are effectively training **many slightly different networks**, each seeing a different subset of units. :contentReference[oaicite:14]{index=14}  
+The script then makes a clear analogy to **bagging / random forests**: if we look at the input layer, dropout means some predictors (say $X_3$) are simply not used in that step, just like in random forests we exclude some variables in individual trees. Over many gradient steps, we are effectively training **many slightly different networks**, each seeing a different subset of units.
 
 In simple cases one can interpret the final model as a kind of **ensemble average** over all these thinned networks: we combine the fitted weights and the dropout probabilities, just as bagging combines predictions from bootstrap samples. This ensemble view explains why dropout leads to a more **robust final predictor**. @fig-dropout-bagging illustrates this “ensemble of thinned networks” perspective.
 
