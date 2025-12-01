@@ -1117,93 +1117,69 @@ Each mini-batch therefore gives a **noisy estimate** of the true gradient. A sin
 
 ## Parameter initialization
 
-Fitting deep neural networks is a difficult task and the underlying optimisation theory is still not fully understood. In practice, many of the rules used in training are heuristic and require a certain amount of engineering experience. One of the first engineering choices is how to initialise the parameters and preprocess the inputs.
+Fitting deep neural networks is a difficult task and, as the professor stresses, “an art and an area of research in itself”. The loss \(J(\theta)\) is highly non-convex, with many local minima and no closed-form solution for the optimal parameters, so gradient descent will typically not find **the** global minimum, but just slide down to some local minimum near the starting point \(\theta^{(0)}\). 
 
-It is usually advisable to standardise all input features so that they have mean zero and unit variance. This ensures that the different coordinates of $x$ are on a comparable scale, which is particularly important when we later apply regularisation: otherwise some inputs would be implicitly penalised more than others simply because they are measured in larger units.
+Because of this, the way we **initialise** the parameters already acts as a first form of regularisation:
 
-Since the loss $J(\theta)$ is non-convex, the starting values $\theta^{(0)}$ can have a strong influence on the final solution reached by gradient descent.
+- It is usually advisable to **standardise the inputs** so that each predictor has mean zero and standard deviation one. Then all coordinates of \(x=(x_1,\dots,x_p)\) are on a comparable scale and are “treated equally”, which matters especially once we add explicit regularisation. :contentReference[oaicite:2]{index=2}  
 
--   The weights and biases are typically initialised as small random values sampled from a normal or uniform distribution. This breaks symmetry between neurons so that they do not all learn the same features.
--   If the starting weights are too small, signals can quickly shrink to (almost) zero as they are propagated through many layers, making learning extremely slow or causing gradients to vanish.
--   If the starting weights are too large, activations and gradients can explode during the forward and backward passes, leading to numerical instability and divergence.
+- Since \(J(\theta)\) is non-convex, the **starting values** \(\theta^{(0)}\) can have a strong influence on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima, some of which generalise better than others.   
 
-Good initialisation therefore aims for a middle ground: random weights that are large enough to avoid losing signal, but small enough to prevent exploding values. Modern schemes such as Xavier or He initialisation formalise this idea by choosing the variance of the initial weights as a function of the layer width, but the basic principle is the same as in this slide.
+- A general recommendation in the script is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.   
 
-## Parameter initialization
+  - If the initial weights are **too large**, then in the forward pass repeated linear combinations make activations **explode**: values become huge, the initial predictions are extremely poor, and we may never reach a “reasonable” region of parameter space.  
+  - If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn. :contentReference[oaicite:5]{index=5}  
 
-Fitting deep neural networks is a difficult task and, as the professor stresses, “an art and an area of research in itself”. The loss $J(\theta)$ is highly non-convex, with many local minima and no closed-form solution for the optimal parameters. Gradient descent will therefore not find **the** global minimum, but just “slides down” to some local minimum near the starting point $\theta^{(0)}$. This is why the initial parameters can strongly influence which solution we end up with and how quickly we get there.
-
-Because of this, there are a few practical rules of thumb:
-
--   It is usually advisable to **standardise the inputs** to have mean zero and standard deviation one. Then all predictors are on a comparable scale and are “treated equally”, which is particularly important once we add regularisation: the penalty no longer depends on arbitrary units of measurement.
-
--   Since $J(\theta)$ is non-convex, the **starting values** $\theta^{(0)}$ can have a strong impact on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima.
-
--   In practice, **weights and biases** are typically initialised as **small random values**, sampled from a normal or uniform distribution centred at zero. Small weights mean that, at the beginning of training, the network behaves almost linearly and activations stay in a reasonable range.
-
--   If starting weights are **too small**, signals can quickly die out when they are multiplied layer after layer, so information from the input is lost as it propagates through the network. Choosing weights that are a bit larger helps to avoid “losing the signal” during forward and back-propagation.
-
--   If starting weights are **too large**, the opposite happens: activations and gradients can blow up as they are repeatedly multiplied along the layers, leading to **exploding values** and unstable training.
-
-In modern deep learning there are more sophisticated initialisation schemes (such as Xavier or He initialisation), but they follow the same basic idea: start from random weights that are neither too small nor too large, so that information and gradients can flow through the network without vanishing or exploding, while remembering that, in a non-convex landscape, the chosen starting point matters.
+Good initialisation therefore aims for a **compromise**: small random weights that are large enough to keep some signal flowing through the layers, but small enough to avoid exploding activations and gradients. Modern schemes (e.g. Xavier, He) formalise this idea by choosing the variance of the initial weights as a function of the layer width, but the basic intuition is exactly the one explained in the video.
 
 ## Regularisation
 
-Typically, a deep neural network has **far too many parameters**. If we really drove gradient descent all the way to the *global* minimum of the training loss $J(\theta)$, the network would usually **overfit**: it would adapt to noise and idiosyncrasies in the training set instead of learning a pattern that generalises. The transcript stresses this point: because the model is so flexible, the issue is not “Can we fit the data?” but “Can we keep the fit from becoming too wiggly and unstable on new data?”.
+Deep neural networks have **a huge number of parameters**. If we simply ran gradient descent all the way to (a) minimum of the training loss \(J(\theta)\), the training error would become extremely small, but we would usually **overfit**: the model would adapt to noise and idiosyncrasies of the training set, and its **prediction error** on new data would be poor.   
 
-To make the network more **robust** and to improve its **generalisation performance**, we add **regularisation**. The basic idea is to gently discourage very large weights. Large weights correspond to sharp, highly sensitive decision boundaries; small weights correspond to smoother, more stable functions.
+Regularisation explicitly **prevents overfitting**: we sacrifice some training fit in order to improve the **generalisation error** (test error). The script presents several complementary tools:
 
 ### Parameter penalties
 
-Exactly as in ridge and lasso regression, we modify the objective and minimise a **penalised loss** $$J_{\text{reg}}(\theta) = J(\theta) + \alpha,\Omega(\theta),$$ where $\alpha>0$ is a tuning parameter and $\Omega(\theta)$ is a penalty term that measures the overall size of the parameters. A common choice is an $\ell_2$-type penalty on the weights $$\Omega(\theta) = \sum_{i,j,m} \big(w^{(m)}*{ij}\big)^2,$$ i.e. we sum the squares of all weights $w^{(m)}*{ij}$ across all layers $m$ (often biases are excluded or penalised more weakly). Other norms, such as an $\ell_1$ penalty, are also possible and behave similarly to the lasso by encouraging sparsity in the weights.
+As in ridge and lasso regression, we can add a **penalty term** to the loss and minimise the **penalised objective**
+$$J_{\text{reg}}(\theta)=J(\theta)+\alpha\Omega(\theta),$$
+where \(\alpha>0\) is a tuning parameter and \(\Omega(\theta)\) measures the overall size of the parameters. :contentReference[oaicite:7]{index=7}  
 
-Intuitively:
+A common choice is an \(\ell_2\)-type penalty on the weights:
+$$\Omega(\theta)=\sum_{m,i,j}\big(w^{(m)}_{ij}\big)^2,$$
+i.e. we sum the squared values of all weights \(w^{(m)}_{ij}\) over all layers \(m\) and connections \((i,j)\); often biases are excluded or penalised more weakly. This **shrinks the weights towards zero** and makes the network less “wiggly”, in exactly the same spirit as ridge regression. One can also use an \(\ell_1\) penalty to encourage sparsity, but in neural nets we typically care less about exact zero coefficients than we did in lasso, because individual weights have no simple interpretation. :contentReference[oaicite:8]{index=8}  
 
--   $J(\theta)$ wants to fit the **training data** well.
--   $\Omega(\theta)$ wants the **weights to stay small**, keeping the network simple.
--   $\alpha$ balances these two forces: large $\alpha$ means *more regularisation* (simpler networks, higher bias, lower variance); small $\alpha$ means *less regularisation* (more flexible networks, lower bias, higher variance).
+Interpretation:
 
-The interpretation is therefore the same as for regularised linear models: we trade off data fit and model complexity. In practice, $\alpha$ is chosen by **cross-validation**, looking for the value that gives the lowest validation error rather than the lowest training error.
+- \(J(\theta)\) wants to **fit the training data** as well as possible.  
+- \(\Omega(\theta)\) wants the **weights to stay small**, keeping the model simple.  
+- \(\alpha\) balances these two forces: large \(\alpha\) means strong regularisation (simpler networks, higher bias, lower variance); small \(\alpha\) means weak regularisation (very flexible networks, lower bias, higher variance).
 
-## Dropout
-
-Dropout is a regularisation method in which the **network architecture changes at every gradient step**. Instead of always using the full network, we temporarily “thin” it during training.
-
-Before each forward pass and its corresponding back-propagation, **every non-output neuron is independently switched off with some probability** $q \in [0,1]$. If a neuron is dropped out, its activation is set to zero and none of its outgoing connections contribute in that update. Typical choices are:
-
-- hidden units: $q \approx 0.5$ (each hidden neuron is kept with probability $1-q = 0.5$),
-- input units: $q \approx 0.2$ (each input feature is kept with probability $0.8$).
-
-In practice, dropout means that at each step we sample a slightly different **sub-network** from the full architecture shown in @fig-dropout. In that figure you see all hidden units $z^{(1)},z^{(2)},z^{(3)}$ active; with dropout, some of these blue neurons and some green input units would be “greyed out” (set to zero) for the current mini-batch, so only the remaining paths from inputs to outputs are used in that update.
-
-As the lecturer explains in the script, training with dropout is similar to training a large **ensemble** of many related networks that all share parameters:
-
-- neurons cannot **co-adapt** too strongly, because any particular neighbour might disappear at the next step;
-- the model becomes more **robust**, since a good prediction must be supported by many alternative paths through the network, not by a single fragile connection.
-
-At test time we use the **full network without dropout**, but rescale activations (or equivalently the weights) so that the average activity matches what the network saw during training. In effect, dropout behaves like an inexpensive, built-in ensemble method that regularises deep networks and improves generalisation.
-
-![Dropout during training: in each update step, some non-output neurons are randomly removed, so a different thinned network is used at every iteration.](Images_qmd_ML/ML11_regulariation.png){#fig-dropout width="80%" fig-align="center"}
+As in other regularised models, \(\alpha\) is typically chosen by **validation or cross-validation**, looking at the behaviour of the **validation error**, not the training error.   
 
 ## Dropout
 
-Dropout is a regularisation method in which the **network structure itself changes at every gradient step**. Instead of always using the full network, we temporarily “thin” it during training.
+Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**. :contentReference[oaicite:10]{index=10}  
 
-Before each forward pass (and its corresponding back-propagation), **every non-output neuron is independently dropped with some probability** $q\in[0,1]$. If a neuron is dropped, its activation is set to zero and none of its outgoing connections are used in that update. Typical choices are:
+Before each forward pass (and the corresponding back-propagation), **every non-output neuron is independently dropped with some probability** \(q\in[0,1]\):
 
-- hidden units: $q \approx 0.5$ (each hidden neuron is kept with probability $1-q = 0.5$),
-- input units: $q \approx 0.2$ (each input feature is kept with probability $0.8$).
+- for hidden units, a typical choice is \(q\approx0.5\) (so each hidden neuron is kept with probability \(0.5\));  
+- for input units, a smaller probability is used, e.g. \(q\approx0.2\) (each input feature is kept with probability \(0.8\)). :contentReference[oaicite:11]{index=11}  
 
-In @fig-dropout you can see this “thinning” visually: some input and hidden units are coloured in grey, meaning they are dropped for this step, while the blue units stay active and form the sub-network that actually propagates information from $X_1,\dots,X_4$ to the two responses $Y_1,Y_2$.
+If a unit is dropped, its activation is set to zero and none of its outgoing weights contribute in that update. In that gradient step we pretend that the network **never had** those grey units. We compute the gradient only on the **reduced network**, and only the weights belonging to currently active connections are updated.   
 
-This procedure **robustifies the fitting**: because a unit cannot rely on a specific neighbour (that neighbour might be dropped in the next iteration), it must learn to be useful **on its own**, independent of any particular combination of other units. The script emphasises that this forces the network to distribute information more evenly and avoids fragile “co-adaptations” where a small set of neurons only works well together.
+In @fig-dropout-structure you see this visually: the grey input and hidden units are dropped for the current step, while the blue units form the “thinned” network that actually propagates the signal from the inputs to the outputs.
 
-A helpful way to think about dropout is as a form of **bagging**:
+![Dropout in one gradient step: grey units are dropped and only the blue “thinned network” is used for forward and backward passes.](Images_qmd_ML/ML11_regulariation.png){#fig-dropout-structure width="75%" fig-align="center"}
 
-- At each training step we sample a different sub-network (by dropping a random subset of units).
-- We fit all these thinned networks **in parallel in time**, sharing parameters where units survive.
-- At test time, we use the **full network without dropout**, but rescale activations/weights so that the expected output matches the average over all those sampled sub-networks.
+This procedure **robustifies the fitting**:
 
-So the final predictor behaves like an **ensemble** that combines the fitted weights with the **dropout probabilities**: it is as if we averaged the predictions of many related networks that saw different subsets of neurons. This ensemble view explains why dropout is such an effective regulariser in deep learning.
+- Each weight that is updated must learn to work **independently of particular neighbours**, because some of those neighbours might vanish in the next iteration.  
+- The network cannot rely on a single fragile pathway; useful information must be distributed across many different paths through the network.   
 
-![Dropout during training: at each update a random subset of input and hidden units (grey) is dropped, and only the remaining blue sub-network is used to propagate the signal and update the parameters.](Images_qmd_ML/ML11_regularisation_2.png){#fig-dropout width="85%" fig-align="center"}
+The script then makes a clear analogy to **bagging / random forests**: if we look at the input layer, dropout means some predictors (say \(X_3\)) are simply not used in that step, just like in random forests we exclude some variables in individual trees. Over many gradient steps, we are effectively training **many slightly different networks**, each seeing a different subset of units. :contentReference[oaicite:14]{index=14}  
+
+In simple cases one can interpret the final model as a kind of **ensemble average** over all these thinned networks: we combine the fitted weights and the dropout probabilities, just as bagging combines predictions from bootstrap samples. This ensemble view explains why dropout leads to a more **robust final predictor**. @fig-dropout-bagging illustrates this “ensemble of thinned networks” perspective.
+
+![Dropout as an implicit ensemble: across many training steps, different thinned networks are fitted, and the final predictor behaves like an average over these models.](Images_qmd_ML/ML11_regularisation_2.png){#fig-dropout-bagging width="80%" fig-align="center"}
+
+At **test time** we use the **full network without dropout**, but rescale activations or weights so that the expected activation of each unit matches what it saw during training. Operationally, dropout behaves like a cheap built-in ensemble method that regularises deep networks and improves generalisation.
