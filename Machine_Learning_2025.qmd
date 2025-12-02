@@ -804,7 +804,7 @@ By using basis functions, we can bend or reshape the linear model to capture mor
 
 In least squares regression, we often minimise the residual sum of squares (RSS) to estimate the coefficients. Here, for simplicity, we fix $\beta_1$ to its true value $\beta_1^*$ and only estimate $\beta_0$ by least squares.
 
-In gradient descent, the **cost function** (often denoted as $J(\theta)$ or $L(\theta)$) is the mathematical expression that measures how wrong the model is — that is, how far the model’s predictions are from the true values. It tells us how costly a particular choice of parameters $\theta$ (like $\beta_0$, $\beta_1$, …) is.
+In gradient descent, the **cost function** (often denoted as $J(\theta)$ or $L(\theta)$) is the mathematical expression that measures how wrong the model is, that is, how far the model’s predictions are from the true values. It tells us how costly a particular choice of parameters $\theta$ (like $\beta_0$, $\beta_1$, …) is.
 
 The goal of gradient descent is to find the parameters $\theta$ that **minimise the cost function**, i.e., make the model as accurate as possible. In this case, to find the value of $\beta_0$ that minimises $$\hat{\beta}_0 = \arg\min_{\beta_0 \in \mathbb{R}} \text{RSS}(\beta_0) = \arg\min_{\beta_0 \in \mathbb{R}} J(\beta_0)$$
 

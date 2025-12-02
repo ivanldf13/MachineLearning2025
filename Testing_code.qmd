@@ -932,19 +932,19 @@ Even this “simple” architecture already has a large number of parameters. Ea
 
 ## Loss functions for neural networks
 
-Neural networks are non-linear parametric prediction models. All weights and biases that transform one layer into the next can be collected into a single long parameter vector $\theta$, even if this vector has thousands or hundreds of thousands of entries. For a fixed $\theta$ the network defines a predictive function, which we denote by $f$. In regression we usually write $f(x)$ and keep in mind that it depends on $\theta$, while in classification with $q$ terminal neurons the network outputs $q$ functions $f_1(x),\dots,f_q(x)$, one for each class probability.
+Neural networks are non-linear parametric models. All weight matrices and bias vectors that transform one layer into the next are collected into a single parameter vector $$\theta=(W^{(1)},\dots,W^{(M+1)},b^{(1)},\dots,b^{(M+1)}).$$ For a fixed $\theta$ the network defines a predictive model; in regression we denote it by $\hat{f}=\hat{f}_\theta$, and in classification with $q$ classes by $\hat{f}_1,\dots,\hat{f}_q$, where $\hat{f}_j(x)$ is the predicted probability of class $j$.
 
-Given training data $(x_1,y_1),\dots,(x_n,y_n)$, we define a loss function $J(\theta)$ that measures how well the network predicts the responses on the whole training set. This $J(\theta)$ is our objective function: if we change $\theta$, the neural network changes, the predictions $f(x_i)$ change, and therefore the value of $J(\theta)$ changes.
+Given training data $(x_1,y_1),\dots,(x_n,y_n)$, we define a loss function $J(\theta)$ that measures how well the network predicts all responses on the training set. Changing $\theta$ changes the predictions $\hat{f}_\theta(x_i)$ (or $\hat{f}_j(x_i)$) and therefore changes the value of $J(\theta)$.
 
-For regression, where the $y_i$ are quantitative, we use the usual squared-error loss and define the residual sum of squares $$J(\theta)=\sum_{i=1}^n\big(y_i-f(x_i)\big)^2.$$ This is just the squared error iterated over all training samples, comparing each true response to the prediction from the neural network.
+For regression, where $y_i\in\mathbb{R}$, we use the squared-error loss and define $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat{f}_\theta(x_i)\big)^2.$$
 
-For classification with $q$ classes, $y_i\in\{1,\dots,q\}$, we use the cross-entropy (deviance) loss known from multinomial logistic regression, $$J(\theta)=-\sum_{i=1}^n\sum_{j=1}^q I\{y_i=j\}\log f_j(x_i).$$ Here $I\{y_i=j\}$ is the indicator of the true class. For each observation this loss takes the log-probability that the network assigns to the true class and sums it over all training samples. Minimising $J(\theta)$ in this case is equivalent to maximum likelihood estimation of a classifier with class probabilities given by the neural network.
+For classification with $q$ classes, $y_i\in\{1,\dots,q\}$, we use the cross-entropy (deviance) loss $$J(\theta)=-\sum_{i=1}^n\sum_{j=1}^q I\{y_i=j\}\log\hat{f}_j(x_i),$$ which is the negative log-likelihood of the multinomial model with class probabilities given by the network outputs $\hat{f}_1(x),\dots,\hat{f}_q(x)$.
 
 ## Fitting of neural networks
 
-Fitting a neural network means choosing the parameter vector $\theta$ (all weights and biases stacked into one long vector) so that the loss $J(\theta)$ is small on the training data. As the lecturer stresses, this is really an art and an active research topic in its own right. The loss $J(\theta)$ is a highly non-linear, non-convex function of very many parameters, so there is no closed-form solution: we cannot simply write down the optimal $\theta$ as we did for linear regression.
+Fitting a neural network means choosing the parameter vector $\theta$ (all weights and biases stacked into one long vector) so that the loss $J(\theta)$ is small on the training data. This is essentially an art and remains an active area of research. The loss $J(\theta)$ is a highly non-linear, non-convex function of very many parameters, so there is no closed-form solution: we cannot simply write down the optimal $\theta$ as we did for linear regression.
 
-You should picture $J(\theta)$ as a complicated surface over a huge parameter space. In low dimension we might draw a bumpy landscape with many valleys and ridges; in reality the neural network lives in a very high-dimensional version of this picture. Because we have so many parameters, the true global (or even very deep local) minimum of $J(\theta)$ would typically correspond to overfitting the training data: the network can adapt too closely to idiosyncrasies and noise. In practice we are not trying to find that global minimum. Instead, we will later control overfitting with tools such as regularisation and early stopping and be satisfied with parameter values that give a good fit without memorising the data.
+It is helpful to picture $J(\theta)$ as a complicated surface over a huge parameter space. In low dimension we might draw a bumpy landscape with many valleys and ridges; in reality the neural network lives in a very high-dimensional version of this picture. Because there are so many parameters, the true global (or even very deep local) minimum of $J(\theta)$ would typically correspond to overfitting the training data: the network can adapt too closely to idiosyncrasies and noise. In practice we are not aiming for that global minimum. Instead, we will later control overfitting with tools such as regularisation and early stopping and be satisfied with parameter values that give a good fit without memorising the data.
 
 For now, the question is how we can improve an initial model using gradient descent. We start from some arbitrary initial parameter vector $\theta^{(0)}$ and move step by step down the loss surface.
 
@@ -953,10 +953,12 @@ For now, the question is how we can improve an initial model using gradient desc
 1.  Start with an arbitrary initial value $\theta^{(0)}$.
 2.  For iterations $i=1,2,\dots$:
     1.  Compute the gradient (derivative) of the loss at the current parameters, $$\nabla_\theta J(\theta^{(i-1)})=\left.\frac{\partial J(\theta)}{\partial \theta}\right|_{\theta=\theta^{(i-1)}}.$$
-    2.  Update the parameters with learning rate $\alpha>0$, $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
+    2.  Update the parameters with learning rate $\alpha>0$,[^3] $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
 3.  Stop when a suitable stopping criterion is satisfied (for example, after a fixed number of iterations or when the loss stops improving).
 
-Intuitively, each step looks at the current model, asks in which direction in parameter space $J(\theta)$ decreases fastest, and moves a small distance in that direction. The lecturer emphasises that this algorithm itself is standard; what is specific to neural networks is how we obtain the gradient efficiently for such a complex model. Thus, all we really need in order to fit a neural network by gradient descent are the gradients $\nabla_\theta J(\theta)$, which will be provided by the backpropagation algorithm.
+[^3]: $\alpha$ is the learning rate (step size) in gradient descent: it controls how far we move in the direction of the negative gradient at each update. A large $\alpha$ gives big, potentially unstable steps, while a small $\alpha$ yields slow but more stable progress.
+
+Intuitively, each step looks at the current model, determines in which direction in parameter space $J(\theta)$ decreases fastest, and moves a small distance in that direction. The gradient descent algorithm itself is completely standard; what is special in the neural-network setting is how we obtain the gradient efficiently for such a complex model. In essence, to fit a neural network by gradient descent we “only” need the gradients $\nabla_\theta J(\theta)$, and these are supplied by the back-propagation algorithm.
 
 ## Computing the gradient: back-propagation
 
@@ -971,11 +973,23 @@ Recall the chain rule for two functions $f$ and $g$. If we define $h(x)=f(g(x))$
 \cdot
 \left.\frac{\partial g(x)}{\partial x}\right|_{x=x_0}.$$ In short-hand notation, if we set $z=g(x)$, this becomes $$\frac{\partial h}{\partial x}=\frac{\partial h}{\partial z}\cdot\frac{\partial z}{\partial x}.$$
 
+Interpretation:
+
+1.  See how $h$ changes when $z$ changes ($\partial h/\partial z$).
+
+2.  See how $z$ changes when $x$ changes ($\partial z/\partial x$).
+
+3.  Multiply them to get how $h$ changes when $x$ changes.
+
 The key idea for back-propagation is to apply this rule repeatedly along the layers of the network, but **from the output back to the input**. We first differentiate the loss with respect to the final output $f_\theta(x)$, then propagate this derivative backwards through the last layer, then through the previous layer, and so on, each time multiplying by the relevant local derivative. In this way we reuse intermediate quantities and avoid recomputing the same derivatives many times. This is what makes back-propagation an efficient method for obtaining the gradients needed in gradient descent for neural networks.
+
+In other words, back-propagation goes from the output layer to the input layer, using the chain rule to compute how the loss changes with respect to each layer’s activations and weights, reusing intermediate results so we don’t recompute the same derivatives again and again. This makes gradient computation efficient.
 
 ## Back-propagation: the forward pass
 
-To compute the gradient for a given parameter vector $\theta$ it is convenient to look at one training pair $(x,y)$ at a time. We fix a single input vector $x=(x_1,\dots,x_p)$ and its target $y$, together with the current weights and biases collected in $\theta$. For this fixed $\theta$ we first run a **forward pass** through the network in order to know the activation value of every hidden neuron and the final prediction.
+The forward pass takes a fixed parameter vector $\theta$ and a single training pair $(x,y)$, sends $x$ from the input layer through all hidden layers to the output, computes the prediction $\hat{y}$ and its loss against $y$, and stores all intermediate activations. These stored activations are exactly what back-propagation will use later to compute gradients efficiently.
+
+To compute the gradient for a given parameter vector $\theta$ it is convenient to look at one training pair $(x,y)$ at a time. We fix a single input vector $x = (x_1,\dots,x_p)$ and its target $y$, together with the current weights and biases collected in $\theta$. For this fixed $\theta$ we first run a **forward pass** through the network in order to compute the activation value of every hidden neuron and the final prediction.
 
 Starting from the input layer, the activations of the hidden units are computed exactly as in the definition of the network. For a single hidden layer with activation function $g$ this means\
 $$z=g\big(b^{(1)}+W^{(1)}x\big),$$ where $W^{(1)}$ and $b^{(1)}$ are the weights and biases of the first layer and $z$ collects the hidden activations. The output neuron then combines these hidden activations linearly to form the prediction $$\hat{y}=f_\theta(x)=b^{(2)}+w^{(2)\top}z.$$
@@ -992,6 +1006,8 @@ Conceptually, the forward pass in @fig-backprop-forward takes the fixed input $x
 These forward computations provide all the activations that back-propagation will differentiate with respect to the parameters in the backward pass.
 
 ![Forward pass for one training example $(x,y)$: the input is propagated through the hidden layer to the output and the loss $L(\theta)$ is computed.](Images_qmd_ML/ML11_back-prop.png){#fig-backprop-forward width="70%" fig-align="center"}
+
+As a side product we also get the activations of the hidden layers.
 
 ## Back-propagation
 
@@ -1044,7 +1060,7 @@ For the first-layer weights we found $$\frac{\partial L}{\partial w^{(1)}_{ij}}
 
 The quantities $\delta^{(2)}$ and $\delta^{(1)}_i$ are the **errors** associated with the output neuron and the $i$-th hidden neuron, respectively. They satisfy the simple relationship $$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big),$$ which is exactly the expression on the slide: the error at a hidden node is the error at the next layer, multiplied by the connecting weight and by the derivative of the activation at that node.
 
-For the ReLU activation $g(x)=\max\{0,x\}$ we have $$g'(x)=\mathbf{1}\{x>0\},$$ so the hidden error $\delta^{(1)}_i$ is either zero (if the neuron is inactive) or proportional to $\delta^{(2)}w^{(2)}_i$ (if the neuron is active).
+For the ReLU activation $g(x)=\max\{0,x\}$ we have $$g'(x)={1}\{x>0\},$$ so the hidden error $\delta^{(1)}_i$ is either zero (if the neuron is inactive) or proportional to $\delta^{(2)}w^{(2)}_i$ (if the neuron is active).
 
 ### Two-pass back-propagation algorithm
 
@@ -1055,10 +1071,10 @@ With this delta notation, back-propagation is implemented as a **two-pass algori
 
 2.  **Backward pass.**
 
-    -   Compute the output error $\delta^{(2)}=2(\hat{y}-y)$.\
+    -   Compute the output error $\delta^{(2)}=2(\hat{y}-y)$.
     -   Use the recursion\
         $$\delta^{(1)}_i=\delta^{(2)}\cdot w^{(2)}_i\cdot g'\big(b^{(1)}_i+w^{(1)\top}_i x\big)$$\
-        to obtain the hidden errors $\delta^{(1)}_i$.\
+        to obtain the hidden errors $\delta^{(1)}_i$.
     -   Finally compute the gradients $$\frac{\partial L}{\partial w^{(2)}_i}=\delta^{(2)}z_i,\qquad
           \frac{\partial L}{\partial w^{(1)}_{ij}}=\delta^{(1)}_i x_j.$$
 
@@ -1121,14 +1137,14 @@ Fitting deep neural networks is a difficult task and, as the professor stresses,
 
 Because of this, the way we **initialise** the parameters already acts as a first form of regularisation:
 
--   It is usually advisable to **standardise the inputs** so that each predictor has mean zero and standard deviation one. Then all coordinates of $x=(x_1,\dots,x_p)$ are on a comparable scale and are “treated equally”, which matters especially once we add explicit regularisation. 
+-   It is usually advisable to **standardise the inputs** so that each predictor has mean zero and standard deviation one. Then all coordinates of $x=(x_1,\dots,x_p)$ are on a comparable scale and are “treated equally”, which matters especially once we add explicit regularisation.
 
 -   Since $J(\theta)$ is non-convex, the **starting values** $\theta^{(0)}$ can have a strong influence on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima, some of which generalise better than others.
 
 -   A general recommendation in the script is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.
 
     -   If the initial weights are **too large**, then in the forward pass repeated linear combinations make activations **explode**: values become huge, the initial predictions are extremely poor, and we may never reach a “reasonable” region of parameter space.
-    -   If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn. 
+    -   If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn.
 
 Good initialisation therefore aims for a **compromise**: small random weights that are large enough to keep some signal flowing through the layers, but small enough to avoid exploding activations and gradients. Modern schemes (e.g. Xavier, He) formalise this idea by choosing the variance of the initial weights as a function of the layer width, but the basic intuition is exactly the one explained in the video.
 
@@ -1140,9 +1156,9 @@ Regularisation explicitly **prevents overfitting**: we sacrifice some training f
 
 ### Parameter penalties
 
-As in ridge and lasso regression, we can add a **penalty term** to the loss and minimise the **penalised objective** $$J_{\text{reg}}(\theta)=J(\theta)+\alpha\Omega(\theta),$$ where $\alpha>0$ is a tuning parameter and $\Omega(\theta)$ measures the overall size of the parameters. 
+As in ridge and lasso regression, we can add a **penalty term** to the loss and minimise the **penalised objective** $$J_{\text{reg}}(\theta)=J(\theta)+\alpha\Omega(\theta),$$ where $\alpha>0$ is a tuning parameter and $\Omega(\theta)$ measures the overall size of the parameters.
 
-A common choice is an $\ell_2$-type penalty on the weights: $$\Omega(\theta)=\sum_{m,i,j}\big(w^{(m)}_{ij}\big)^2,$$ i.e. we sum the squared values of all weights $w^{(m)}_{ij}$ over all layers $m$ and connections $(i,j)$; often biases are excluded or penalised more weakly. This **shrinks the weights towards zero** and makes the network less “wiggly”, in exactly the same spirit as ridge regression. One can also use an $\ell_1$ penalty to encourage sparsity, but in neural nets we typically care less about exact zero coefficients than we did in lasso, because individual weights have no simple interpretation. 
+A common choice is an $\ell_2$-type penalty on the weights: $$\Omega(\theta)=\sum_{m,i,j}\big(w^{(m)}_{ij}\big)^2,$$ i.e. we sum the squared values of all weights $w^{(m)}_{ij}$ over all layers $m$ and connections $(i,j)$; often biases are excluded or penalised more weakly. This **shrinks the weights towards zero** and makes the network less “wiggly”, in exactly the same spirit as ridge regression. One can also use an $\ell_1$ penalty to encourage sparsity, but in neural nets we typically care less about exact zero coefficients than we did in lasso, because individual weights have no simple interpretation.
 
 Interpretation:
 
@@ -1154,12 +1170,12 @@ As in other regularised models, $\alpha$ is typically chosen by **validation or 
 
 ## Dropout
 
-Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**. 
+Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**.
 
 Before each forward pass (and the corresponding back-propagation), **every non-output neuron is independently dropped with some probability** $q\in[0,1]$:
 
 -   for hidden units, a typical choice is $q\approx0.5$ (so each hidden neuron is kept with probability $0.5$);
--   for input units, a smaller probability is used, e.g. $q\approx0.2$ (each input feature is kept with probability $0.8$). 
+-   for input units, a smaller probability is used, e.g. $q\approx0.2$ (each input feature is kept with probability $0.8$).
 
 If a unit is dropped, its activation is set to zero and none of its outgoing weights contribute in that update. In that gradient step we pretend that the network **never had** those grey units. We compute the gradient only on the **reduced network**, and only the weights belonging to currently active connections are updated.
 
