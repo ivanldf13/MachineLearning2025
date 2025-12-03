@@ -1195,3 +1195,271 @@ In simple cases one can interpret the final model as a kind of **ensemble averag
 ![Dropout as an implicit ensemble: across many training steps, different thinned networks are fitted, and the final predictor behaves like an average over these models.](Images_qmd_ML/ML11_regularisation_2.png){#fig-dropout-bagging width="80%" fig-align="center"}
 
 At **test time** we use the **full network without dropout**, but rescale activations or weights so that the expected activation of each unit matches what it saw during training. Operationally, dropout behaves like a cheap built-in ensemble method that regularises deep networks and improves generalisation.
+
+# Deep learning: Convolutional neural networks
+
+## Image recognition: CIFAR-10
+
+To illustrate convolutional networks, we will work with the CIFAR-10 data set, a standard benchmark for image recognition. It consists of 60 000 colour images of size $(32 \times 32)$ pixels, each belonging to one of 10 object classes: $$ \mathcal{G} = \{\text{airplane}, \text{automobile}, \text{bird}, \text{cat}, \text{deer}, \text{dog}, \text{frog}, \text{horse}, \text{ship}, \text{truck}\}. $$
+
+Each image has **three colour channels** (red, green, blue). At every pixel we therefore store three intensity values, one per channel. If we ignore the spatial structure and simply stack all pixel values into a single vector, the predictor dimension would be $$ p = 32 \times 32 \times 3 = 1024. $$
+
+So each tiny CIFAR-10 image is already a 1024-dimensional point in input space. Many images are also quite ambiguous or noisy, making them challenging to classify even for humans. Some examples are shown in @fig-cifar10-examples. Yet modern convolutional neural networks, which explicitly exploit the 2D image structure and local patterns (edges, textures, shapes), reach test accuracies above 95 %. CIFAR-10 is therefore a convenient running example: small enough to train models quickly, but rich enough to show why specialised architectures for images are needed.
+
+![Examples of CIFAR-10 images](Images_qmd_ML/ML12_imag.png){#fig-cifar10-examples width="80%" fig-align="center"}
+
+## A dense neural network
+
+For the CIFAR-10 data set, each image is represented by $(p = 1024)$ predictors (32 × 32 pixels × 3 colour channels).
+
+A **dense** (fully connected) neural network connects every neuron in one layer to every neuron in the next, each connection having its own weight. If we build a dense network for CIFAR-10 with hidden layers of size 1024, then each dense layer contains roughly $$ 1024 \times 1024 \approx 10^6 $$ weights, plus biases. So each layer has about one million parameters, and the full network has several million.
+
+This creates two main problems:
+
+-   **Computational cost:** backpropagation has to update millions of parameters at every training step.
+-   **Overfitting:** with only 60 000 training images, the model has far more parameters than observations and can easily memorise the training set instead of learning patterns that generalise.
+
+As illustrated in @fig-dense-cifar, this architecture also ignores the spatial structure of images: the pixels are simply stacked into a long vector $X_1,\dots,X_{1024}$, and the network learns separate weights for each connection. This motivates convolutional neural networks, which drastically reduce the number of parameters by sharing weights and by explicitly exploiting locality in images.
+
+![Dense fully connected neural network for CIFAR-10 classification](Images_qmd_ML/ML12_dense.png){#fig-dense-cifar width="80%" fig-align="center"}
+
+## Spatial structures in image data
+
+So far we have treated images as long predictor vectors $X_1,\dots,X_{1024}$ and used generic regularisation (ridge, dropout, etc.) to fight overfitting. For image data, however, we have extra **domain knowledge** we can exploit: there is a natural **spatial structure** in the predictors. Neighbouring pixels in an image tend to look similar, while pixels that are far apart are usually less related.
+
+A very effective way to regularise a neural network is therefore to **decrease the number of parameters in its architecture**, using this spatial structure. Instead of learning completely separate weights for every pixel–neuron pair, we can **share parameters** across locations that “play the same role” in different parts of the image (e.g. all local $3 \times 3$ patches). This reduces model complexity and builds in the prior belief that local patterns (edges, corners, small shapes) repeat across the image.
+
+![CIFAR-10 car example illustrating spatial structure in neighbouring pixels](Images_qmd_ML/ML12_spatial_car.png){#fig-spatial-car width="45%" fig-align="center"}
+
+In the CIFAR-10 car image shown in @fig-spatial-car, for example, neighbouring pixels along the car roof or the road are very similar, whereas a pixel on the sky and a pixel on a tyre are quite different. Convolutional neural networks make this intuition explicit in their architecture: they use local filters that look at small neighbourhoods of pixels and **reuse the same filter weights across the whole image**, achieving parameter sharing and exploiting spatial structure at the same time.
+
+## Convolutional neural networks
+
+Convolutional neural networks (CNNs) are **deep neural networks** with many hidden layers, designed specifically to exploit the spatial structure of image data.
+
+The key idea is that hidden layers no longer all have to be of the same **dense/fully connected** type. So far we only know dense layers, where every neuron is connected to all neurons of the previous layer with its own weight. CNNs introduce other layer types in which:
+
+-   different operations are applied, and/or
+-   **parameter sharing** is used instead of separate weights for every connection.
+
+Among these, the most important are **convolutional layers**, whose role is to extract **local image features** (such as edges or small patterns). Conceptually, a convolutional layer is built from three stages:
+
+a)  **Convolution stage:** linear filtering with small local kernels to produce feature maps
+b)  **Activation stage:** a non-linearity (typically ReLU) applied pointwise to these feature maps;
+c)  **Pooling stage:** a downsampling step (e.g. max pooling) that aggregates nearby activations.
+
+In the following slides we will study each of these stages in detail and see how stacking such layers allows CNNs to learn increasingly complex visual features.
+
+## The convolutional stage
+
+The first stage of a convolutional layer is the **convolution operation**. It takes a small local patch of the image, called the **receptive field** (for example a $3 \times 3$ block of pixels), and combines its values linearly into a single score. The weights of this linear combination form a **filter** (or kernel).
+
+In the illustration @fig-conv-stage, the left grid is the input image $I$, the middle grid is a $3 \times 3$ filter $K$, and the right grid is the **convolved image** $I * K$:
+
+-   We place the filter on top of a $3 \times 3$ receptive field in $I$ (red square).
+-   We multiply each entry of the receptive field by the corresponding entry of $K$ and sum all products.
+-   This sum is written into the corresponding position of the output grid $I * K$ (green cell).
+
+Formally, for a receptive field of the same size as $K$, the output at location $(i,j)$ is $$ (I * K)_{ij} = \sum_{u,v} I_{i+u,\,j+v}\,K_{u,v}. $$So convolution is just a dot product between the filter and the local image patch.
+
+We then **slide** the receptive field across the image: first to the right, then down, repeating the same computation at each location. This produces a whole grid of scores, often called a **feature map**. Intuitively, if the pattern in the receptive field looks similar to the filter (for example, both look like a small cross or an edge), the score will be large; if they are very different, the score will be small. Different filters therefore detect different local features.
+
+The crucial point is that the **same filter weights are reused** at every spatial position. The convolutional stage of a layer has only a small number of parameters (the entries of $K$ plus a bias), shared across all locations. Compared with a dense layer, this dramatically reduces the number of parameters while still exploiting the local structure of images.
+
+![Illustration of a 3×3 convolution: a receptive field in the input image I is combined with a filter K to produce one entry of the convolved image I \* K.](Images_qmd_ML/ML12_conv_stage.png){#fig-conv-stage width="70%" fig-align="center"}
+
+## The convolution stage: hyperparameters
+
+Convolutional layers come with several important **hyperparameters** that control how the filter is applied and how large the output feature map will be.
+
+-   **Filter width and height.**\
+    The first choice is the spatial size of the filter (for example $3 \times 3$ or $5 \times 5$). Larger filters see a bigger neighbourhood but also increase the number of parameters and computations.
+
+-   **Depth (number of filters).**\
+    A single filter produces one output feature map. In practice we use many different filters in parallel, so the **depth** of the layer is the number of feature maps produced. For image input with three colour channels, a convolutional layer with, say, 32 filters will output 32 feature maps, each responding to a different type of local pattern.
+
+-   **Stride.**\
+    The **stride** specifies by how many pixels we shift the filter to get the next output position. With stride $1$ we move the filter one pixel at a time; with stride $2$ we jump two pixels, skipping intermediate locations. As illustrated in panel (a) of @fig-conv-hparams, increasing the stride makes the output smaller because we take fewer positions, and it also reduces computation.
+
+-   **Padding and output size.**\
+    If we slide a $3 \times 3$ filter over a finite image without touching the borders, the output becomes smaller than the input. To avoid losing resolution, we can use **zero-padding** (also called “same” padding): we pad the image with zeros around the edges so that the filter can still be centred near the boundary. In panel (b) of @fig-conv-hparams, the outer red frame of zeros shows such padding; with appropriate padding the output feature map can be kept at the **same spatial size** as the input.
+
+These hyperparameters let us trade off spatial resolution, number of features and computational cost. Later, when designing CNN architectures, we will combine filter size, depth, stride and padding to control how quickly the spatial dimensions shrink and how rich the learned representation becomes.
+
+![Convolution hyperparameters: (a) effect of stride on output size; (b) zero-padding to keep input and output sizes the same.](Images_qmd_ML/ML12_conv_hparams.png){#fig-conv-hparams width="100%" fig-align="center"}
+
+## The detector and pooling stages
+
+The **second stage** of the convolutional layer is the **detector stage**. Here we apply a fixed non-linearity, usually the ReLU, $$ \text{ReLU}(t) = \max\{0, t\}, $$ independently to every score produced by the convolution. A neuron is **active** (fires) only if the convolution score at that location is large enough, so a high ReLU output means that the feature encoded by the filter (for example a vertical edge) is present in that part of the image. This stage usually introduces **no additional parameters**, because the form of the non-linearity is chosen in advance.
+
+The **third stage** is **pooling**, a form of **downsampling**. Pooling aggregates nearby activations into a single value, thereby reducing the spatial resolution of the feature map. The most common choice is **max-pooling**: we partition the feature map into small blocks (often $2 \times 2$) and keep only the maximum activation in each block.
+
+In the left part of @fig-pooling, a $4 \times 4$ grid of activations is transformed by $2 \times 2$ max-pooling into a $2 \times 2$ grid: in each coloured $2 \times 2$ block we keep only the largest number (20, 30, 112, 37). This throws away information, but it has two important effects:
+
+-   it **reduces the image size**, so later layers have fewer units and parameters;\
+-   it makes the representation more **robust to small translations**: if a feature (say, a vertical edge) moves slightly within a $2 \times 2$ block, the pooled value stays the same, so the network still registers that the feature is present somewhere in that region.
+
+The right part of @fig-pooling shows the same idea in a real CNN: a feature map of size $224 \times 224 \times 64$ is downsampled by pooling to $112 \times 112 \times 64$. Repeating convolution–ReLU–pooling blocks many times lets us gradually shrink the spatial dimensions while keeping only the most important activations, so that later we can afford to add dense layers on a much smaller representation.
+
+![Detector (ReLU) and 2×2 max-pooling: local downsampling of activation maps and reduction from 224×224×64 to 112×112×64.](Images_qmd_ML/ML12_pooling.png){#fig-pooling width="90%" fig-align="center"}
+
+## The convolutional layer
+
+We can now put the three stages together. In this course, a **convolutional layer** means:
+
+convolution operation → ReLU (detector stage) → pooling.
+
+Sometimes in the literature only the convolution operation (possibly followed by ReLU) is called a “convolutional layer”, and pooling is treated as a separate layer. Here we group them, because they are almost always used in this sequence.
+
+In a deep CNN there are usually **several convolutional layers in a row**. Often we apply multiple convolution + ReLU blocks before doing a pooling step, then repeat this pattern at the next spatial scale. Each time we:
+
+-   use convolution + ReLU to detect more complex local features;\
+-   use pooling to downsample and keep only the strongest activations.
+
+As illustrated in @fig-conv-layer, the original car image is successively transformed by many CONV–ReLU–POOL stages. Early layers respond to simple patterns such as edges and corners; deeper layers respond to larger shapes and object parts. Finally, the last feature maps are fed into one or more **fully connected (FC)** layers that output class scores such as “car”, “truck”, “airplane”, “ship”, “horse”.
+
+![Several convolutional (CONV + ReLU + POOL) layers stacked before a final fully connected classifier.](Images_qmd_ML/ML12_conv_layer.png){#fig-conv-layer width="65%" fig-align="center"}
+
+## Convolutional layers
+
+A single convolutional layer usually applies **several filters in parallel** to the same input image. Each filter looks at the same local neighbourhoods (receptive fields), but with **different weights**, so it responds to different types of local patterns.
+
+In @fig-conv-car we start from a greyscale image of a car. Below, @fig-conv-filters shows four simple $4 \times 4$ filters whose entries are $-1$ (black) or $+1$ (white). They are chosen by hand to behave like oriented **edge detectors**:
+
+-   Filter 1 reacts to vertical transitions from dark to light (left edges).
+-   Filter 2 reacts to vertical transitions from light to dark (right edges).
+-   Filter 3 reacts to horizontal transitions from dark to light (bottom edges).
+-   Filter 4 reacts to horizontal transitions from light to dark (top edges).
+
+Each filter is convolved with the car image, sliding across all positions. This produces four **activation maps**, shown in @fig-conv-activations. Bright areas in an activation map indicate locations where the corresponding pattern is strongly present. Some filters highlight vertical contours of the car, others emphasise horizontal structures such as the bonnet or bumper.
+
+This illustrates two key ideas:
+
+-   A convolutional layer learns **multiple filters** so that different feature maps focus on different visual aspects of the same image.
+-   Filters are local and **shared across the whole image**, so the same pattern (for example “vertical edge”) can be detected anywhere in the image.
+
+In real CNNs, the filter values are not hand-crafted as here; they are **learned from data** via gradient descent so that the activation maps become useful for the final prediction task.
+
+![Greyscale input image of a car](Images_qmd_ML/ML12_car.png){#fig-conv-car width="40%" fig-align="center"}
+
+![Four 4×4 edge-detecting filters](Images_qmd_ML/ML12_filter.png){#fig-conv-filters width="80%" fig-align="center"}
+
+![Activation maps for the four filters](Images_qmd_ML/ML12_activation.png){#fig-conv-activations width="95%" fig-align="center"}
+
+## Convolutional layer
+
+Mathematically, a convolutional layer combines the three stages we have seen:
+
+1.  **Linear convolution stage**
+2.  **Detector stage (ReLU)**
+3.  **Pooling stage**
+
+For one feature map, we can write these stages as $$ Z_j^{(1)} = b^{(1)} + w^{(1)\top}_j X, \quad j = 1,\dots,m_1, $$ $$ Z_j^{(2)} = \max\{0, Z_j^{(1)}\}, \quad j = 1,\dots,m_1, $$ $$ Z_j^{(3)} = \text{pool}(Z^{(2)})_j, \quad j = 1,\dots,m_3. $$
+
+Here $X$ is the vector of input pixels (possibly after zero-padding), $Z^{(1)}$ are the convolution scores, $Z^{(2)}$ the ReLU activations, and $Z^{(3)}$ the pooled outputs. The index $j$ runs over spatial locations: each $Z_j^{(1)}$ corresponds to one receptive field of the filter.
+
+In a **convolutional** layer, the parameters are heavily constrained:
+
+-   All biases are equal: $b_1^{(1)} = \cdots = b_{m_1}^{(1)} = b^{(1)}$.
+-   Each weight vector $w_j^{(1)}$ has non-zero entries only for pixels inside the receptive field of the filter; all other entries are zero.
+-   Moreover, the non-zero pattern is the **same for every** $j$: the vectors $w_1^{(1)},\dots,w_{m_1}^{(1)}$ are just spatially shifted copies of the same filter weights, aligned with different receptive fields. This is the formal way of expressing **weight sharing**.
+
+As illustrated in the 1D toy example in @fig-conv-maths, a single $3 \times 1$ filter slides over an input of six pixels (plus zero-padding). The corresponding convolution stage uses the same three non-zero weights and one shared bias at every location. After ReLU and pooling, only three pooled outputs remain.
+
+A crucial consequence is that the **number of parameters does not depend on the image size or the number of output locations**. For a single filter of height H and width W we only need $$ \text{H} \times \text{W} + 1 $$ parameters (H×W filter weights plus one bias). In the example of @fig-conv-maths, this is $3 \times 1 + 1 = 4$, much smaller than a dense layer that would use a different set of weights at every position.
+
+![1D toy example of a convolutional layer with zero-padding, convolution, ReLU and pooling, illustrating weight sharing and the small number of parameters.](Images_qmd_ML/ML12_maths.png){#fig-conv-maths width="65%" fig-align="center"}
+
+## A typical CNN
+
+In practice, a convolutional layer almost never uses just one filter. Instead we apply **several filters in parallel** to the same input. The number of filters is called the **filter depth** and equals the number of output feature maps.
+
+If each filter has height H and width W, and we use one shared bias per filter, then the total number of parameters in a convolutional layer is $$(\text{H} \times \text{W} + 1) \times \text{filter depth}.$$ So the parameter cost grows with the filter size and the number of filters, but **not** with the spatial size of the input image. In the first convolutional layer of @fig-typical-cnn we use 10 filters of size $5 \times 5$, each with one bias: $$(5 \times 5 + 1) \times 10 = 260 \text{ parameters.}$$ A dense layer connecting a $28 \times 28$ input directly to, say, 100 hidden units would already need $28 \times 28 \times 100 = 78\,400$ weights, so the saving is substantial.
+
+The architecture in @fig-typical-cnn shows a **typical CNN for MNIST digits**:
+
+-   Input: a $28 \times 28$ greyscale image of a digit.
+-   First convolutional layer: 10 filters of size $5 \times 5$ produce 10 feature maps of size $24 \times 24$.
+-   Max-pooling layer: $2 \times 2$ pooling reduces these to $12 \times 12 \times 10$.
+-   Second convolutional and pooling layers: more filters extract higher-level features and further reduce the spatial size (down to $4 \times 4 \times 20$ in the sketch).
+
+Before the final prediction, a **flattening layer** simply reshapes the last $4 \times 4 \times 20$ tensor into a 1D vector so that we can use a standard **fully connected layer** (with dropout for regularisation) to output 10 class scores, one for each digit. The convolution–pooling blocks therefore act as a trainable feature extractor, and the dense layers on top perform classification.
+
+![Example of a typical CNN architecture for MNIST digits, with two convolution–pooling blocks followed by flattening and fully connected layers.](Images_qmd_ML/ML12_typical.png){#fig-typical-cnn width="95%" fig-align="center"}
+
+## Digit classification with neural networks
+
+We return to the handwritten digit data set and compare a range of models, from classical linear methods to deep neural networks. All methods are trained on the same training set and evaluated on an independent test set. We consider both a **fully connected neural network (FC NN)** and a **convolutional neural network (CNN)**.
+
+The table below shows that several methods (RF, FC NN, CNN) achieve essentially **zero training error**, meaning they fit the training digits almost perfectly. However, their **test errors** are quite different: the CNN reaches about $3.2\%$ test error, clearly better than all other methods, including the FC NN (about $5.8\%$) and strong baselines such as the radial SVM (about $5.4\%$). This illustrates two points stressed in the lecture:
+
+-   Training error alone is not informative once models are sufficiently flexible; we must compare **generalisation performance** on unseen data.
+-   CNNs gain a substantial advantage by exploiting the **spatial structure** of images, whereas fully connected networks and other methods treat pixels as unordered features.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Models compared:}  
+\begin{itemize}
+\tightlist
+\item \textbf{linreg:} direct linear regression.  
+\item \textbf{LDA1:} Linear Discriminant Analysis (LDA) based on the values $x_i$.  
+\item \textbf{LDA2:} LDA based on $x_i$ and $x_i^2$.  
+\item \textbf{QDA:} Quadratic Discriminant Analysis with a distinct covariance matrix for each class.  
+\item \textbf{log:} logistic regression (multinomial).  
+\item \textbf{log-ridge:} logistic regression with ridge penalty.  
+\item \textbf{log-lasso:} logistic regression with lasso penalty.  
+\item \textbf{RF:} random forest.  
+\item \textbf{linear SVM:} linear support vector classifier.  
+\item \textbf{radial SVM:} SVM with radial basis kernel.  
+\item \textbf{FC NN:} fully connected neural network.  
+\item \textbf{CNN:} convolutional neural network.
+\end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\textbf{Training and test errors (\%)}  
+\begin{tabular}{lcc}
+\hline
+Method & Training & Test \\
+\hline
+linreg & 7.6 & 13.1 \\
+LDA1 & 6.2 & 11.5 \\
+LDA2 & 3.9 & 10.2 \\
+QDA & 1.8 & 13.5 \\
+log & 0.01 & 11.1 \\
+log-ridge & 4.1 & 9.0 \\
+log-lasso & 2.7 & 8.8 \\
+RF & 0.0 & 5.9 \\
+linear SVM & 1.5 & 6.5 \\
+radial SVM & 0.6 & 5.4 \\
+FC NN & $\approx 0.0$ & 5.8 \\
+CNN & $\approx 0.0$ & 3.2 \\
+\hline
+\end{tabular}
+\end{center}
+\end{minipage}
+
+## Activations and filters of the first layer
+
+The first convolutional layer in a CNN is not yet trying to decide whether an image is a 2, 4, 6, etc. Its role is to extract very **generic visual features** that will be reused by deeper layers.
+
+In @fig-first-layer-acts, each row shows:
+
+-   on the left, an input digit image (2, 4, 9, 6, …);
+-   next to it, the corresponding **activation maps** produced by several learned filters in the first layer;
+-   at the bottom, some of the **filters themselves**, visualised as small greyscale patches.
+
+These learned filters behave like simple edge or stroke detectors:
+
+-   some respond strongly to **horizontal transitions** from white to black;
+-   others to **vertical strokes**;
+-   others to slightly **diagonal curves** or to regions with a lot of ink (thick strokes).
+
+Where a particular pattern appears in the digit (for example, the horizontal top of a 2 or the vertical spine of a 4), the matching filter produces a **high activation** in that region of its activation map. Thus, each filter specialises in one basic pattern, and its activation map shows *where* that pattern is present in the image.
+
+Two important points the script emphasises:
+
+-   In the **first layer**, filters and activations are still closely related to the raw pixels, so we can interpret them visually.
+-   Deeper layers then **combine** these basic features (edges, blobs, simple shapes) into more complex patterns that are harder to interpret directly but more useful for classification.
+
+![Activations and filters of the first convolutional layer: each row shows an input digit, the corresponding activation maps of several filters, and examples of the learned filters themselves.](Images_qmd_ML/ML12_first_layer.png){#fig-first-layer-acts fig-align="center" width="60%"}
