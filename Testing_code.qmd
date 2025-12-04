@@ -1196,7 +1196,7 @@ In simple cases one can interpret the final model as a kind of **ensemble averag
 
 At **test time** we use the **full network without dropout**, but rescale activations or weights so that the expected activation of each unit matches what it saw during training. Operationally, dropout behaves like a cheap built-in ensemble method that regularises deep networks and improves generalisation.
 
-# Deep learning: Convolutional neural networks
+# Deep learning: Convolutional Neural Networks
 
 ## Image recognition: CIFAR-10
 
