@@ -1206,7 +1206,7 @@ Each image has **three colour channels** (red, green, blue). At every pixel we t
 
 So each tiny CIFAR-10 image is already a 1024-dimensional point in input space. Many images are also quite ambiguous or noisy, making them challenging to classify even for humans. Some examples are shown in @fig-cifar10-examples. Yet modern convolutional neural networks, which explicitly exploit the 2D image structure and local patterns (edges, textures, shapes), reach test accuracies above 95 %. CIFAR-10 is therefore a convenient running example: small enough to train models quickly, but rich enough to show why specialised architectures for images are needed.
 
-![Examples of CIFAR-10 images](Images_qmd_ML/ML12_imag.png){#fig-cifar10-examples width="80%" fig-align="center"}
+![Examples of CIFAR-10 images](Images_qmd_ML/ML12_imag.png){#fig-cifar10-examples width="60%" fig-align="center"}
 
 ## A dense neural network
 
@@ -1313,7 +1313,7 @@ Sometimes in the literature only the convolution operation (possibly followed by
 
 In a deep CNN there are usually **several convolutional layers in a row**. Often we apply multiple convolution + ReLU blocks before doing a pooling step, then repeat this pattern at the next spatial scale. Each time we:
 
--   use convolution + ReLU to detect more complex local features;\
+-   use convolution + ReLU to detect more complex local features;
 -   use pooling to downsample and keep only the strongest activations.
 
 As illustrated in @fig-conv-layer, the original car image is successively transformed by many CONV–ReLU–POOL stages. Early layers respond to simple patterns such as edges and corners; deeper layers respond to larger shapes and object parts. Finally, the last feature maps are fed into one or more **fully connected (FC)** layers that output class scores such as “car”, “truck”, “airplane”, “ship”, “horse”.
@@ -1463,3 +1463,282 @@ Two important points the script emphasises:
 -   Deeper layers then **combine** these basic features (edges, blobs, simple shapes) into more complex patterns that are harder to interpret directly but more useful for classification.
 
 ![Activations and filters of the first convolutional layer: each row shows an input digit, the corresponding activation maps of several filters, and examples of the learned filters themselves.](Images_qmd_ML/ML12_first_layer.png){#fig-first-layer-acts fig-align="center" width="60%"}
+
+# Deep learning: Further topics
+
+## ImageNet
+
+To move beyond relatively small benchmarks such as CIFAR-10, computer vision models are often evaluated on **ImageNet**, a much more complex data set that underpinned the ImageNet Large Scale Visual Recognition Challenge (ILSVRC).
+
+Compared with CIFAR-10, ImageNet is harder in several ways:
+
+-   It contains around **200 object categories**, rather than just 10.
+-   **Multiple objects can appear in one image**, so a single picture may be labelled with several classes (e.g. bird and frog, or person, dog and chair).
+-   The data set is **much larger**, with roughly **450 000 training images** and **40 000 test images**.
+-   Images have **higher and variable resolution**; the average size is about $482 \times 415$ pixels, so each raw image is on the order of $2 \cdot 10^5$ pixels instead of 1024.
+
+Because of this combination of many classes, multiple objects, and high-resolution images, ImageNet became the standard benchmark for testing new convolutional network architectures (AlexNet, VGG, ResNet, and others). In the next sections we will see how such large ImageNet-trained CNNs can be reused for new tasks through **transfer learning**.
+
+## Popular network architectures
+
+Convolutional neural networks were first developed in the 1990s, notably by Yann LeCun and co-authors. The best-known early architecture is **LeNet**, designed to read handwritten zip codes (essentially the MNIST digit data). LeNet already used the basic building blocks we have seen:
+
+-   a first **convolutional layer**,
+-   a **subsampling / pooling** layer,
+-   another convolution + pooling block,
+-   followed by one or two **fully connected layers** for classification.
+
+This architecture is relatively shallow by today’s standards, but it already illustrates two key ideas:
+
+-   convolution + pooling layers act as an **automatic feature extractor**, turning raw pixels into increasingly abstract features;
+-   as we go deeper, **learned features become more complex**: early filters detect simple strokes or edges, later ones combine these into shapes that resemble parts of digits.
+
+Since LeNet, a whole **“zoo” of CNN architectures** has been proposed, each trying to improve benchmark performance on data sets such as CIFAR-10 and ImageNet. Examples include AlexNet, VGG, Inception and ResNet. They mainly differ in how many layers they use, how they arrange convolution and pooling, and how they choose filter sizes, but they all build on the same core principles introduced by LeNet.
+
+## AlexNet
+
+**AlexNet** (Krizhevsky, Sutskever and Hinton, 2012) was the network that truly popularised CNNs in modern computer vision. It introduced several important changes compared with earlier architectures like LeNet:
+
+-   It used **ReLU activations** systematically instead of sigmoids, which made optimisation easier and allowed much deeper networks to be trained.
+-   It was **deeper and wider**: many more filters per layer and more convolutional layers stacked on top of each other.
+-   It often applied **several convolution + ReLU layers before pooling**, rather than always pooling immediately after each convolution.
+
+Trained on the ImageNet challenge, AlexNet reduced the classification error from about **26 % to 16 %**, a dramatic improvement at the time. Conceptually, however, its structure is still similar to LeNet:
+
+-   a stack of convolutional layers (with ReLU and occasional max-pooling) that gradually extract higher-level visual features;
+-   followed by a few large **fully connected layers** that do the final classification.
+
+The main step forward was not a completely new idea, but the ability to **train a much deeper, higher-capacity CNN** successfully, showing that such networks can scale to large, high-resolution image data sets like ImageNet.
+
+## VGGNet
+
+The winner of the ILSVRC 2014 ImageNet challenge was **VGGNet** (Simonyan and Zisserman). Its main message was that the **depth of the network is critical** for good performance: by simply stacking many small convolutional layers, one can dramatically improve accuracy.
+
+VGGNet has a very **homogeneous architecture**: from input to the last convolutional block it uses only
+
+-   $3 \times 3$ convolutions, and
+-   $2 \times 2$ max-pooling,
+
+repeated many times. A typical configuration has **16 weight layers** (convolution + fully connected). The downside is that this simplicity comes at a cost: VGGNet has on the order of **140 million parameters**, most of them in the fully connected layers, so it requires a lot of memory and computation.
+
+## More networks
+
+After AlexNet and VGGNet, many other CNN architectures were proposed, often motivated by specific applications or by the desire to go deeper without losing trainability. Examples include:
+
+-   **ResNet**, which introduces *skip connections* so that very deep networks (50+ layers) can be trained reliably.
+-   **Inception** (GoogleNet), which mixes different filter sizes in parallel within the same layer to capture information at multiple spatial scales.
+
+There is now a large variety of architectures – convolutional, recurrent, residual, generative, etc. – and new variants keep appearing as research in deep learning for vision and other domains remains very active.
+
+## Typical filter weights of the first layer
+
+The **filters of the first convolutional layer** can often be visualised directly, since they operate on the raw pixels. As shown in @fig-firstlayer-filters, when we plot these filters for a CNN trained on natural images, they typically look like:
+
+-   oriented **edge detectors** (similar to Gabor filters), sensitive to lines at different angles;
+-   small **blob or colour detectors**, sensitive to local spots of particular colours.
+
+These are very **generic features**: they do not “know” about specific objects such as cats or cars, but they capture basic visual primitives (edges, corners, simple textures) that are useful for almost any vision task. Deeper layers then build on these primitives to form more complex and task-specific features, which are harder to interpret visually.
+
+![Typical first-layer filters of a CNN trained on natural images. Many resemble oriented edge detectors or small colour blobs.](Images_qmd_ML/ML12_firstlayer_filters.png){#fig-firstlayer-filters width="60%" fig-align="center"}
+
+## Unconverged filters
+
+On the previous slide we saw clean first-layer filters that behaved like edge or blob detectors. In contrast, as shown in @fig-unconverged-filters, sometimes the learned filters look more like noisy static: they do **not** show clear structure and do not extract clear features.
+
+There are several possible reasons for such **unconverged filters**:
+
+-   The network has **not been trained long enough**, so optimisation stopped before reaching a good minimum.
+-   The **learning rate** is badly chosen (for example too high), so stochastic gradient descent keeps bouncing around instead of settling.
+-   **Weight regularisation** is too weak, which allows very jagged, noisy filters instead of smooth, interpretable ones.
+
+When you visualise first-layer filters and they all look like noise, it is a warning sign that the training setup (epochs, learning rate, regularisation) needs to be revisited.
+
+![Example of unconverged first-layer filters that look noisy and do not exhibit clear edge or blob patterns.](Images_qmd_ML/ML12_unconverged_filters.png){#fig-unconverged-filters width="50%" fig-align="center"}
+
+## Activations of deeper layers
+
+For early layers we can interpret the filters themselves (edges, colours, textures). For deeper layers this is much harder, because each filter combines many earlier features. Instead, we look at **which input images maximally activate a given neuron**.
+
+A common procedure is:
+
+1.  Pick a neuron in a **deep layer** (here: the 5th and last pooling layer of AlexNet).
+2.  Run a large collection of images through the network.
+3.  For that neuron, select the images where its activation is **highest**.
+4.  Display those images in one row.
+
+As shown in @fig-deeper-activations, each row in the visualisation corresponds to one deep neuron. We see, for example:
+
+-   a neuron that fires mostly on **human faces**;
+-   one that responds strongly to **dogs** and similar animal faces;
+-   one that prefers **text or number patterns**;
+-   others that specialise in **houses** or bright **round highlights**.
+
+The neuron does not “know” the semantic label; it simply responds to a particular **visual pattern** that tends to appear in those objects. This illustrates the general trend:
+
+-   **Early layers** learn generic, low-level features (edges, colours, textures).
+-   **Deeper layers** learn features that are **specific to the data set and task**, and begin to resemble human-interpretable concepts such as faces, dogs or buildings.
+
+![Images that maximally activate six neurons in a deep pooling layer of AlexNet, showing specialisation to faces, dogs, text, houses and other high-level patterns.](Images_qmd_ML/ML12_deeper_activations.png){#fig-deeper-activations width="95%" fig-align="center"}
+
+## Pre-trained networks
+
+Modern CNNs (AlexNet, VGG, ResNet, …) have tens or hundreds of millions of parameters and were trained on huge data sets such as ImageNet. For these models, the **expensive part is fitting** (backpropagation and optimisation), not the forward pass.
+
+As an end-user you may not have:
+
+-   enough **data** to train such a network from scratch; or
+-   enough **computational resources** to run the full training.
+
+A practical alternative is to use a **pre-trained network**:
+
+-   Take a state-of-the-art CNN that has already been trained on a large benchmark like ImageNet.
+-   Download its **weights** from a public “model zoo”.
+-   Use it directly to perform **exactly the same task** it was trained on (same input size, same output label set).
+
+This setup lets you benefit from a powerful feature extractor without paying the training cost yourself. However, it only solves the *original* task (e.g. ImageNet classification). To adapt the network to a **new task or new classes**, we need **transfer learning**, where we keep most of the pre-trained network and retrain only the final layers (or fine-tune a few deeper layers) on our own data set.
+
+## Transfer learning
+
+A main limitation of a **pre-trained network** is that it can only predict the **pre-defined categories** it was originally trained on (for example the 1000 ImageNet classes). In many practical applications, however, you care about **different categories**, such as:
+
+-   flower species,
+-   cancer types,
+-   car brands,
+-   traffic signs,
+-   or even astronomical objects such as different types of galaxies.
+
+At the same time, you often have only a **small number of labelled images** for your own problem – far too few to train a large CNN from scratch.
+
+**Transfer learning** addresses this situation. The idea is to:
+
+1.  start from a CNN that has been **pre-trained on a large data set** such as ImageNet;
+2.  **reuse what it has already learned** about generic visual features;
+3.  adapt only part of the model to your specific task.
+
+For example, you might use an ImageNet-trained network as the starting point for a classifier that distinguishes between several kinds of galaxies.
+
+## Transfer learning in practice
+
+How does this work in practice? As shown in @fig-transfer-cat, it helps to view a CNN as consisting of two conceptual parts:
+
+1.  a **generic feature extractor** – all the convolution + pooling layers;
+2.  a **problem-specific classifier** – the last fully connected layers that map features to output classes.
+
+In transfer learning we typically:
+
+-   keep the **feature extractor** from the pre-trained network (possibly freezing its weights, or fine-tuning only slightly), because it already encodes useful edges, textures and shapes;
+-   **replace the final classifier** with a new one adapted to our labels (for example a new softmax layer with as many outputs as our target classes), and train only this part on our smaller data set.
+
+This way we benefit from the rich, generic visual representation learned from millions of ImageNet images, while only needing to learn a relatively small number of additional parameters for the new classification task.
+
+![Transfer learning: reuse the convolutional feature extractor and retrain a new task-specific classifier on top.](Images_qmd_ML/ML12_cat.png){#fig-transfer-cat width="80%" fig-align="center"}
+
+## Transfer learning: mathematical view
+
+We can describe transfer learning more formally by splitting a CNN into two functions:
+
+-   a **feature extractor** that maps an input image $x$ to a vector of feature activations $$ z = f(x) = (z_1,\dots,z_m), $$
+-   a **classifier** that maps the features to output scores or probabilities $$ y = g(z). $$
+
+When a network is trained on a large data set such as ImageNet, we learn parameters $\theta_f$ of the feature extractor and $\theta_g$ of the classifier: $$ z = f_{\theta_f}(x), \qquad y = g_{\theta_g}(z). $$
+
+In **transfer learning** for a new, smaller data set we proceed as follows:
+
+1.  **Start from the ImageNet-trained network.**\
+    The convolution + pooling layers define $f_{\theta_f}$; the final fully connected layers define $g_{\theta_g}$.
+
+2.  **Freeze the feature extractor.**\
+    We keep $\theta_f$ fixed and reuse it as a generic map that turns any input image into a feature vector $z = f_{\theta_f}(x)$.
+
+3.  **Replace and retrain the classifier.**\
+    We discard the original last layer(s), introduce a new classifier $g_{\phi}$ with parameters $\phi$ (for example a softmax over our own classes), and train only $\phi$ on the small task-specific data set: $$ y = g_{\phi}(f_{\theta_f}(x)). $$
+
+In the left panels of the slide (labelled “Train on ImageNet” and “Small data set feature extractor”), this corresponds to:
+
+-   keeping all convolutional blocks and the first fully connected layers as the **frozen feature extractor**;
+-   retraining only the final fully connected layers on the new labels.
+
+Mathematically, transfer learning is thus the reuse of a pre-trained feature map $f_{\theta_f}$ and the **replacement of the last part of the network** by a new classifier tailored to the target problem.
+
+## Transfer learning: practical strategy
+
+A simple and widely used transfer-learning strategy is illustrated in @fig-transfer-strategy:
+
+1.  **Start from a pre-trained CNN**, typically trained on ImageNet (for example **AlexNet**).
+2.  **Remove the last fully connected layer**, whose output are the 1000 ImageNet class probabilities.
+3.  **Freeze all remaining layers** (convolution, pooling and the first fully connected layers) and use them as a **fixed feature extractor**.
+4.  For each new image, pass it through the network and take the activations of the **last but one layer** (sometimes called the *code*).
+    -   For AlexNet this code is a vector in $\mathbb{R}^{4096}$.
+5.  **Train a separate linear classifier on these codes**, for instance:
+    -   multinomial logistic regression, or
+    -   a linear SVM.
+
+In this way, the heavy convolutional part of the network is reused without change, and only a light-weight linear model is fitted on top of the learned representation for the new task.
+
+![Transfer-learning strategy: use AlexNet (trained on ImageNet) as a fixed feature extractor and train a new linear classifier on the 4096-dimensional codes from the last but one layer.](Images_qmd_ML/ML12_transfer.png){#fig-transfer-strategy width="80%" fig-align="center"}
+
+## Transfer learning: fine-tuning strategy
+
+An alternative to using a pre-trained network only as a fixed feature extractor is to **fine-tune** (parts of) the CNN.
+
+Instead of freezing all convolutional layers and training only a new classifier, we can:
+
+-   keep the **early layers fixed**, because they learn very generic features such as edge or blob detectors that are useful for many tasks;
+-   **unfreeze some of the later layers** (often the last few convolutional blocks and/or fully connected layers) and continue training them on the new data set together with the new classifier.
+
+This makes sense because:
+
+-   early layers mainly capture low-level structure that transfers well between data sets;
+-   **later layers are more specific** to the original training data, so adapting them helps the network specialise to the new task.
+
+Fine-tuning therefore lies between two extremes: - at one end, we train only a new linear classifier on fixed features; - at the other end, we train the whole network from scratch. It allows us to reuse most of the pre-trained representation while still adapting higher-level features to the new problem.
+
+## Choosing a transfer-learning strategy
+
+Which transfer-learning strategy to use depends on several factors, in particular:
+
+-   the **size** of your data set;
+-   the **similarity** between your data and the data used to train the original network.
+
+A useful rule of thumb is:
+
+-   If your data set is **small and very similar** to ImageNet (or the original data), you should generally **train only the final classifier** and keep the rest of the network fixed, to avoid overfitting.
+-   If your data set is **large** and **not too different** from the original data, you can additionally **fine-tune some of the deeper layers** (often with a smaller learning rate) with relatively low risk of overfitting.
+
+In practice, many applications start with the simple “fixed feature extractor + new classifier” set-up, and then experiment with gradually unfreezing deeper layers if enough data are available.
+
+## Further topics
+
+Classical deep neural networks are only the starting point. Around them there is a whole ecosystem of architectures and applications that keeps growing.
+
+- **Recurrent neural networks (RNNs).**  
+  Designed for **sequences** rather than static inputs. They are widely used for time-series forecasting, natural language, speech, and any setting where past inputs influence future predictions. The key idea is that the network maintains a **hidden state** that propagates through time and summarises past information.
+
+- **Generative Adversarial Networks (GANs).**  
+  GANs are **generative models**: instead of predicting labels, they generate new samples that look like the training data. A *generator* network tries to create realistic images, while a *discriminator* network tries to distinguish real from fake. Training them together leads to very sharp, realistic samples and underlies technologies such as deepfakes.
+
+- **Autoencoders (and variational autoencoders).**  
+  Autoencoders learn to **compress data into a low-dimensional code** and then reconstruct it. They are used for dimension reduction, denoising and representation learning. Variational autoencoders add a probabilistic layer and can also be used as generative models.
+
+- **Deep reinforcement learning.**  
+  In reinforcement learning, an agent must learn how to act in an environment to maximise long-term reward. Deep networks are used to approximate value functions or policies when states are high-dimensional (e.g. images), enabling applications such as game-playing agents and robotics.
+
+Overall, deep learning is not a single model but a **family of tools**: convolutional networks for images, RNNs for sequences, GANs and autoencoders for generation and compression, and deep RL for sequential decision-making.
+
+
+## Reinforcement learning
+
+Reinforcement learning formalises **learning by trial and error**.
+
+- There is an **agent** (for example a robot, a trading algorithm, or a game-playing program) that repeatedly interacts with an **environment**.
+- At each time step the agent observes a **state**, chooses an **action**, and receives a **reward** plus a new state.
+- Over many iterations the agent aims to learn a **strategy of action** (a *policy*) that maximises the expected **long-term cumulative reward**, not just the immediate one.
+
+In simple settings the optimal policy can sometimes be computed exactly. In more realistic settings the state is high-dimensional (e.g. raw images of a game screen) and the dynamics are complex. Here **deep neural networks** are used inside the RL algorithm to approximate:
+
+- a **value function** (how good a state or state–action pair is), or
+- a **policy** (a mapping from states to action probabilities).
+
+This combination, known as **deep reinforcement learning**, has enabled systems that learn to play Atari games directly from pixels and programmes such as AlphaGo, which learned to play Go at superhuman level by combining deep networks with reinforcement learning.
+
+
