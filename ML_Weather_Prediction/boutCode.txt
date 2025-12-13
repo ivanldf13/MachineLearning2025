@@ -1,0 +1,14 @@
+def preTraitement_test(df_test):
+    df_test = pd.concat([df_test, pd.get_dummies(df_test['season'])], axis=1)
+    df_hours = df_test[['hour']]
+    df_test = df_test.drop(columns=['season', 'Id', 'hour'])
+    df_test = pd.concat([df_test, df_hours], axis=1)
+
+    #df_test = df_test.drop(columnsNotWanted,axis=1)
+    df_test = df_test.dropna()
+    df_test = df_test.astype(float)
+
+    #X = df_test.drop(columnsNotWanted2,axis=1)
+    return {
+        'X': df_test
+    }
