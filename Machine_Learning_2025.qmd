@@ -626,7 +626,7 @@ Each predictor contributes independently to explaining $Y$. The regression finds
 
 We observe $n$ data points $\{(x_i, y_i)\}_{i=1}^{n}$, where each $x_i = (x_{i1}, \ldots, x_{ip})^\top$ contains the $p$ predictor values for observation $i$. All predictors can be represented compactly as an $n \times p$ matrix:
 
-$$\mathbf{X} =
+$$X =
 \begin{bmatrix}
 x_{11} & x_{12} & \cdots & x_{1p} \\
 x_{21} & x_{22} & \cdots & x_{2p} \\
@@ -824,8 +824,8 @@ Here $\theta = (\beta_0, \beta_1)^\top$ denotes the parameter vector, and $J(\th
 
 \begin{minipage}{0.45\textwidth}
 \begin{itemize}
-  \item The plot shows **contour lines** of the cost surface $J(\beta_0, \beta_1)$, where each line connects points with equal RSS.
-  \item The **red dot** marks the minimum — the optimal pair $(\hat{\beta}_0, \hat{\beta}_1)$.
+  \item The plot shows \textcolor{blue}{contour lines} of the cost surface $J(\beta_0, \beta_1)$, where each line connects points with equal RSS.
+  \item The \textcolor{red}{red dot} marks the minimum: the optimal pair $(\hat{\beta}_0, \hat{\beta}_1)$.
   \item Gradient descent iteratively updates $(\beta_0, \beta_1)$, moving step by step along the steepest downward direction until it reaches the centre.
 \end{itemize}
 \end{minipage}
@@ -843,9 +843,7 @@ Here $\theta = (\beta_0, \beta_1)^\top$ denotes the parameter vector, and $J(\th
 
 Gradient descent is a general optimisation algorithm used to find the parameter values that minimise a cost (or objective) function $J(\theta)$. Formally, it solves the problem $\arg\min_{\theta \in \mathbb{R}^d} J(\theta)$.
 
-## Key Points
-
--   The essential components are:
+-   The **essential components** are:
 
     -   The **objective function** $J(\theta)$, which measures model error or loss.
     -   Its **derivatives** (gradients) in all directions, denoted $\nabla J$.
@@ -854,7 +852,7 @@ Gradient descent is a general optimisation algorithm used to find the parameter 
     Intuitively, a derivative measures how much the cost function $J$ changes when one parameter changes slightly.\
     In one dimension, it’s just the slope $\frac{dJ}{d\theta}$; in multiple dimensions, the gradient vector\
     $\nabla J(\theta) = \left[\frac{\partial J}{\partial \beta_0}, \frac{\partial J}{\partial \beta_1}, \ldots, \frac{\partial J}{\partial \beta_p}\right]^\top$\
-    points in the direction of the **steepest increase** of $J$ at point $\theta$. Therefore, gradient descent moves **in the opposite direction** — the direction of the **steepest decrease** — to minimise $J(\theta)$.
+    points in the direction of the **steepest increase** of $J$ at point $\theta$. Therefore, gradient descent moves **in the opposite direction** (the direction of the **steepest decrease**) to minimise $J(\theta)$.
 
 -   **Important restriction:** the function $J$ must be **differentiable**. Otherwise, gradients cannot be computed.
 
@@ -888,7 +886,7 @@ Think of gradient descent as walking downhill on a complex landscape. You can’
 -   To evaluate **generalisation**, we use a separate **test dataset** $\{(\tilde{x}_1,\tilde{y}_1),\dots,(\tilde{x}_m,\tilde{y}_m)\}$ containing $m$ new observations not seen during training.
 -   The model $\hat{f}$, trained earlier, is now applied to these new points to produce predictions $\tilde{y}_i = \hat{f}(\tilde{x}_i)$.
 -   The **test (or generalisation) error** is then computed as: $$\text{MSE}_{\text{Te}} = \frac{1}{m}\sum_{i=1}^{m}\{\tilde{y}_i - \hat{f}(\tilde{x}_i)\}^2$$
--   This test error provides an unbiased measure of how well the model is expected to perform on future data.
+-   This test error provides an approximately unbiased estimate of how well the model is expected to perform on future data.
 -   Formally, it estimates the **expected prediction error:** $$\text{Err}_{\hat{f}} = \mathbb{E}[(Y - \hat{f}(X))^2]$$
 
 The training error measures how well the model explains the data it has already seen, while the test error shows how well it generalises to unseen examples. As model flexibility increases, the training error steadily decreases, but the test error often follows a U-shaped curve, first improving, then worsening, because of **overfitting**.
@@ -905,11 +903,7 @@ The figure above illustrates how **training** and **test errors** evolve as mode
     -   **Training error** $\text{MSE}_{\text{Tr}}$ in grey, which decreases steadily as flexibility increases.
     -   **Test error** $\text{MSE}_{\text{Te}}$ in red, which decreases at first but eventually rises due to overfitting.
 
-When model flexibility is low, both training and test errors are high, in other words, the model underfits and fails to capture the structure of the data. As flexibility increases, the model fits the training data better and generalises more effectively, reaching a point of **optimal complexity** where test error is minimised. Beyond this point, further flexibility causes the model to memorise noise, leading to rising test error, i.e., the hallmark of **overfitting**.
-
-```{r}
-#TODO LDA invariant to rescaling
-```
+When model flexibility is low, both training and test errors are high, in other words, the model underfits and fails to capture the structure of the data. As flexibility increases, the model fits the training data better and generalises more effectively, reaching a point of **optimal complexity** where test error is minimised. Beyond this point, further flexibility causes the model to memorise noise, leading to rising test error, i.e., the hallmark of **overfitting**. This U-shaped behaviour of the test error can be formally explained by the bias–variance decomposition of the expected prediction error.
 
 ## The Bias–Variance Decomposition
 
@@ -950,11 +944,6 @@ The total prediction error reaches its minimum when bias and variance are optima
 - As $k$ increases, predictions become smoother → **higher bias** but **lower variance**.\
 - The **orange curve** in the figure shows the **total prediction error**, which is minimised at an intermediate $k$, where bias and variance are optimally balanced.\
 - The **green curve** represents the **squared bias**, and the **blue curve** shows the **variance**, both plotted as functions of $k$ to illustrate their trade-off.
-
-**Summary:**\
-- **Low** $k$ (high flexibility): low bias → high variance → overfitting\
-- **High** $k$ (low flexibility): high bias → low variance → underfitting\
-- **Optimal** $k$: balanced bias and variance → minimal expected prediction error
 
 ## The Bias–Variance Trade-off
 
@@ -1039,8 +1028,8 @@ In practice, choosing $K = 5$ or $K = 10$ usually provides the best balance: bia
 
 ## Interpreting the K-Fold Cross-Validation Estimate
 
--   The **K-Fold Cross-Validation estimate** is a widely used and general method that can be applied to almost any model.\
--   This estimate allows us to **select the best model** among several candidates and provides an empirical approximation of the **expected prediction error** $\text{Err}_{\hat{f}}$ for the final chosen model.\
+-   The **K-Fold Cross-Validation estimate** is a widely used and general method that can be applied to almost any model.
+-   This estimate allows us to **select the best model** among several candidates and provides an empirical approximation of the **expected prediction error** $\text{Err}_{\hat{f}}$ for the final chosen model.
 -   The appropriate choice of $K$ depends on the dataset size $n$, but in practice, $K = 5$ or $K = 10$ are commonly used as they provide a good balance between bias, variance, and computational efficiency.
 
 **Interpreting the cross-validation estimate:**\
@@ -1054,15 +1043,10 @@ Thus, cross-validation helps assess not only *which model performs best on avera
 ## Leave-One-Out Cross-Validation
 
 -   One limitation of **K-Fold Cross-Validation** is that it requires training $K$ separate models, which can become computationally expensive for large datasets.
-
 -   A useful special case of K-Fold CV is **Leave-One-Out Cross-Validation (LOOCV)**, where each observation is treated as its own validation fold. In this case, $K = n$ and $C_k = \{k\}$ for $k = 1, \dots, n$.
-
 -   The **LOOCV estimate** of the prediction error is: $$\text{CV}_{(n)} = \frac{1}{n} \sum_{k=1}^{n} (y_k - \hat{f}_{-k}(x_k))^2$$ where $\hat{f}_{-k}$ denotes the model fitted on all data except the $k$-th observation.
-
 -   In general, this requires fitting $n$ separate models (one for each observation) which can be computationally intensive. However, for **linear models**, a convenient approximation exists: $$ \text{CV}_{(n)} \approx \frac{1}{n} \sum_{k=1}^{n} \left( \frac{y_k - \hat{f}(x_k)}{1 - S_{kk}} \right)^2$$ where $S_{kk}$ are leverage values (diagonal elements of the hat matrix), automatically available from the linear model fit.
-
 -   Overall, $\text{CV}_{(K)}$ is a reliable estimate of the **expected prediction error** $\text{Err}_{\hat{f}}$. The choice of $K$ reflects a **bias–variance trade-off**:
-
     -   Large $K$ (e.g. LOOCV) → smaller bias but higher variance.
     -   Small $K$ (e.g. 5-Fold CV) → higher bias but lower variance.
 
@@ -1150,23 +1134,17 @@ The corresponding model $\hat{f}_3$ is then refitted on **all 252 observations**
 
 Overall, cross-validation proved useful not only for identifying the best-performing model ($p = 3$) but also for ensuring that the final specification remains **interpretable, stable, and generalisable**.
 
-# Linear Model selection and Regularization
+# Linear Model Selection and Regularization
 
 ## Credit data set and data standardisation
 
 -   The **Credit data set** from the package *ISLR* contains the response *balance* (average credit card debt) and quantitative predictors such as *age*, number of credit *cards*, *income*, and *education*.
-
 -   It also includes four qualitative predictors: *gender*, *student*, *status*, and *ethnicity*.
-
 -   Such variables often exhibit **different numeric scales** or units of measurement, which can affect the behaviour of many algorithms.
-
 -   When predictors $X_1, \dots, X_p$ have **different scales**, the relative magnitude of each variable can distort distance-based methods (e.g. $k$-Nearest Neighbour) or affect regularisation penalties.
-
 -   To ensure comparability, it is good practice to **standardise the predictors** in the training data $\mathbf{x}_i$, $i = 1, \dots, n$, for each margin $j = 1, \dots, p$: $$ x_{ij}^{\text{scaled}} = \frac{x_{ij} - \bar{x}_j}{\hat{\sigma}_j} $$\
     where $\bar{x}_j$ and $\hat{\sigma}_j$ are the sample mean and standard deviation of predictor $j$
-
 -   In Python, this can be done with the transformer `StandardScaler()`.
-
 -   For a new input $x_0 \in \mathbb{R}^p$, standardise as $x_{0j}^{\text{scaled}} = (x_{0j} - \bar{x}_j)/\hat{\sigma}_j$ before applying the predictive model.
 
 Standardisation ensures that all predictors contribute equally to the model by removing scale effects. Without it, a single variable with large numerical values—such as *income* measured in thousands—can dominate the model’s distance or penalty calculations, overshadowing the contribution of smaller-scale variables such as *age* or *education*.
@@ -1502,9 +1480,9 @@ As shown in @fig-kfold-cv, each block $C_1, C_2, \ldots, C_K$ represents a diffe
 
 ## Linear Decision Boundaries: Hyperplanes
 
-Linear classification methods assign classes according to the sign of a linear function. Suppose we have two classes $G = {0,1}$. Each observation $\mathbf{x}$ is evaluated through a linear combination of its predictors, and the points where this expression equals zero define the decision boundary (or hyperplane).
+Linear classification methods assign classes according to the sign of a linear function. Suppose we have two classes $G = {0,1}$. Each observation $x$ is evaluated through a linear combination of its predictors, and the points where this expression equals zero define the decision boundary (or hyperplane).
 
-In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $\mathbf{x} \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
+In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $x \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
 
 If a point $\mathbf{x}$ does not satisfy this equality, then $$b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
 
@@ -1592,11 +1570,11 @@ The intersection point between the scaled densities $g_1(x)\pi_1$ and $g_2(x)\pi
 
 ## Estimation
 
-In practice, the parameters of LDA are estimated from a training sample $(y_1, \mathbf{x}_1), \ldots, (y_n, \mathbf{x}_n)$.\
+In practice, the parameters of LDA are estimated from a training sample $(y_1, x_1), \ldots, (y_n, x_n)$.\
 The model includes:
 
--   the **prior class probabilities** $\pi_1, \ldots, \pi_q \in (0, 1)$\
--   the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$\
+-   the **prior class probabilities** $\pi_1, \ldots, \pi_q \in (0, 1)$
+-   the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$
 -   the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$
 
 We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} \mathbf{1}\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} \mathbf{x}_i \mathbf{1}\{y_i = j\}}{\sum_{i=1}^{n} \mathbf{1}\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} \mathbf{1}\{y_i = j\}}{n - q}.$$
@@ -1606,15 +1584,21 @@ Unlike linear regression, we do not use the numerical values of the $y_i$’s, o
 
 ## Prediction
 
-Given a new observation $\mathbf{x}_0 \in \mathbb{R}^p$, we predict its class by maximising the posterior probability estimated from the training data: $$\hat{y}_0 = \arg\max_{j=1,\ldots,q} \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \arg\max_{j=1,\ldots,q} \log \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0).$$
+Given a new observation $x_0 \in \mathbb{R}^p$, we predict its class by maximising the posterior probability estimated from the training data:
 
-From the Gaussian model, we have: $$\log \widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \log \hat{g}_j(\mathbf{x}_0) + \log \hat{\pi}_j + \text{constant},$$
+$$\hat{y}_0 = \arg\max_{j=1,\ldots,q} \widehat{\Pr}(Y = j \mid X = x_0)
+= \arg\max_{j=1,\ldots,q} \log \widehat{\Pr}(Y = j \mid X = x_0).$$
 
-which expands to $$-\tfrac{1}{2}(\mathbf{x}_0 - \hat{\boldsymbol{\mu}}_j)^{\top} \hat{\boldsymbol{\Sigma}}^{-1} (\mathbf{x}_0 - \hat{\boldsymbol{\mu}}_j) + \log \hat{\pi}_j + \text{constant}.$$
+From the Gaussian model, we have: $$\log \widehat{\Pr}(Y = j \mid X = x_0) = \log \hat{g}_j(x_0) + \log \hat{\pi}_j + \text{constant},$$
 
-Ignoring terms independent of $j$, this simplifies to a **linear discriminant function**: $$\delta_j(\mathbf{x}_0) = \mathbf{x}_0^{\top}\hat{\boldsymbol{\Sigma}}^{-1}\hat{\boldsymbol{\mu}}_j - \tfrac{1}{2}\hat{\boldsymbol{\mu}}_j^{\top}\hat{\boldsymbol{\Sigma}}^{-1}\hat{\boldsymbol{\mu}}_j + \log \hat{\pi}_j.$$
+which expands to $$ -\tfrac{1}{2}(x_0 - \hat{\mu}_j)^{\top} \hat{\Sigma}^{-1} (x_0 - \hat{\mu}_j)
++ \log \hat{\pi}_j + \text{constant}.$$
 
-We assign $\mathbf{x}_0$ to the class with the largest $\delta_j(\mathbf{x}_0)$.
+Ignoring terms independent of $j$, this simplifies to a **linear discriminant function**: $$ \delta_j(x_0) = x_0^{\top}\hat{\Sigma}^{-1}\hat{\mu}_j
+- \tfrac{1}{2}\hat{\mu}_j^{\top}\hat{\Sigma}^{-1}\hat{\mu}_j
++ \log \hat{\pi}_j.$$
+
+We assign $x_0$ to the class with the largest $\delta_j(x_0)$.
 
 ### Geometric interpretation
 
@@ -1625,11 +1609,11 @@ These boundaries are **linear** because $\Sigma$ is common to all classes.
 
 ## Decision Boundaries
 
-The **decision boundary** separating two classes $j, m \in \{1, \ldots, q\}$ is the set of all $\mathbf{x} \in \mathbb{R}^p$ such that $$\Pr(Y = j \mid X = \mathbf{x}) = \Pr(Y = m \mid X = \mathbf{x}).$$
+The **decision boundary** separating two classes $j, m \in \{1, \ldots, q\}$ is the set of all $x \in \mathbb{R}^p$ such that $$\Pr(Y = j \mid X = x) = \Pr(Y = m \mid X = x).$$
 
-This is equivalent to $$\log \Pr(Y = j \mid X = \mathbf{x}) - \log \Pr(Y = m \mid X = \mathbf{x}) = 0.$$
+This is equivalent to $$\log \Pr(Y = j \mid X = x) - \log \Pr(Y = m \mid X = x) = 0.$$
 
-Replacing these probabilities by their Gaussian expressions and the prior class probabilities gives the **decision boundary equation**: $$\log \frac{\pi_j}{\pi_m} - \tfrac{1}{2}(\boldsymbol{\mu}_j + \boldsymbol{\mu}_m)^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) + \mathbf{x}^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) = 0.$$
+Replacing these probabilities by their Gaussian expressions and the prior class probabilities gives the **decision boundary equation**: $$\log \frac{\pi_j}{\pi_m} - \tfrac{1}{2}(\boldsymbol{\mu}_j + \boldsymbol{\mu}_m)^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) + x^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) = 0.$$
 
 This is a **linear equation in** $\mathbf{x}$.\
 Hence, the boundaries separating any two classes $j$ and $m$ are **hyperplanes** in $\mathbb{R}^p$ of dimension $p - 1$.\
@@ -1644,8 +1628,7 @@ After fitting LDA to these two features, we obtain three **piecewise linear deci
 
 ![LDA decision regions for the Iris data using two predictors (sepal length and sepal width).](Images_qmd_ML/ML5_iris.png){#fig-lda-iris width="55%"}
 
-In @fig-lda-iris, each coloured region represents the set of points assigned to one of the three classes. The black circles correspond to the training observations.\
-As expected from LDA, the boundaries between classes are straight lines — consistent with the linear decision boundaries derived theoretically.\
+In @fig-lda-iris, each coloured region represents the set of points assigned to one of the three classes. The black circles correspond to the training observations. As expected from LDA, the boundaries between classes are straight lines, i.e., consistent with the linear decision boundaries derived theoretically.\
 Despite using only two features, LDA achieves clear separation between *setosa* and the other two species, while *versicolor* and *virginica* overlap slightly, reflecting their natural similarity in the data.
 
 ## Extensions of LDA
@@ -1678,7 +1661,7 @@ Although QDA can fit the data more closely, it also increases the risk of overfi
 ## Comments on LDA
 
 LDA is **easy** and **fast to compute**.\
-It also provides estimates of the **posterior class probabilities**: $$\widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \frac{\hat{g}_j(\mathbf{x}_0)\hat{\pi}_j}{\sum_{k=1}^{q} \hat{g}_k(\mathbf{x}_0)\hat{\pi}_k}.$$
+It also provides estimates of the **posterior class probabilities**: $$\widehat{\Pr}(Y = j \mid X = x_0) = \frac{\hat{g}_j(x_0)\hat{\pi}_j}{\sum_{k=1}^{q} \hat{g}_k(x_0)\hat{\pi}_k}.$$
 
 In practice, LDA usually performs well and can compete with more complex methods.\
 This is not because the normality assumption is realistic, but because a **linear decision boundary** is often the best the data can support.\
@@ -1980,7 +1963,7 @@ As seen in Figure \ref{fig-ML6-col-plot}, the classifier attempts to separate th
 
 ## Digit classification
 
-We now apply the classification methods to the full ten-digit problem using all $p = 256$ pixel predictors. Each image is represented as a point in $\mathbb{R}^{256}$, where the predictors $\mathbf{x}_i$ correspond to the greyscale values of all pixels, and the outcome $y_i$ indicates which digit is shown.
+We now apply the classification methods to the full ten-digit problem using all $p = 256$ pixel predictors. Each image is represented as a point in $\mathbb{R}^{256}$, where the predictors $x_i$ correspond to the greyscale values of all pixels, and the outcome $y_i$ indicates which digit is shown.
 
 ![](Images_qmd_ML/ML6_digit_class.png){#fig-ML6-digit-class}
 
@@ -1988,13 +1971,13 @@ We now apply the classification methods to the full ten-digit problem using all 
 \textbf{Training and test data:}  
 \begin{itemize}
 \tightlist
-\item Training data $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_n, y_n)$, $n = 7290$, are used for model fitting and selection.  
+\item Training data $(x_1, y_1), \ldots, (x_n, y_n)$, $n = 7290$, are used for model fitting and selection.  
   \begin{itemize}
   \tightlist
-  \item Predictors $\mathbf{x}_i =$ $i$-th image $\in \mathbb{R}^p$ are the greyscale pixel values.  
+  \item Predictors $x_i =$ $i$-th image $\in \mathbb{R}^p$ are the greyscale pixel values.  
   \item Outcomes $y_i =$ $i$-th digit $\in \{\text{zero}, \text{one}, \ldots, \text{nine}\}$.
   \end{itemize}
-\item Test data $(\hat{\mathbf{x}}_1, \hat{y}_1), \ldots, (\hat{\mathbf{x}}_m, \hat{y}_m)$, $m = 2006$, are not used for fitting or selection, only for evaluating performance.
+\item Test data: $(\hat{x}_1, \hat{y}_1), \ldots, (\hat{x}_m, \hat{y}_m)$, $m = 2006$, are not used for fitting or selection, only for evaluating performance.
 \end{itemize}
 
 \smallskip
@@ -2048,11 +2031,11 @@ This visualisation provides an intuitive impression of the class centroids, illu
 
 ## Example: digit classification
 
-The table below shows a few misclassified test observations from the LDA1 model. Each row corresponds to one test image, with its true label shown in parentheses. The ten columns on the right display the predicted class probabilities (in %) for $k \in \{0, \ldots, 9\}$.
+The table in @fig-lda-misclassified presents a selection of misclassified test observations produced by the LDA1 model. Each row corresponds to a single handwritten digit from the test set, with the true class label reported in parentheses. The columns display the predicted class probabilities (in percent) assigned to each digit $k \in \{0,\ldots,9\}$.
 
-These results illustrate how the model distributes probability mass across different classes when uncertain. For example, a digit “6” may be partly misclassified as an “8” if the loop closure is faint, or a “9” mistaken for a “4” if the stem is short. Such errors reveal how subtle variations in handwriting can affect class boundaries and show the limits of simple linear discriminant models.
+Rather than concentrating probability mass entirely on the true class, the model often spreads it across several plausible alternatives. For example, a digit “6” may receive substantial probability for class “8” when the loop closure is faint, while a “9” can be confused with a “4” if the vertical stroke is unusually short. Such patterns illustrate how small variations in handwriting style can blur linear decision boundaries, revealing the inherent limitations of linear discriminant analysis in high-dimensional image classification problems.
 
-![](Images_qmd_ML/ML6_dig_class.png)
+![Predicted class probabilities (in %) for selected misclassified test images under the LDA1 model.](Images_qmd_ML/ML6_dig_class.png){#fig-lda-misclassified width="60%" fig-align="center"}
 
 ## Digit classification with regularisation
 
@@ -2271,15 +2254,15 @@ In the *Hitters* example, this corresponds to a **moderately sized tree** that r
 
 **Classification trees** are conceptually similar to regression trees, except that they predict a **qualitative** rather than a **quantitative** response. The response variable takes values in a finite set $\mathcal{G} = \{1, \ldots, q\}$, representing different classes.
 
-For each region $R_j$, the prediction is a constant $\hat{y}_{R_j}$ corresponding to the **most frequently occurring class** among the training observations that fall into that region. Formally, for class $g = 1, \ldots, q$: $$\hat{p}_{jg} = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} \mathbf{1}\{y_i = g\}.$$
+For each region $R_j$, the prediction is a constant $\hat{y}_{R_j}$ corresponding to the **most frequently occurring class** among the training observations that fall into that region. Formally, for class $g = 1, \ldots, q$: $$\hat{p}_{jg} = \frac{1}{n_j} \sum_{i : x_i \in R_j} 1 \{y_i = g\}.$$
 
-Hence, the classifier assigns each new observation to the region $R_j$ that maximises $\hat{p}_{jg}$, producing the final prediction function: $$\hat{G}(\mathbf{x}) = \sum_{j=1}^{J} \hat{y}_{R_j} \mathbf{1}\{\mathbf{x} \in R_j\}.$$
+Hence, the classifier assigns each new observation to the region $R_j$ that maximises $\hat{p}_{jg}$, producing the final prediction function: $$\hat{G}(x) = \sum_{j=1}^{J} \hat{y}_{R_j} 1 \{x \in R_j\}.$$
 
-The construction principles — such as **tree growth**, **pruning**, and **subtree selection** — are the same as in regression trees. However, the **residual sum of squares (RSS)** cannot be used as a loss function for qualitative outcomes. Instead, classification trees rely on **measures of node impurity**, which quantify the heterogeneity of classes within a region.
+The construction principles (such as **tree growth**, **pruning**, and **subtree selection**) are the same as in regression trees. However, the **residual sum of squares (RSS)** cannot be used as a loss function for qualitative outcomes. Instead, classification trees rely on **measures of node impurity**, which quantify the heterogeneity of classes within a region.
 
 Common impurity measures for a terminal node $R_j$ include:
 
-1.  **Misclassification error:** $$M = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} \mathbf{1}\{y_i \ne \hat{y}_{R_j}\}.$$
+1.  **Misclassification error:** $$M = \frac{1}{n_j} \sum_{i : x_i \in R_j} 1 \{y_i \ne \hat{y}_{R_j}\}.$$
 
 2.  **Gini index:** $$G = \sum_{g=1}^{q} \hat{p}_{jg} (1 - \hat{p}_{jg}).$$
 
