@@ -6,6 +6,8 @@
 .Rproj.user/
 # Ignore Microsoft Office temporary lock files
 ~$*
+# Ignore Rhistory
+.Rhistory
 
 # Large model / result artefacts from the weather project
 ML_Weather_Prediction/*.pkl
