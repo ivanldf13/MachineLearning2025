@@ -42,15 +42,15 @@ Machine learning aims at programming a computer to learn from information (Data)
 
 Types of variables:
 
--   quantitative variables take values in an ordered set, typically the real numbers R;
+-   **Quantitative variables** take values in an ordered set, typically the real numbers ($R$);
 
--   qualitative variables (also called categorical or factor) take values in a finite set $G = {G1, . . . , Gq }$ without ordering, e.g., ${Yes, No}$, ${blue, red, green, yellow}$, etc.
+-   **Qualitative variables** (also called categorical or factor) take values in a finite set $G = {G1, . . . , Gq }$ without ordering, e.g., ${Yes, No}$, ${blue, red, green, yellow}$, etc.
 
 **Supervised learning**
 
 We observe training data ($x_i , y_i ), i = 1, . . . , n$ where
 
--   the inputs $xi ∈ Rp$ are called predictors, covariates or features;
+-   the inputs $xi ∈ R^p$ are called predictors, covariates or features;
 
 -   the outputs $y_i$ are called responses (in this course we assume they are univariate).
 
@@ -86,25 +86,23 @@ $\hat{y}_0 = \hat{\beta}_0 + \hat{\beta}_1 x_0$
 
 -   $x_0$: This is the value of the predictor (input) variable that we're using to make a prediction.
 
-The numbers $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ are estimated model parameters. \### What does $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ mean?
+The numbers $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ are estimated model parameters.
 
-It says both $\hat{\beta}_0$ and $\hat{\beta}_1$ are **real numbers** — elements of the set of real numbers $\mathbb{R}$.
+### What does $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ mean?
 
-In practical terms: they're just numerical values (like 2.3, -1.5, etc.) estimated from the data using statistical methods (usually least squares).
+It says both $\hat{\beta}_0$ and $\hat{\beta}_1$ are **real numbers**, i.e., elements of the set of real numbers $\mathbb{R}$. In practical terms: they're just numerical values (like 2.3, -1.5, etc.) estimated from the data using statistical methods (usually least squares).
 
 ![Regression: simple linear model](Images_qmd_ML/ML1_regression.png){width="40%"}
 
 ## Regression: kNN method
 
--   **Data**: Observations (x1, y1), . . . , (xn, yn)
+-   **Data**: Observations ($x_1, y_1$), . . . , ($x_n, y_n$)
 
--   **Goal**: Predict unknown outcome y0 for new predictor x0.
+-   **Goal**: Predict unknown outcome y0 for new predictor $x_0$.
 
 ### The k-Nearest Neighbor (kNN) Method
 
-The prediction for a new input $x_0$ is given by:
-
-$$\hat{y}_0 = \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} y_i = \text{ave}\{y_i : x_i \in N_k(x_0)\}$$
+The prediction for a new input $x_0$ is given by: $$\hat{y}_0 = \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} y_i = \text{ave}\{y_i : x_i \in N_k(x_0)\}$$
 
 -   $N_k(x_0)$ refers to the $k$ closest points $x_i$ to $x_0$ in the training data.
 -   The number $k$ is a **tuning parameter** that controls how many neighbours are used to make the prediction.
@@ -112,10 +110,6 @@ $$\hat{y}_0 = \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} y_i = \text{ave}\{y_i : x_
 ![K = 1](Images_qmd_ML/ML1_pred_kNN_1.png){width="33%"} ![K = 5](Images_qmd_ML/ML1_pred_kNN_5.png){width="33%"} ![K = 20](Images_qmd_ML/ML1_pred_kNN_20.png){width="33%"}
 
 As we see in the figures above, the greater the number of neighbours, the smoother the curve since we are taking into account more information.
-
-```{r}
-#TODO how to put the three images next to each other with the undertitle
-```
 
 Business application: advertising
 
@@ -125,25 +119,19 @@ Medical application: body fat
 
 -   **Data:** Observations $(x_1, y_1), \ldots, (x_n, y_n)$, where $y_i \in G = \{0, 1\}$
 
-```{r}
-#TODO can classification methods have more y_i than 0 or 1?
-```
-
--   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$
+-   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$.
 
 Directly apply linear regression treating the classes as quantitative values 0 and 1.\
-The prediction is
-
-$$\hat{y}_0 = \begin{cases}
+The prediction is $$\hat{y}_0 = \begin{cases}
 1, & \text{if } \hat{\beta}_0 + \hat{\beta}^T x_0 \geq \frac{1}{2}, \\
 0, & \text{otherwise}.
 \end{cases}$$
 
 The numbers $\hat{\beta}_0, \hat{\beta}_1 \in \mathbb{R}$ are estimated model parameters.
 
-can be explained term-by-term as follows:
+The previous expression can be explained term-by-term as follows:
 
--   $\hat{y}_0$: The predicted class label for a new input $x_0$. The hat ($\hat{\ }$) indicates it's an estimate from the model.
+-   $\hat{y}_0$: The predicted class label for a new input $x_0$. The hat (\^) indicates it's an estimate from the model.
 
 -   **The piecewise notation** $\begin{cases} ... \end{cases}$ means the prediction depends on a condition.
 
@@ -151,32 +139,28 @@ can be explained term-by-term as follows:
 
 -   $\hat{\beta}^T x_0$: The dot product (transpose of $\hat{\beta}$ times $x_0$), representing the weighted sum of the input features.
 
--   $\hat{\beta}_0 + \hat{\beta}^T x_0$: The linear combination of the intercept and weighted features — the model’s predicted score.
+-   $\hat{\beta}_0 + \hat{\beta}^T x_0$: The linear combination of the intercept and weighted features, i.e., the model’s predicted score.
 
 -   $\geq \frac{1}{2}$: The threshold. If the score is greater than or equal to 0.5, predict class 1; otherwise, 0.
 
 -   **1 and 0**: The two possible class labels (e.g., positive/negative or class 1/class 0).
 
-In simple terms:\
-You calculate a score from the model for $x_0$. If it’s at least 0.5, you predict class 1; otherwise, class 0.
+In simple terms: You calculate a score from the model for $x_0$. If it’s at least 0.5, you predict class 1; otherwise, class 0.
 
 ![Classification: simple linear model](Images_qmd_ML/ML1_classification_lr.png){width="40%"}
 
 ## Classification: the kNN Method
 
--   **Data:** Observations $(x_1, y_1), \ldots, (x_n, y_n)$, where $y_i \in G = \{0, 1\}$
+-   **Data:** Observations $(x_1, y_1), \ldots, (x_n, y_n)$, where $y_i \in G = \{0, 1\}$.
 
--   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$
+-   **Goal:** Predict unknown class $y_0$ for new predictor $x_0$.
 
-The k-Nearest-Neighbor (kNN) method predicts the majority class in the neighborhood:
-
-$$\hat{y}_0 = \begin{cases}
-1, & \text{if } \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} \mathbf{1}\{y_i = 1\} > \frac{1}{2}, \\
+The k-Nearest-Neighbor (kNN) method predicts the majority class in the neighborhood:$$ \hat{y}_0 = \begin{cases}
+1, & \text{if } \frac{1}{k} \sum_{i : x_i \in N_k(x_0)} 1\{y_i = 1\} > \frac{1}{2}, \\
 0, & \text{otherwise}.
-\end{cases}$$
+\end{cases} $$
 
-Here, $N_k(x_0)$ are the $k$ closest points $x_i$ to $x_0$.\
-The number $k$ is a tuning parameter, meaning that it does not come from the data. We can choose which k would be better using Cross Validation, for example.
+Here, $N_k(x_0)$ are the $k$ closest points $x_i$ to $x_0$. The number $k$ is a tuning parameter, meaning that it does not come from the data. We can choose which k would be better using Cross Validation, for example.
 
 ### Explanation of terms:
 
@@ -184,19 +168,19 @@ The number $k$ is a tuning parameter, meaning that it does not come from the dat
 
 -   $N_k(x_0)$: The set of the $k$ closest neighbors to $x_0$ in the training data.
 
--   $\mathbf{1}\{y_i = 1\}$: An indicator function that equals 1 if the class label $y_i$ is 1, and 0 otherwise.
+-   $1\{y_i = 1\}$: An indicator function that equals 1 if the class label $y_i$ is 1, and 0 otherwise.
 
--   $\frac{1}{k} \sum_{i : x_i \in N_k(x_0)} \mathbf{1}\{y_i = 1\}$: The fraction of neighbours whose class is 1 — effectively, the proportion of class 1 in the neighbourhood.
+-   $\frac{1}{k} \sum_{i : x_i \in N_k(x_0)} 1\{y_i = 1\}$: The fraction of neighbours whose class is 1; effectively, the proportion of class 1 in the neighbourhood.
 
--   $> \frac{1}{2}$: The decision threshold — if more than half the neighbours are class 1, predict 1; otherwise, predict 0.
+-   $> \frac{1}{2}$: The decision threshold: if more than half the neighbours are class 1, predict 1; otherwise, predict 0.
 
--   $k$: The tuning parameter controlling how many neighbors to consider.
+-   $k$: The tuning parameter controlling how many neighbours to consider.
 
 ![K = 1](Images_qmd_ML/ML1_class_kNN_1.png){width="33%"} ![K = 5](Images_qmd_ML/ML1_class_kNN_5.png){width="33%"} ![K = 20](Images_qmd_ML/ML1_class_kNN_20.png){width="33%"}
 
 Again, with low $k$, we tend to overfit the model to our training data.
 
-### Handwritten characters / digits recognitions
+### Handwritten characters / digits recognition
 
 Each pixel gives us the amount of darkness in a grey scale (0 to 9). We have 32 predictors (16 times 16, the size of the pictures). Given this predictors the system has to predict
 
@@ -228,18 +212,17 @@ We want to create a model that represents reality but we don't want to make it t
 
 -   We have a **quantitative response** $Y$ and $p$ **predictors** $X_1, \ldots, X_p$.
 
--   We assume there is a relationship between $Y$ and $X = (X_1, \ldots, X_p)$ given by\
-    $$ Y = f(X) + \varepsilon $$ where $\varepsilon$ is a random error term with $\mathbb{E}(\varepsilon) = 0$ (on average, errors cancel out and there is no systematic bias in the error) and $\text{Var}(\varepsilon) = \sigma^2$ (the variability of $\varepsilon$ is constant — homoscedastic — i.e. it does not depend on $X$).
+-   We assume there is a relationship between $Y$ and $X = (X_1, \ldots, X_p)$ given by $$Y = f(X) + \varepsilon$$ where $\varepsilon$ is a random error term with $\mathbb{E}(\varepsilon) = 0$ (on average, errors cancel out and there is no systematic bias in the error) and $\text{Var}(\varepsilon) = \sigma^2$ (the variability of $\varepsilon$ is constant, i.e., homoscedastic (it does not depend on $X$)).
 
 -   The function $f$ is **fixed but unknown**[^1] and represents the **systematic information** that $X$ provides about $Y$.
 
-[^1]: It's fixed because the relationship between $X$ and $Y$ in the population exists — it’s not random. In our housing example, there really is a true relationship between size and price. And it's unknown, we don’t know what $f$ actually is, that’s what we’re trying to estimate using data. When we run a regression, we build an estimate $\hat{f}(X)$ that approximates the true (but hidden) $f(X)$.
+[^1]: It's fixed because the relationship between $X$ and $Y$ in the population exists, it’s not random. In our housing example, there really is a true relationship between size and price. And it's unknown, we don’t know what $f$ actually is, that’s what we’re trying to estimate using data. When we run a regression, we build an estimate $\hat{f}(X)$ that approximates the true (but hidden) $f(X)$.
 
 **Example** Let: $Y =$ *house price* (in 100k) and $X =$ *size* (in $m^2$)
 
 Then: $$Y = 2 + 0.03X + \varepsilon$$
 
-which can be interpreted as: $\text{house price} = 2 + 0.03 \times \text{size} + \text{error}$
+which can be interpreted as: $\text{house price} = 2 + 0.03 \times \text{size} + \text{error}$.
 
 -   This true relationship $f(X) = 2 + 0.03X$ is called the **population regression line**.
 
@@ -249,14 +232,14 @@ which can be interpreted as: $\text{house price} = 2 + 0.03 \times \text{size} +
 
 **Understanding why it is** $(p + 1)$-dimensional
 
-In regression, $X$ is not just one variable — it’s a vector of predictors: $$ X = (X_1, X_2, \dots, X_p) $$
+In regression, $X$ is not just one variable, it’s a vector of predictors: $$ X = (X_1, X_2, \dots, X_p) $$
 
 \newpage
 
 1.  **What we mean by** $(X, Y)$
 
     -   Each $X_j$ represents one feature (e.g. size, number of rooms, location, etc.), and there are $p$ such features in total.
-    -   The response variable $Y$ is another random variable — the outcome we want to predict (e.g. house price).
+    -   The response variable $Y$ is another random variable, i.e., the outcome we want to predict (e.g. house price).
     -   So when we consider the pair $(X, Y)$ together, we’re grouping all predictors and the response into one joint random vector.
 
 2.  **Counting the dimensions**
@@ -267,7 +250,7 @@ In regression, $X$ is not just one variable — it’s a vector of predictors: $
 
 3.  **Why it matters**
 
-    -   We call it a **random vector** because all its components (the predictors $X_1, \ldots, X_p$ and the response $Y$) are random variables.
+    -   We call it a **random vector** because all its components (the predictors $X_1, \ldots, X_p$ and the response $Y$) are random variables (they represent quantities that vary across individuals in the population, and whose values are not known in advance).
 
     -   Their joint distribution $P(X_1, X_2, \dots, X_p, Y)$ describes how they vary together in the population.
 
@@ -281,7 +264,7 @@ At the **population level**, $(X, Y)$ represents the theoretical random vector: 
 
 Each $X_j$ is a random variable corresponding to one predictor, and $Y$ is the random response variable.
 
-At the **observation level**, we work with realised data points — specific numerical values drawn from this population. For observation $i$, we write: $$ (x_i, y_i) = (x_{i1}, x_{i2}, \dots, x_{ip}, y_i) $$ For example, if $p = 2$ (size and number of rooms) and $Y$ is house price:
+At the **observation level**, we work with realised data points, in other words, specific numerical values drawn from this population. For observation $i$, we write: $$ (x_i, y_i) = (x_{i1}, x_{i2}, \dots, x_{ip}, y_i) $$ For example, if $p = 2$ (size and number of rooms) and $Y$ is house price:
 
 | Observation | $x_{i1}$ (size) | $x_{i2}$ (rooms) | $y_i$ (price) |
 |:-----------:|:---------------:|:----------------:|:-------------:|
@@ -300,7 +283,7 @@ Thus, each $(x_i, y_i)$ is one **realisation** of the $(p + 1)$-dimensional rand
 -   Assume we are given $n$ measurements $(x_1, y_1), \dots, (x_n, y_n)$ of $(X, Y)$, where $x_i = (x_{i1}, \dots, x_{ip})^\top$, and
     -   the inputs $x_i \in \mathbb{R}^p$ are called **predictors**
     -   the outputs $y_i$ are called **responses**
--   We will use this data to **learn** the unknown relationship $f$ between $Y$ and $X$, i.e., to **train** (or **estimate**) a predictive model $\hat{f}$
+-   We will use this data to **learn** the unknown relationship $f$ between $Y$ and $X$, i.e., to **train** (or **estimate**) a predictive model $\hat{f}$.
 
 **Example** : $[Y = \text{house price (100k)}; \quad X = \text{size (m}^2)]$; $\text{house price} \approx \hat{f}(\text{size}) = 2.977 + 0.027 \times \text{size}$
 
@@ -376,15 +359,15 @@ Geometrically, if you look at all points with the same $X = 3$, their $Y$-values
 
 ### Defining what a “good” prediction means
 
-To decide what makes a **good prediction**, we need a way to measure how far a predicted value $\hat{y}$ is from the true value $y$. This is done through a **loss function** $L$, which quantifies the **discrepancy** between prediction and reality.
+To decide what makes a **good prediction**, we need a way to measure how far a predicted value $\hat{y}$ is from the true value $y$. This is done through a **loss function** $L$, which quantifies the **discrepancy** between prediction and reality. In other words, a loss function is a rule that assigns a numerical penalty to each prediction, depending on how wrong it is.
 
-### Squared Error Loss
+### Squared Error Loss (pointwise)
 
 In regression, the most common choice is the **squared error loss**: $$L(y, \hat{y}) = (y - \hat{y})^2$$
 
 This loss penalises large errors more heavily than small ones, because the difference is squared.
 
-### Expected squared prediction error
+### Expected squared prediction error (population risk)
 
 For a predictive model $\hat{f}$, we can define the **expected loss**, that is, the expected squared prediction error across all possible pairs $(X, Y)$: $$ \text{Err}_{\hat{f}} = \mathbb{E}\{[Y - \hat{f}(X)]^2\} $$
 
@@ -418,7 +401,9 @@ What we can do to estimate $\hat{f}(x)$ in practice is to approximate the expect
 
 ### The k-Nearest Neighbours approach
 
-The **k-Nearest Neighbours (k-NN)** method estimates $\hat{f}(x_0)$ by averaging the $Y$ values of the $k$ data points whose $X_i$ values are closest to $x_0$: $$\hat{f}(x_0) = \text{Ave}(Y \mid X \in N_k(x_0))$$where:
+The **k-Nearest Neighbours (k-NN)** method estimates $\hat{f}(x_0)$ by averaging the $Y$ values of the $k$ data points whose $X_i$ values are closest to $x_0$: $$\hat{f}(x_0) = \text{Ave}(Y \mid X \in N_k(x_0))$$
+
+where:
 
 -   $N_k(x_0)$ is the set of the $k$ observations $(x_i, y_i)$ whose $x_i$ values are closest to $x_0$.
 
@@ -446,7 +431,7 @@ The **k-Nearest Neighbours (k-NN)** method estimates $\hat{f}(x_0)$ by averaging
   \setlength\itemsep{0.2em}
   \item The \textbf{vertical solid line} marks the target point $x_0 = 3$.
   \item The \textbf{dashed vertical lines} indicate the neighbourhood $N_k(x_0)$, which contains the $k$ nearest observations around $x_0$.
-  \item The \textbf{average of the $Y$ values} within this neighbourhood provides $\hat{f}(3)$ — the \emph{estimated regression value} at $X = 3$.
+  \item The \textbf{average of the $Y$ values} within this neighbourhood provides $\hat{f}(3)$, the \emph{estimated regression value} at $X = 3$.
 \end{itemize}
 \end{minipage}
 
@@ -495,7 +480,7 @@ This quantity estimates the expected squared prediction error using the availabl
 We square the error for three main reasons:
 
 1.  **To penalise large errors more strongly:**\
-    Squaring makes large deviations more costly — an error of 4 is *four times* worse than an error of 2.
+    Squaring makes large deviations more costly. For example, an error of 4 leads to a squared loss of 16, whereas an error of 2 leads to a squared loss of 4, so the larger error is penalised four times as much.
 2.  **To avoid cancellation of positive and negative errors:**\
     Without squaring (or taking absolute values), overestimates and underestimates would cancel each other out.
 3.  **For mathematical and statistical convenience:**\
@@ -533,7 +518,7 @@ In **simple linear regression**, we assume that the relationship between $Y$ and
 
 -   $\beta_0$ is the **intercept**, i.e., the predicted value of $Y$ when $X = 0$;
 
--   $\beta_1$ is the **slope** — the expected change in $Y$ for a one-unit increase in $X$.
+-   $\beta_1$ is the **slope**: the expected change in $Y$ for a one-unit increase in $X$.
 
 Together, $\beta_0$ and $\beta_1$ are called the **model coefficients** or **parameters**.
 
@@ -549,16 +534,14 @@ Finally, to measure the total prediction error across all observations, we compu
 
 or equivalently, $$ \text{RSS}(\hat{\beta}_0, \hat{\beta}_1) = \sum_{i=1}^{n} (y_i - \hat{f}(x_i))^2 = \sum_{i=1}^{n} (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i)^2 $$
 
-Minimising this RSS gives the **least squares estimates** $\hat{\beta}_0$ and $\hat{\beta}_1$ — the line that best fits the data in the least-squares sense.
+Minimising this RSS gives the **least squares estimates** $\hat{\beta}_0$ and $\hat{\beta}_1$, in other words, the line that best fits the data in the least-squares sense.
 
 \begin{minipage}{0.38\textwidth}
 \vspace*{\fill}
-\begin{figure}[H]
 \centering
 \includegraphics[width=0.95\linewidth]{Images_qmd_ML/ML2_SLR.png}
-\caption{\footnotesize Simple Linear Regression: true function vs. estimated function}
-\label{fig:slr-lines}
-\end{figure}
+
+\footnotesize Simple Linear Regression: true function vs. estimated function
 \vspace*{\fill}
 \end{minipage}
 \hfill
@@ -566,10 +549,10 @@ Minimising this RSS gives the **least squares estimates** $\hat{\beta}_0$ and $\
 \textbf{As we see in the plot on the left:}
 
 \begin{itemize}
-  \setlength\itemsep{0.2em} % tighter spacing between bullet points
-  \item The \textbf{red line} represents the \emph{true} function $f(X) = \beta_0 + \beta_1 X$, which is generally unknown.
-  \item The \textbf{blue line} represents the \emph{estimated} regression line $\hat{f}(X) = \hat{\beta}_0 + \hat{\beta}_1 X$.
-  \item The \textbf{vertical grey lines} show the residuals $e_i = y_i - \hat{y}_i$, i.e., the differences between the observed and fitted values.
+  \setlength\itemsep{0.2em}
+  \item The \textbf{\textcolor{red}{red line}} represents the \emph{true} function $f(X) = \beta_0 + \beta_1 X$, which is generally unknown.
+  \item The \textbf{\textcolor{blue}{blue line}} represents the \emph{estimated} regression line $\hat{f}(X) = \hat{\beta}_0 + \hat{\beta}_1 X$.
+  \item The \textbf{\textcolor{gray}{vertical grey lines}} show the residuals $e_i = y_i - \hat{y}_i$, i.e., the differences between the observed and fitted values.
 \end{itemize}
 
 The goal of linear regression is to make the estimated line $\hat{f}(X)$ as close as possible to the true underlying relationship $f(X)$ by minimising the RSS.
@@ -583,18 +566,14 @@ where $$\text{RSS}(\beta_0, \beta_1) = \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x
 
 This means we are finding the intercept and slope that make the predicted values $\hat{y}_i = \beta_0 + \beta_1 x_i$ as close as possible to the actual $y_i$, in the least-squares sense.
 
-So, **how do we solve the optimisation problem?**.
+So, **how do we solve the optimisation problem?**
 
 There are two main approaches to find $(\hat{\beta}_0, \hat{\beta}_1)$:
 
 1.  **Numerically**, using computer algorithms such as **gradient descent**, which iteratively adjusts the coefficients to reduce the RSS.
-2.  **Analytically**, by **differentiation** — setting the partial derivatives of the RSS with respect to $\beta_0$ and $\beta_1$ to zero and solving the system of equations.
+2.  **Analytically**, by **differentiation**, i.e., setting the partial derivatives of the RSS with respect to $\beta_0$ and $\beta_1$ to zero and solving the system of equations.
 
-The analytical (closed-form) solutions are:
-
-$$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
-
-$$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+The analytical (closed-form) solutions are: $$\hat{\beta}_1 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^{n}(x_i - \bar{x})^2}$$ $$\hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
 
 where $\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i$ and $\bar{y} = \frac{1}{n} \sum_{i=1}^{n} y_i$ are the **sample means** of $X$ and $Y$ respectively.
 
@@ -608,9 +587,9 @@ The estimates $(\hat{\beta}_0, \hat{\beta}_1)$ are **random variables**, not fix
 \textbf{In the plot on the right:}
 
 \begin{itemize}
-  \item The \textbf{red line} represents the true model $f(X) = \beta_0 + \beta_1 X$.
-  \item The \textbf{blue line} shows the estimated regression line $\hat{f}(X) = \hat{\beta}_0 + \hat{\beta}_1 X$.
-  \item The \textbf{grey lines} correspond to regression lines obtained from other random samples, illustrating how $(\hat{\beta}_0, \hat{\beta}_1)$ vary due to sampling variability.
+  \item The \textbf{\textcolor{red}{red line}} represents the true model $f(X) = \beta_0 + \beta_1 X$.
+  \item The \textbf{\textcolor{blue}{blue line}} shows the estimated regression line $\hat{f}(X) = \hat{\beta}_0 + \hat{\beta}_1 X$.
+  \item The \textbf{\textcolor{gray}{grey lines}} correspond to regression lines obtained from other random samples, illustrating how $(\hat{\beta}_0, \hat{\beta}_1)$ vary due to sampling variability.
 \end{itemize}
 \end{minipage}
 \hfill
@@ -675,7 +654,7 @@ Expanding the dot product $x_i^\top \beta$ gives $$\text{RSS}(\beta_0, \ldots, \
 
 This expression measures how far the model’s predictions are from the true observed values, across all $n$ observations. The parameter estimates $(\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p)$ are the values that **minimise** this total squared error.
 
-**Intuition:** this generalises the simple linear regression idea — we’re fitting a *hyperplane* rather than a line. Each coefficient $\beta_j$ tells us how $Y$ changes when predictor $X_j$ increases by one unit, **holding all other predictors constant**. The minimisation process finds the hyperplane that best fits all the data points in $p$-dimensional space by minimising the vertical distances (residuals).
+**Intuition:** this generalises the simple linear regression idea, in other words, we’re fitting a *hyperplane* rather than a line. Each coefficient $\beta_j$ tells us how $Y$ changes when predictor $X_j$ increases by one unit, **holding all other predictors constant**. The minimisation process finds the hyperplane that best fits all the data points in $p$-dimensional space by minimising the vertical distances (residuals).
 
 ### Making Predictions
 
@@ -686,9 +665,9 @@ Here, the new point $x_0$ represents a new combination of predictor values (e.g.
 \begin{minipage}{0.6\textwidth}
 \textbf{In the 3D plot on the right:}
 \begin{itemize}
-  \item The \textbf{green–blue surface} represents the fitted regression plane (the model $\hat{f}(X)$).
-  \item The \textbf{red points} are the observed data points $(x_{i1}, x_{i2}, y_i)$.
-  \item The \textbf{vertical red lines} show residuals — the distances between the actual values and the fitted surface.
+  \item The \textbf{\textcolor{teal}{green--blue surface}} represents the fitted regression plane (the model $\hat{f}(X)$).
+  \item The \textbf{\textcolor{red}{red points}} are the observed data points $(x_{i1}, x_{i2}, y_i)$.
+  \item The \textbf{\textcolor{gray}{vertical grey lines}} show residuals, i.e., the distances between the actual values and the fitted surface.
 \end{itemize}
 
 \textbf{Intuition:} when we move from simple to multiple regression, we replace the best-fitting line with the best-fitting \textit{plane} (or \textit{hyperplane} in higher dimensions). The same least-squares principle applies: the plane is positioned to minimise the overall squared vertical distances between the observed points and the regression surface.
@@ -702,30 +681,6 @@ Here, the new point $x_0$ represents a new combination of predictor values (e.g.
 \label{fig:mlr-3d}
 \end{figure}
 \end{minipage}
-
-## Estimation and Prediction in Multiple Linear Regression
-
-As before, we estimate the parameters $(\beta_0, \beta_1, \ldots, \beta_p)$ by minimising the **residual sum of squares (RSS)**: $$\text{RSS}(\beta_0, \ldots, \beta_p) = \sum_{i=1}^{n} (y_i - \beta_0 - x_i^\top \beta)^2$$
-
-Expanding the dot product $x_i^\top \beta$ gives $$\text{RSS}(\beta_0, \ldots, \beta_p) = \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1 x_{i1} - \cdots - \beta_p x_{ip})^2$$
-
-This expression measures how far the model’s predictions are from the true observed values, across all $n$ observations. The parameter estimates $(\hat{\beta}_0, \hat{\beta}_1, \ldots, \hat{\beta}_p)$ are the values that **minimise** this total squared error.
-
-**Intuition:** this generalises the simple linear regression idea — we’re fitting a *hyperplane* rather than a line. Each coefficient $\beta_j$ tells us how $Y$ changes when predictor $X_j$ increases by one unit, **holding all other predictors constant**. The minimisation process finds the hyperplane that best fits all the data points in $p$-dimensional space by minimising the vertical distances (residuals).
-
-### Making Predictions
-
-Once the parameters are estimated, we can predict the response for a new observation $x_0 = (x_{01}, \ldots, x_{0p})$ using $$\hat{y}_0 = \hat{\beta}_0 + x_0^\top \hat{\beta}$$ or equivalently $$\hat{y}_0 = \hat{\beta}_0 + \hat{\beta}_1 x_{01} + \cdots + \hat{\beta}_p x_{0p}$$ where $\hat{\beta} = (\hat{\beta}_1, \ldots, \hat{\beta}_p)$.
-
-**Intuition:** the new point $x_0$ represents a new combination of predictor values (e.g. TV, radio, and newspaper budgets). By plugging these into the model, we obtain the **predicted response** $\hat{y}_0$, which lies on the estimated regression surface.
-
-### Visual Interpretation
-
-In the 3D plot on the right: - The **green–blue surface** represents the fitted regression plane (the model $\hat{f}(X)$).\
-- The **red points** are the observed data points $(x_{i1}, x_{i2}, y_i)$.\
-- The **vertical red lines** show residuals — the distances between actual values and the fitted surface.
-
-**Intuition:** when we move from simple to multiple regression, we replace the best-fitting line with the best-fitting *plane* (or *hyperplane* in higher dimensions). The same least-squares principle applies: the plane is positioned to minimise the overall squared vertical distances between the data points and the surface.
 
 ## Advertising Data
 
@@ -750,7 +705,7 @@ The **intercept** (2.939) represents the expected sales when all advertising bud
 | **radio**     |     |   1    |   0.354   |
 | **newspaper** |     |        |     1     |
 
-**Intuition:** correlations among predictors help us detect **multicollinearity** — when predictors are correlated with each other. Here, the correlations are low (except a moderate 0.354 between radio and newspaper), so multicollinearity is not a major issue.
+**Intuition:** correlations among predictors help us detect **multicollinearity**, in other words, when predictors are correlated with each other. Here, the correlations are low (except a moderate 0.354 between radio and newspaper), so multicollinearity is not a major issue.
 
 ## Example: The Auto Data Set
 
@@ -773,9 +728,9 @@ In this case, both $\beta_1$ and $\beta_2$ are statistically significant, meanin
 \hfill
 \begin{minipage}{0.6\textwidth}
 \begin{itemize}
-  \item The \textbf{yellow line} represents a simple linear fit (degree 1).
-  \item The \textbf{blue curve} (degree 2) captures curvature and fits the data better.
-  \item The \textbf{green curve} (degree 5) fits the data even more closely but may overfit small variations.
+  \item The \textbf{\textcolor{yellow}{yellow line}} represents a simple linear fit (degree 1).
+  \item The \textbf{\textcolor{blue}{blue curve}} (degree 2) captures curvature and fits the data better.
+  \item The \textbf{\textcolor{green}{green curve}} (degree 5) fits the data even more closely but may overfit small variations.
 \end{itemize}
 
 The goal is to strike a balance between \textbf{bias} (oversimplification) and \textbf{variance} (overfitting) when choosing model complexity.
@@ -793,9 +748,9 @@ By using basis functions, we can bend or reshape the linear model to capture mor
 
 ### Possible Choices for the Basis Functions $h_m(X)$
 
--   $h_m(X) = X_m$, for $m = 1, \ldots, p$: essentially recovers the original linear model.\
--   $h_m(X) = X_j^2$ or $h_m(X) = X_j X_k$: allows higher-order polynomial terms or interactions between predictors.\
--   $h_m(X) = \log(X_j)$ or $h_m(X) = \sqrt{X_j}$: captures other nonlinear transformations.\
+-   $h_m(X) = X_m$, for $m = 1, \ldots, p$: essentially recovers the original linear model.
+-   $h_m(X) = X_j^2$ or $h_m(X) = X_j X_k$: allows higher-order polynomial terms or interactions between predictors.
+-   $h_m(X) = \log(X_j)$ or $h_m(X) = \sqrt{X_j}$: captures other nonlinear transformations.
 -   etc.
 
 **Intuition:** each $h_m(X)$ acts as a new transformed version of the original predictors, expanding the feature space to better approximate the true relationship $f(X)$. Linear regression then finds the best linear combination of these transformed predictors.
@@ -886,7 +841,7 @@ Here $\theta = (\beta_0, \beta_1)^\top$ denotes the parameter vector, and $J(\th
 
 ## Gradient Descent: Remarks
 
-Gradient descent is a general optimisation algorithm used to find the parameter values that minimise a cost (or objective) function $J(\theta)$.nFormally, it solves the problem $\arg\min_{\theta \in \mathbb{R}^d} J(\theta)$.
+Gradient descent is a general optimisation algorithm used to find the parameter values that minimise a cost (or objective) function $J(\theta)$. Formally, it solves the problem $\arg\min_{\theta \in \mathbb{R}^d} J(\theta)$.
 
 ## Key Points
 
@@ -1421,27 +1376,26 @@ How do we measure the quality of a prediction? For classification, the squared e
 
 ## The Bayes Classifier
 
-What is a \textbf{good classifier}? Ideally, we would like to find the optimal $G^*$ that minimises  
+What is a \textbf{good classifier}? Ideally, we would like to find the optimal $G^*$ that minimises\
 $$ \text{Err}_{\hat{G}} = \Pr\{Y \ne \hat{G}(X)\}. $$
 
-For simplicity, consider \textbf{two-class classification}, i.e. $\mathcal{G} = \{0, 1\}$.  
+For simplicity, consider \textbf{two-class classification}, i.e. $\mathcal{G} = \{0, 1\}$.\
 The optimal $G^*$ is called the \textbf{Bayes classifier}, which assigns each observation to the class with the highest conditional probability $\Pr(Y = j \mid X = \mathbf{x})$.
 
-Formally, the Bayes classifier assigns to a predictor $\mathbf{x}$ the most likely class:
-$$ G^*(\mathbf{x}) = \underset{j = 0, 1}{\arg\max} \, \Pr(Y = j \mid X = \mathbf{x}) = 
+Formally, the Bayes classifier assigns to a predictor $\mathbf{x}$ the most likely class: $$ G^*(\mathbf{x}) = \underset{j = 0, 1}{\arg\max} \, \Pr(Y = j \mid X = \mathbf{x}) = 
   \begin{cases}
   0 & \text{if } \Pr(Y = 0 \mid X = \mathbf{x}) > 1/2, \\
   1 & \text{otherwise.}
   \end{cases} $$
 
-- The \textbf{Bayes decision boundary} is the curve (in $\mathbb{R}^p$) where  
-  $$ \Pr(Y = 0 \mid X = \mathbf{x}) = 1/2. $$
+-   The \textbf{Bayes decision boundary} is the curve (in $\mathbb{R}^p$) where\
+    $$ \Pr(Y = 0 \mid X = \mathbf{x}) = 1/2. $$
 
-- The Bayes classifier achieves the \textbf{lowest possible 0–1 loss} — this minimum achievable error is called the \textbf{Bayes error rate}, given by  
-  $$ \text{Err}_{G^*} = \Pr\{Y \ne G^*(X)\}. $$
+-   The Bayes classifier achieves the \textbf{lowest possible 0–1 loss} — this minimum achievable error is called the \textbf{Bayes error rate}, given by\
+    $$ \text{Err}_{G^*} = \Pr\{Y \ne G^*(X)\}. $$
 
-The Bayes classifier represents the theoretical ideal: it predicts the class with the highest conditional probability given the input $X = \mathbf{x}$.  
-In practice, the true probabilities $\Pr(Y \mid X)$ are unknown, so learning algorithms approximate this rule from data.  
+The Bayes classifier represents the theoretical ideal: it predicts the class with the highest conditional probability given the input $X = \mathbf{x}$.\
+In practice, the true probabilities $\Pr(Y \mid X)$ are unknown, so learning algorithms approximate this rule from data.\
 The \textbf{decision boundary} (white curve in Figure \ref{fig-bayes-classifier}) separates regions where each class is more likely; in other words, it marks $\Pr(Y = 0 \mid X) = 0.5$.
 
 \begin{minipage}{0.55\textwidth}
@@ -1490,17 +1444,17 @@ In practice, the plug-in rule approximates the Bayes classifier by estimating $\
 
 Depending on how we model the relationship between $Y$ and $X$, we can distinguish three main approaches to classification:
 
-**(a) Generative models** estimate the **joint distribution** of $(Y, X)$ and then deduce the posterior class probabilities for $j = 0, 1$:  
-$$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}) = \frac{\widehat{\Pr}(Y = j, X = \mathbf{x})}{\widehat{\Pr}(X = \mathbf{x})}. $$  
-- More complex and data-demanding, as they require modelling both $Y$ and $X$.  
+**(a) Generative models** estimate the **joint distribution** of $(Y, X)$ and then deduce the posterior class probabilities for $j = 0, 1$:\
+$$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}) = \frac{\widehat{\Pr}(Y = j, X = \mathbf{x})}{\widehat{\Pr}(X = \mathbf{x})}. $$\
+- More complex and data-demanding, as they require modelling both $Y$ and $X$.\
 - **Examples:** Linear/Quadratic Discriminant Analysis, Naive Bayes.
 
-**(b) Discriminative models** estimate only the **conditional distribution** $\Pr(Y \mid X)$. That is, they directly model the posterior class probabilities $\widehat{\Pr}(Y = j \mid X = \mathbf{x})$.  
-- Usually preferred, since they provide posterior probabilities and are less complex than generative models.  
+**(b) Discriminative models** estimate only the **conditional distribution** $\Pr(Y \mid X)$. That is, they directly model the posterior class probabilities $\widehat{\Pr}(Y = j \mid X = \mathbf{x})$.\
+- Usually preferred, since they provide posterior probabilities and are less complex than generative models.\
 - **Examples:** *k*-Nearest Neighbours (kNN), Logistic Regression, Random Forest, Neural Networks.
 
-**(c) Geometric models** directly estimate a **decision boundary function** that predicts the class (0 or 1) from $\mathbf{x}$ without modelling probabilities.  
-- Simpler, since no probability distribution is assumed, but they do not provide estimates of class probabilities.  
+**(c) Geometric models** directly estimate a **decision boundary function** that predicts the class (0 or 1) from $\mathbf{x}$ without modelling probabilities.\
+- Simpler, since no probability distribution is assumed, but they do not provide estimates of class probabilities.\
 - **Examples:** Support Vector Machines (SVM).
 
 ## The Empirical Misclassification Rate
@@ -1533,17 +1487,16 @@ The plot on the right shows how the empirical misclassification rate changes wit
 
 Given a **data set** $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, we perform **K-Fold Cross-Validation (CV)** to estimate how well a classifier generalises to unseen data.
 
-For each fold $C_k$, $k = 1, \ldots, K$, we treat $C_k$ as the **validation/test set** and fit the classification model $\hat{G}_{-k}$ on the remaining $K - 1$ folds.  
-The **empirical misclassification rate** for fold $k$ is given by  
+For each fold $C_k$, $k = 1, \ldots, K$, we treat $C_k$ as the **validation/test set** and fit the classification model $\hat{G}_{-k}$ on the remaining $K - 1$ folds.\
+The **empirical misclassification rate** for fold $k$ is given by\
 $$ \text{err}_k = \frac{1}{|C_k|} \sum_{i \in C_k} L(y_i, \hat{G}_{-k}(x_i)) = \frac{1}{n/K} \sum_{i \in C_k} \mathbf{1}\{y_i \ne \hat{G}_{-k}(x_i)\}. $$
 
-The **K-Fold CV estimate** is then the average of these values:  
+The **K-Fold CV estimate** is then the average of these values:\
 $$ \text{CV}(K) = \frac{1}{K} \sum_{k = 1}^{K} \text{err}_k. $$
 
 ![K-Fold Cross-Validation: the dataset is divided into $K$ subsets (folds). Each fold acts once as a validation set (in red) while the remaining folds (in blue) are used for training. The process is repeated $K$ times, and the average error provides an overall estimate of model performance.](Images_qmd_ML/ML4_kfold.png){#fig-kfold-cv}
 
 As shown in @fig-kfold-cv, each block $C_1, C_2, \ldots, C_K$ represents a different subset of the data. The algorithm cycles through these folds, training on $K - 1$ parts and validating on the remaining one. This rotation ensures that every observation is used both for training and validation exactly once, producing a balanced and robust estimate of model accuracy.
-
 
 # Linear and Quadratic Discriminant Analysis (LDA & QDA)
 
@@ -1589,16 +1542,14 @@ Any point $(x_1, x_2)$ that satisfies this equation lies on the decision boundar
 \captionof{figure}{Linear decision boundary in $\mathbb{R}^2$ separating two classes.}\label{fig:hyperplane-2d}
 \end{minipage}
 
-Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + \mathbf{b}^\top \mathbf{x}$—that is, on which side of the boundary each observation lies.
-We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
+Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + \mathbf{b}^\top \mathbf{x}$—that is, on which side of the boundary each observation lies. We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
 
 \bigskip
 
-**Example $p = 3$**
+**Example** $p = 3$
 
-When we move to three dimensions, the hyperplane becomes a two-dimensional \emph{plane} in $\mathbb{R}^3$: $$(x_1, x_2, x_3) \in \mathbb{R}^3 : \; b_0 + b_1x_1 + b_2x_2 + b_3x_3 = 0.$$
-This plane divides the three-dimensional feature space into two half-spaces, one for each class.  
-Each additional predictor adds a new dimension to the feature space, while the decision boundary always remains one dimension lower.  
+When we move to three dimensions, the hyperplane becomes a two-dimensional \emph{plane} in $\mathbb{R}^3$: $$(x_1, x_2, x_3) \in \mathbb{R}^3 : \; b_0 + b_1x_1 + b_2x_2 + b_3x_3 = 0.$$ This plane divides the three-dimensional feature space into two half-spaces, one for each class.\
+Each additional predictor adds a new dimension to the feature space, while the decision boundary always remains one dimension lower.\
 The geometry is analogous to the regression surface shown earlier in Figure \ref{fig:mlr-3d}, except that here the plane represents a \emph{separating boundary} rather than a fitted surface.
 
 ## Linear Methods for Classification
@@ -1607,7 +1558,7 @@ A direct but naive approach to classification is to apply **linear regression** 
 
 Many other classification methods, however, also produce **linear decision boundaries**. These boundaries are linear **in the feature space**, corresponding to hyperplanes of the form $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
 
-By augmenting the feature space with transformations such as squares, interactions, or higher powers (e.g. $x_1^2$, $x_1x_2$, $x_2^3$), the model remains linear in this \emph{expanded space}, but its projection onto the original predictor space becomes **non-linear**.  
+By augmenting the feature space with transformations such as squares, interactions, or higher powers (e.g. $x_1^2$, $x_1x_2$, $x_2^3$), the model remains linear in this \emph{expanded space}, but its projection onto the original predictor space becomes **non-linear**.\
 Thus, linear classification in a rich feature space can yield flexible, curved decision boundaries in the original variables.
 
 ![Linear and piecewise-linear decision boundaries in feature and original spaces.](Images_qmd_ML/ML5_class.png){#fig-linear-classification}
@@ -1618,8 +1569,8 @@ In problems with more than two classes, linear methods produce **piecewise linea
 
 ### Setup
 
-We aim to classify an observation $Y \in \mathcal{G} = \{1, \ldots, q\}$ given predictors $X = (X_1, \ldots, X_p)$.  
-The idea is to model the **class-conditional densities** of $X$ given the class $Y = j$, denoted $g_j(x)$, and the **marginal class probabilities** $\pi_j = \Pr(Y = j)$ for $j = 1, \ldots, q$.  
+We aim to classify an observation $Y \in \mathcal{G} = \{1, \ldots, q\}$ given predictors $X = (X_1, \ldots, X_p)$.\
+The idea is to model the **class-conditional densities** of $X$ given the class $Y = j$, denoted $g_j(x)$, and the **marginal class probabilities** $\pi_j = \Pr(Y = j)$ for $j = 1, \ldots, q$.\
 Using Bayes’ theorem, we can express the posterior probability of belonging to class $j$ as $$\Pr(Y = j \mid X = x) = \frac{\Pr(X = x \mid Y = j) \Pr(Y = j)}{\Pr(X = x)}\propto g_j(x)\pi_j.$$
 
 This proportionality means that, for classification, we only need to compare the quantities $g_j(x)\pi_j$ across classes.
@@ -1628,29 +1579,29 @@ This proportionality means that, for classification, we only need to compare the
 
 In **Linear Discriminant Analysis (LDA)**:
 
-1. Each class-conditional density $g_j(x)$ is assumed to follow a **multivariate normal distribution**: $$g_j(x) = \frac{1}{(2\pi)^{p/2} (\det \Sigma_j)^{1/2}} \exp\left\{ -\frac{1}{2}(x - \mu_j)^\top \Sigma_j^{-1} (x - \mu_j) \right\}.$$
+1.  Each class-conditional density $g_j(x)$ is assumed to follow a **multivariate normal distribution**: $$g_j(x) = \frac{1}{(2\pi)^{p/2} (\det \Sigma_j)^{1/2}} \exp\left\{ -\frac{1}{2}(x - \mu_j)^\top \Sigma_j^{-1} (x - \mu_j) \right\}.$$
 
-2. All classes share the **same covariance matrix**, that is, $\Sigma_j = \Sigma$ for all $j$.
+2.  All classes share the **same covariance matrix**, that is, $\Sigma_j = \Sigma$ for all $j$.
 
 Under these assumptions, the decision boundary between two classes is **linear** in $x$, because the logarithm of the posterior probabilities yields a linear function of $x$.
 
 ![Class-conditional normal densities $g_1(x)\pi_1$ and $g_2(x)\pi_2$ under equal covariance assumption.](Images_qmd_ML/ML5_li_disc.png){#fig-lda-gaussians}
 
-@fig-lda-gaussians shows a one-dimensional example with two classes. Each class distribution is modelled by a Gaussian density with its own mean but identical variance.  
+@fig-lda-gaussians shows a one-dimensional example with two classes. Each class distribution is modelled by a Gaussian density with its own mean but identical variance.\
 The intersection point between the scaled densities $g_1(x)\pi_1$ and $g_2(x)\pi_2$ corresponds to the **decision boundary**, i.e., the value of $x$ where the posterior probabilities are equal.
 
 ## Estimation
 
-In practice, the parameters of LDA are estimated from a training sample $(y_1, \mathbf{x}_1), \ldots, (y_n, \mathbf{x}_n)$.  
+In practice, the parameters of LDA are estimated from a training sample $(y_1, \mathbf{x}_1), \ldots, (y_n, \mathbf{x}_n)$.\
 The model includes:
 
-- the **prior class probabilities** $\pi_1, \ldots, \pi_q \in (0, 1)$  
-- the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$  
-- the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$  
+-   the **prior class probabilities** $\pi_1, \ldots, \pi_q \in (0, 1)$\
+-   the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$\
+-   the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$
 
 We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} \mathbf{1}\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} \mathbf{x}_i \mathbf{1}\{y_i = j\}}{\sum_{i=1}^{n} \mathbf{1}\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} \mathbf{1}\{y_i = j\}}{n - q}.$$
 
-These estimators are simple closed forms — no iterative optimisation is needed — which makes LDA **computationally very fast**.  
+These estimators are simple closed forms — no iterative optimisation is needed — which makes LDA **computationally very fast**.\
 Unlike linear regression, we do not use the numerical values of the $y_i$’s, only their class membership.
 
 ## Prediction
@@ -1669,7 +1620,7 @@ We assign $\mathbf{x}_0$ to the class with the largest $\delta_j(\mathbf{x}_0)$.
 
 LDA classifies points based on their **Mahalanobis distance** to each class mean, adjusted by the prior probabilities: $$d_{\Sigma^{-1}}(x, \mu_j) = (x - \mu_j)^{\top}\Sigma^{-1}(x - \mu_j).$$
 
-In geometric terms, the decision boundary lies at points where two discriminant functions are equal, i.e. where the posterior probabilities of the classes coincide.  
+In geometric terms, the decision boundary lies at points where two discriminant functions are equal, i.e. where the posterior probabilities of the classes coincide.\
 These boundaries are **linear** because $\Sigma$ is common to all classes.
 
 ## Decision Boundaries
@@ -1680,21 +1631,21 @@ This is equivalent to $$\log \Pr(Y = j \mid X = \mathbf{x}) - \log \Pr(Y = m \mi
 
 Replacing these probabilities by their Gaussian expressions and the prior class probabilities gives the **decision boundary equation**: $$\log \frac{\pi_j}{\pi_m} - \tfrac{1}{2}(\boldsymbol{\mu}_j + \boldsymbol{\mu}_m)^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) + \mathbf{x}^{\top}\boldsymbol{\Sigma}^{-1}(\boldsymbol{\mu}_j - \boldsymbol{\mu}_m) = 0.$$
 
-This is a **linear equation in $\mathbf{x}$**.  
-Hence, the boundaries separating any two classes $j$ and $m$ are **hyperplanes** in $\mathbb{R}^p$ of dimension $p - 1$.  
+This is a **linear equation in** $\mathbf{x}$.\
+Hence, the boundaries separating any two classes $j$ and $m$ are **hyperplanes** in $\mathbb{R}^p$ of dimension $p - 1$.\
 For $q > 2$ classes, these hyperplanes together form a **piecewise linear decision boundary**.
 
 ## Iris Data Set
 
-To illustrate LDA in practice, we use the classic **Iris data set**, which contains 150 observations of three flower species: *setosa*, *versicolor*, and *virginica*.  Each plant is described by $p = 4$ predictors (sepal length, sepal width, petal length, and petal width), and the response variable $G = \{\textit{setosa}, \textit{versicolor}, \textit{virginica}\}$ indicates the species.
+To illustrate LDA in practice, we use the classic **Iris data set**, which contains 150 observations of three flower species: *setosa*, *versicolor*, and *virginica*. Each plant is described by $p = 4$ predictors (sepal length, sepal width, petal length, and petal width), and the response variable $G = \{\textit{setosa}, \textit{versicolor}, \textit{virginica}\}$ indicates the species.
 
-Here, we restrict the analysis to only **two predictors** (sepal length and sepal width) to visualise the classification boundary in two dimensions.  
+Here, we restrict the analysis to only **two predictors** (sepal length and sepal width) to visualise the classification boundary in two dimensions.\
 After fitting LDA to these two features, we obtain three **piecewise linear decision boundaries**, each separating one species from the others.
 
 ![LDA decision regions for the Iris data using two predictors (sepal length and sepal width).](Images_qmd_ML/ML5_iris.png){#fig-lda-iris width="55%"}
 
-In @fig-lda-iris, each coloured region represents the set of points assigned to one of the three classes. The black circles correspond to the training observations.  
-As expected from LDA, the boundaries between classes are straight lines — consistent with the linear decision boundaries derived theoretically.  
+In @fig-lda-iris, each coloured region represents the set of points assigned to one of the three classes. The black circles correspond to the training observations.\
+As expected from LDA, the boundaries between classes are straight lines — consistent with the linear decision boundaries derived theoretically.\
 Despite using only two features, LDA achieves clear separation between *setosa* and the other two species, while *versicolor* and *virginica* overlap slightly, reflecting their natural similarity in the data.
 
 ## Extensions of LDA
@@ -1711,41 +1662,209 @@ When some predictors are **categorical**, such as $X_1$, we can write $$g_j(x) =
 
 Finally, **non-parametric approaches** estimate $g_j(x)$ directly from data without assuming any specific parametric form, offering the most flexibility at the cost of greater computational effort.
 
-
 ## Iris Data Set: QDA
 
-We again use the **Iris data set** to compare QDA with LDA.  
+We again use the **Iris data set** to compare QDA with LDA.\
 The same three classes (*setosa*, *versicolor*, and *virginica*) are modelled using only two predictors: sepal length and sepal width.
 
 Fitting QDA allows each class to have its own covariance structure, producing **curved boundaries** that better adapt to class shapes in the feature space.
 
 ![Comparison between LDA (left) and QDA (right) decision regions on the Iris data set.](Images_qmd_ML/ML5_QDAvsLDA.png){#fig-lda-vs-qda}
 
-@fig-lda-vs-qda compares the classification regions obtained with LDA (left) and QDA (right).  
-LDA yields **linear boundaries**, while QDA produces **quadratic, more flexible** ones that better capture non-linear class separation.  
+@fig-lda-vs-qda compares the classification regions obtained with LDA (left) and QDA (right).\
+LDA yields **linear boundaries**, while QDA produces **quadratic, more flexible** ones that better capture non-linear class separation.\
 Although QDA can fit the data more closely, it also increases the risk of overfitting when the number of predictors or classes grows.
 
 ## Comments on LDA
 
-LDA is **easy** and **fast to compute**.  
+LDA is **easy** and **fast to compute**.\
 It also provides estimates of the **posterior class probabilities**: $$\widehat{\Pr}(Y = j \mid X = \mathbf{x}_0) = \frac{\hat{g}_j(\mathbf{x}_0)\hat{\pi}_j}{\sum_{k=1}^{q} \hat{g}_k(\mathbf{x}_0)\hat{\pi}_k}.$$
 
-In practice, LDA usually performs well and can compete with more complex methods.  
-This is not because the normality assumption is realistic, but because a **linear decision boundary** is often the best the data can support.  
+In practice, LDA usually performs well and can compete with more complex methods.\
+This is not because the normality assumption is realistic, but because a **linear decision boundary** is often the best the data can support.\
 Moreover, LDA is a **stable estimation method**, meaning that even if the assumed Gaussian model is imperfect, the resulting decision boundary remains robust.
 
 We do not need highly accurate $g_j$ to obtain a good posterior; @fig-comments-lda illustrates this idea.
 
-On the **left**, the two class-conditional densities $g_1(x)$ and $g_2(x)$ are clearly **non-Gaussian**—the blue density is even bimodal.  
-On the **right**, we see the corresponding **posterior probability** of belonging to the red class.  
-Despite the complex shape of the densities, the posterior remains **smooth and monotonic**, producing a clear linear-like separation.  
+On the **left**, the two class-conditional densities $g_1(x)$ and $g_2(x)$ are clearly **non-Gaussian**—the blue density is even bimodal.\
+On the **right**, we see the corresponding **posterior probability** of belonging to the red class.\
+Despite the complex shape of the densities, the posterior remains **smooth and monotonic**, producing a clear linear-like separation.\
 This shows that even if the normality assumption fails, LDA still yields reliable classification boundaries.
 
 ![Even with non-Gaussian class densities (left), LDA yields smooth, stable posterior probabilities (right).](Images_qmd_ML/ML5_com_LDA.png){#fig-comments-lda}
 
-
-
 # Logistic Regression
+
+## Logistic Regression
+
+We begin with binary classification, where the response variable takes values $Y \in \{0,1\}$. To simplify notation, we include the intercept directly in the feature vector by setting $X_1 = 1$.\
+With this convention, the linear predictor can be written compactly as $x^\top \beta$ instead of $\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p$.
+
+Logistic regression models the conditional probability of class 1 as a smooth function of this linear predictor: $$\Pr(Y = 1 \mid X = x) = \sigma(x^\top \beta),$$ where the function $\sigma$ is defined by $$\sigma(t) = \frac{\exp(t)}{1 + \exp(t)}.$$
+
+\begin{minipage}{0.55\textwidth}
+The function $\sigma$ is called the \emph{logistic function}.  
+Its role is to map any real-valued input $x^\top \beta \in \mathbb{R}$ into the interval $(0,1)$, making it suitable for modelling probabilities.
+
+For large negative values of $t$, $\sigma(t)$ is close to 0; for large positive values, it is close to 1.  
+Around $t = 0$, the function increases most rapidly, so observations near the decision boundary exhibit the greatest uncertainty.
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_Log_reg.png}
+\caption{The logistic function $\sigma(t)$ maps real values to probabilities in $(0,1)$.}
+\label{fig-logistic-function}
+\end{figure}
+\end{minipage}
+
+As shown in Figure \ref{fig-logistic-function}, logistic regression replaces a hard threshold by a smooth probabilistic transition, yielding well-defined class probabilities.
+
+## Logistic Regression: Interpretation
+
+A key property of logistic regression follows directly from the model definition.\
+Since $$\Pr(Y = 1 \mid X = x) = \sigma(x^\top \beta),$$ applying the inverse of the logistic function gives $$\sigma^{-1}\!\left(\Pr(Y = 1 \mid X = x)\right) = x^\top \beta,$$ where $$\sigma^{-1}(u) = \log\!\left(\frac{u}{1-u}\right)$$ is called the \emph{logit function}.
+
+This shows that logistic regression assumes linearity of the log-odds: $$\log\!\left(\frac{\Pr(Y = 1 \mid X = x)}{\Pr(Y = 0 \mid X = x)}\right) = x^\top \beta.$$\
+Each coefficient $\beta_j$ represents the change in the log-odds associated with a one-unit increase in the corresponding predictor, holding all other variables fixed.
+
+\begin{minipage}{0.55\textwidth}
+An important consequence is that the decision boundary of logistic regression is linear.  
+The boundary is defined by $\Pr(Y = 1 \mid X = x) = 0.5$, which is equivalent to $x^\top \beta = 0$.
+
+Although the probability model is non-linear, the resulting class separation in feature space remains a hyperplane.  
+This contrasts with linear regression applied to a binary response, which produces unbounded predictions and poorly calibrated probabilities.
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_log_inter.png}
+\caption{Logistic regression compared with linear regression for a binary response.}
+\label{fig-logistic-interpretation}
+\end{figure}
+\end{minipage}
+
+As illustrated in Figure \ref{fig-logistic-interpretation}, logistic regression combines a linear decision boundary with a probabilistic output that is appropriate for classification.
+
+## Logistic Regression: Estimation
+
+The parameters $\beta$ of logistic regression are estimated by maximum likelihood. Given a training sample $(x_1, y_1), \ldots, (x_n, y_n)$ with $y_i \in \{0,1\}$, the logistic model assumes that, conditionally on $x_i$, the response $Y_i$ follows a Bernoulli distribution with success probability $\sigma(x_i^\top \beta)$.
+
+Under this assumption, the conditional log-likelihood of the sample is $$\ell(\beta) = \sum_{i=1}^{n} \log \Pr(Y = y_i \mid X = x_i)
+= \sum_{i=1}^{n} \left( y_i x_i^\top \beta - \log\!\left(1 + e^{x_i^\top \beta}\right) \right).$$
+
+The maximum likelihood estimator $\hat{\beta}$ is defined as the value that maximises this log-likelihood: $$\hat{\beta} = \arg\max_{\beta} \ell(\beta).$$\
+Unlike linear regression, this optimisation problem has no closed-form solution. The log-likelihood is concave, but its maximiser must be found numerically using iterative methods such as Newton–Raphson or gradient-based algorithms.
+
+\begin{minipage}{0.55\textwidth}
+The figure illustrates why likelihood-based estimation is preferable to directly minimising classification error.  
+The blue curve shows the negative log-likelihood as a smooth, well-behaved function of the parameter, with a clear global minimum.  
+In contrast, the black curve represents the 0–1 classification error, which is irregular and non-smooth, making optimisation difficult.
+
+Hence, logistic regression is estimated by maximising likelihood rather than minimising misclassification error.
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_log_estim.png}
+\caption{Negative log-likelihood and 0–1 classification error as functions of a regression parameter.}
+\label{fig-logistic-estimation}
+\end{figure}
+\end{minipage}
+
+Figure \ref{fig-logistic-estimation} highlights that, even when classification error is minimised at a similar parameter value, likelihood-based estimation yields a smoother and more reliable optimisation landscape.
+
+## Logistic Regression: Prediction and Perfect Separation
+
+Given an estimated parameter vector $\hat{\beta}$ and a new input $x_0 \in \mathbb{R}^p$, logistic regression predicts the probability of class 1 as $$\widehat{\Pr}(Y = 1 \mid X = x_0) = \sigma(x_0^\top \hat{\beta}).$$\
+To obtain a class label, we apply the Bayes classifier with equal misclassification costs: $$\hat{y}_0 = \begin{cases} 1 & \text{if } \sigma(x_0^\top \hat{\beta}) > 1/2, \\ 0 & \text{otherwise.} \end{cases}$$\
+Equivalently, since $\sigma$ is increasing, this rule can be written as $\hat{y}_0 = 1$ if $x_0^\top \hat{\beta} > 0$ and $\hat{y}_0 = 0$ otherwise.
+
+\begin{minipage}{0.55\textwidth}
+A practical caveat is that the maximum likelihood estimator $\hat{\beta}$ may fail to exist when the classes are perfectly separable.  
+If there is a hyperplane that classifies all training points correctly, the likelihood can be increased indefinitely by making the logistic curve steeper and steeper.  
+In the one-dimensional setting this corresponds to letting a coefficient (here $\beta_1$) grow without bound, $\beta_1 \to \infty$, so that $\sigma(x^\top \beta)$ approaches a step function.
+
+This phenomenon explains why numerical optimisation may appear to diverge in perfectly separable data sets: the fitted probabilities push towards 0 and 1, and the parameter norm increases rather than stabilising.
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{Images_qmd_ML/ML5_log_bay.png}
+\caption{Perfect separation: increasing the slope makes the logistic curve approach a step, preventing a finite MLE.}
+\label{fig-logistic-separation}
+\end{figure}
+\end{minipage}
+
+Figure \ref{fig-logistic-separation} shows that as the slope increases, the transition around $1/2$ becomes arbitrarily sharp while still classifying the red observations perfectly, so the likelihood keeps improving without reaching a finite optimum.
+
+## Multiclass Logistic Regression (Multinomial Regression)
+
+Logistic regression extends naturally to the multiclass setting, where the response variable takes values $Y \in \{1, \ldots, q\}$.\
+Instead of modelling a single probability, we directly model the conditional probabilities of each class given the input $x$.
+
+To ensure that all class probabilities are positive and sum to one, the model is specified using a multinomial (or softmax-type) formulation.\
+For classes $j = 1, \ldots, q-1$, we define $$\Pr(Y = j \mid X = x) = \frac{\exp(x^\top \beta^{(j)})}{1 + \sum_{\ell=1}^{q-1} \exp(x^\top \beta^{(\ell)})},$$\
+and for the remaining class $q$ we set $$\Pr(Y = q \mid X = x) = \frac{1}{1 + \sum_{\ell=1}^{q-1} \exp(x^\top \beta^{(\ell)})}.$$
+
+Here, $\beta^{(1)}, \ldots, \beta^{(q-1)} \in \mathbb{R}^p$ are parameter vectors to be estimated. Only $q-1$ parameter vectors are needed for $q$ classes because the probabilities must sum to one; the last class acts as a reference class.
+
+As in the binary case, classification is performed by assigning $x$ to the class with the largest posterior probability $\Pr(Y = j \mid X = x)$.
+
+### Estimation
+
+From a probabilistic perspective, the conditional distribution $Y \mid X = x$ is multinomial.\
+Given a training sample $(x_1, y_1), \ldots, (x_n, y_n)$, the parameters are estimated by maximising the log-likelihood $$\ell(\beta) = \sum_{i=1}^{n} \log \Pr(Y = y_i \mid X = x_i).$$
+
+As in binary logistic regression, this optimisation problem has no closed-form solution and must be solved numerically using iterative methods.\
+Nevertheless, the objective function remains smooth and concave, which makes maximum likelihood estimation tractable in practice.
+
+## Iris Data Set: Multinomial Logistic Regression
+
+We illustrate multinomial logistic regression using the **Iris data set**, which contains 150 observations from three species: *setosa*, *versicolor*, and *virginica*. Each plant is described by $p = 4$ predictors, but for visualisation we restrict attention to the first two: sepal length and sepal width.
+
+Multinomial logistic regression directly models the posterior probabilities $\Pr(Y = j \mid X = \mathbf{x})$ for the three classes. Each class is associated with its own linear predictor, relative to a reference class, and classification assigns each point to the class with the highest predicted probability.
+
+![Decision regions obtained by multinomial logistic regression on the Iris data set.](Images_qmd_ML/ML5_log_iris.png){#fig-log-iris}
+
+@fig-log-iris shows the resulting **decision regions** in the two-dimensional feature space. Each coloured region corresponds to the class with the highest posterior probability, while the points indicate the observed flowers.
+
+As expected from the theory, the boundaries between regions are **linear**. In the multiclass setting, these linear boundaries combine to form a **piecewise linear partition** of the plane. The *setosa* class is cleanly separated, while *versicolor* and *virginica* overlap more substantially, reflecting their similarity in these two predictors.
+
+This example highlights that multinomial logistic regression generalises binary logistic regression in a natural way, producing interpretable linear decision boundaries while providing full probabilistic predictions for multiple classes.
+
+## Comments
+
+Logistic regression is defined by the choice of a link function that maps the linear predictor $x^\top \beta$ to a probability. While the logistic function is the most common choice, other link functions can be used.
+
+One important alternative is probit regression, which models the probability of class 1 as $$\Pr(Y = 1 \mid X = x) = \Phi(x^\top \beta),$$ where $\Phi$ denotes the cumulative distribution function of a standard normal random variable.\
+In practice, logistic regression is usually preferred because it is more robust to outliers, while yielding very similar classification boundaries.
+
+More generally, logistic regression belongs to the broader family of generalised linear models (GLMs).\
+In this framework, we model the conditional distribution of $Y \mid X$ through:
+
+-   a linear predictor $x^\top \beta$,
+-   a link function connecting this predictor to the mean response,
+-   and a likelihood appropriate for the response type (Bernoulli for binary outcomes).
+
+### Logistic Regression vs. LDA
+
+Logistic regression and Linear Discriminant Analysis share an important structural property: for both models, the log-odds between any two classes are linear functions of $x$.
+
+The key difference lies in how the models are estimated.
+
+-   LDA is a generative model: it specifies a joint model for $(Y, X)$ by assuming Gaussian class-conditional densities for $X \mid Y$.
+-   Logistic regression, by contrast, is a discriminative model: it models only the conditional distribution $Y \mid X$, without making assumptions about the distribution of $X$ itself.
+
+As a result:
+
+-   when the Gaussian assumptions underlying LDA are reasonable, LDA can outperform logistic regression;
+-   when these assumptions are clearly violated, logistic regression typically performs better.
+-   In many practical situations, however, the two methods exhibit very similar performance, since both ultimately produce linear decision boundaries.
 
 # Image Recognition
 
@@ -1753,7 +1872,7 @@ This shows that even if the normality assumption fails, LDA still yields reliabl
 
 Image recognition aims to identify or classify objects within digital images by learning the relationship between pixel intensities and their corresponding labels. Each image is represented as a grid of pixels, where each pixel encodes the degree of darkness on a greyscale from 0 (white) to 9 (black). In this example, every handwritten digit image consists of $16 \times 16 = 256$ pixels, meaning we have 256 predictors for each observation.
 
-Each predictor corresponds to a specific pixel intensity, and together these values form a feature vector $\mathbf{x}_i = (x_{i1}, x_{i2}, \ldots, x_{i256})$. The model learns a mapping $\hat{f}(\mathbf{x}_i)$ that associates these pixel values with the corresponding digit label $y_i \in \{0, \ldots, 9\}$. Classification algorithms such as logistic regression, neural networks, or convolutional networks can be used to learn this mapping.
+Each predictor corresponds to a specific pixel intensity, and together these values form a feature vector $x_i = (x_{i1}, x_{i2}, \ldots, x_{i256})$. The model learns a mapping $\hat{f}(\mathbf{x}_i)$ that associates these pixel values with the corresponding digit label $y_i \in \{0, \ldots, 9\}$. Classification algorithms such as logistic regression, neural networks, or convolutional networks can be used to learn this mapping.
 
 This approach converts visual information into numerical data, allowing statistical or machine learning methods to identify complex patterns of brightness and shape that define each digit. The more pixels that are used as predictors, the higher the potential resolution and detail the model can learn, although this also increases computational cost and the need for regularisation.
 
