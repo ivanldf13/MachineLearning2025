@@ -1,21 +1,26 @@
 # Ignore video files
 *.mp4
+
 # Ignore macOS system files
 .DS_Store
+
 # Ignore R project files
 .Rproj.user/
+
 # Ignore Microsoft Office temporary lock files
 ~$*
-# Ignore Rhistory
+
+# Ignore R history
 .Rhistory
 
 # Large model / result artefacts from the weather project
 ML_Weather_Prediction/*.pkl
 ML_Weather_Prediction/*.joblib
 
-# Local Python virtual environment (do not commit installed packages)
+# Local Python virtual environment
 .venv/
+venv/
+venv.zip
 
 # Jupyter notebook autosave/checkpoint files
 **/.ipynb_checkpoints/
-
