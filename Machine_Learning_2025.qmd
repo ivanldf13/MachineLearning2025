@@ -11,6 +11,15 @@ format:
       - text: |
           \usepackage{booktabs}
           \usepackage{float}
+          \usepackage[dvipsnames]{xcolor}
+          \definecolor{mlorange}{HTML}{D4A96A}
+          \definecolor{mlblue}{HTML}{8CB6DF}
+          \definecolor{mlgreen}{HTML}{589276}
+          \definecolor{mlred}{HTML}{B2584F}
+          \definecolor{mlgrey}{HTML}{A9A9A9}
+          \definecolor{knnorange}{HTML}{EBB17C}
+          \definecolor{knngreen}{HTML}{9DC189}
+          \definecolor{knnblue}{HTML}{8CD3D5}
     tbl-style: booktabs
     tbl-cap-location: top
     tbl-colwidths: auto
@@ -759,7 +768,7 @@ By using basis functions, we can bend or reshape the linear model to capture mor
 
 In least squares regression, we often minimise the residual sum of squares (RSS) to estimate the coefficients. Here, for simplicity, we fix $\beta_1$ to its true value $\beta_1^*$ and only estimate $\beta_0$ by least squares.
 
-In gradient descent, the **cost function** (often denoted as $J(\theta)$ or $L(\theta)$) is the mathematical expression that measures how wrong the model is, that is, how far the model’s predictions are from the true values. It tells us how costly a particular choice of parameters $\theta$ (like $\beta_0$, $\beta_1$, …) is.
+In gradient descent, the **cost function** (often denoted as $J(\theta)$ or $L(\theta)$) **is the mathematical expression that measures how wrong the model is**, that is, **how far the model’s predictions are from the true values**. It tells us how costly a particular choice of parameters $\theta$ (like $\beta_0$, $\beta_1$, …) is.
 
 The goal of gradient descent is to find the parameters $\theta$ that **minimise the cost function**, i.e., make the model as accurate as possible. In this case, to find the value of $\beta_0$ that minimises $$\hat{\beta}_0 = \arg\min_{\beta_0 \in \mathbb{R}} \text{RSS}(\beta_0) = \arg\min_{\beta_0 \in \mathbb{R}} J(\beta_0)$$
 
@@ -891,17 +900,17 @@ Think of gradient descent as walking downhill on a complex landscape. You can’
 
 The training error measures how well the model explains the data it has already seen, while the test error shows how well it generalises to unseen examples. As model flexibility increases, the training error steadily decreases, but the test error often follows a U-shaped curve, first improving, then worsening, because of **overfitting**.
 
-![Training versus test errors](Images_qmd_ML/ML3_training_error.png){width="92%"}
+![Training versus test errors](Images_qmd_ML/ML3_training_error.png){#fig-ML3 width="85%"}
 
-The figure above illustrates how **training** and **test errors** evolve as model **flexibility** increases.
+@fig-ML3 illustrates how **training** and **test errors** evolve as model **flexibility** increases.
 
 -   On the **left**, the data are generated from the true function $f$ (black line) and fitted using three models:
-    -   a **linear model** (orange line),
-    -   a **moderately flexible polynomial** (blue line),
-    -   and a **highly flexible polynomial** (green line).
+    -   a \textcolor{mlorange}{\textbf{linear model}} (orange line),
+    -   a \textcolor{mlblue}{\textbf{moderately flexible polynomial}} (blue line),
+    -   and a \textcolor{mlgreen}{\textbf{highly flexible polynomial}} (green line).
 -   On the **right**, the curves show:
-    -   **Training error** $\text{MSE}_{\text{Tr}}$ in grey, which decreases steadily as flexibility increases.
-    -   **Test error** $\text{MSE}_{\text{Te}}$ in red, which decreases at first but eventually rises due to overfitting.
+    -   \textcolor{mlgrey}{\textbf{Training error}} $\text{MSE}_{\text{Tr}}$ in grey, which decreases steadily as flexibility increases.
+    -   \textcolor{mlred}{\textbf{Test error}} $\text{MSE}_{\text{Te}}$ in red, which decreases at first but eventually rises due to overfitting.
 
 When model flexibility is low, both training and test errors are high, in other words, the model underfits and fails to capture the structure of the data. As flexibility increases, the model fits the training data better and generalises more effectively, reaching a point of **optimal complexity** where test error is minimised. Beyond this point, further flexibility causes the model to memorise noise, leading to rising test error, i.e., the hallmark of **overfitting**. This U-shaped behaviour of the test error can be formally explained by the bias–variance decomposition of the expected prediction error.
 
@@ -911,13 +920,12 @@ When model flexibility is low, both training and test errors are high, in other 
 -   For a regression fit $\hat{f}$, the **expected prediction error** at an input $X = x_0$ is $$\text{Err}_{\hat{f}}(x_0) = \mathbb{E}[(Y - \hat{f}(X))^2 \mid X = x_0].$$
 -   This can be decomposed into three components:\
     $$\text{Err}_{\hat{f}}(x_0) = \sigma_\varepsilon^2 + \text{Bias}^2(\hat{f}(x_0)) + \text{Var}(\hat{f}(x_0))$$ $$= \text{Irreducible Error} + \text{Bias}^2 + \text{Variance}.$$
+-   The **Irreducible Error** is the error due to the noise variable $\varepsilon$ and cannot be improved.
+-   The **Bias** measures how far the model’s average prediction $\mathbb{E}[\hat{f}(x_0)]$ is from the true function $f(x_0)$.
+-   The **Variance** captures how much $\hat{f}(x_0)$ fluctuates across different training sets.
+-   **A good model finds a balance between low bias and low variance to minimise total error**.
 
-**Intuition:**\
-The **Irreducible Error** is the error due to the noise variable $\varepsilon$ and cannot be improved. The **Bias** measures how far the model’s average prediction $\mathbb{E}[\hat{f}(x_0)]$ is from the true function $f(x_0)$.\
-The **Variance** captures how much $\hat{f}(x_0)$ fluctuates across different training sets.\
-**A good model finds a balance between low bias and low variance to minimise total error**.
-
-#### Example: Bias–Variance Trade-off in k-Nearest Neighbours\*\*
+#### Example: Bias–Variance Trade-off in k-Nearest Neighbours
 
 \begin{minipage}{0.48\textwidth}
 The $k$-Nearest Neighbours (k-NN) algorithm predicts $\hat{f}_k(x_0)$ as the average of the $k$ closest training points to $x_0$: $$ \hat{f}_k(x_0) = \frac{1}{k}\sum_{x_i \in N_k(x_0)} y_i.$$
@@ -942,8 +950,8 @@ The total prediction error reaches its minimum when bias and variance are optima
 **Intuition:**\
 - When $k$ is **small**, the model is very flexible → **low bias** but **high variance**.\
 - As $k$ increases, predictions become smoother → **higher bias** but **lower variance**.\
-- The **orange curve** in the figure shows the **total prediction error**, which is minimised at an intermediate $k$, where bias and variance are optimally balanced.\
-- The **green curve** represents the **squared bias**, and the **blue curve** shows the **variance**, both plotted as functions of $k$ to illustrate their trade-off.
+- The \textcolor{knnorange}{\textbf{orange curve}} in the figure shows the \textcolor{knnorange}{\textbf{total prediction error}}, which is minimised at an intermediate $k$, where bias and variance are optimally balanced.\
+- The \textcolor{knngreen}{\textbf{green curve}} represents the \textcolor{knngreen}{\textbf{squared bias}}, and the \textcolor{knnblue}{\textbf{blue curve}} shows the \textcolor{knnblue}{\textbf{variance}}, both plotted as functions of $k$ to illustrate their trade-off.
 
 ## The Bias–Variance Trade-off
 
@@ -965,23 +973,18 @@ In other words, simple models generalise better when data are limited or assumpt
 
 Choosing the right model involves balancing **bias**, **variance**, and the **purpose** of analysis, i.e., explanation or prediction.
 
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.48\textwidth}
-When we start with a very simple model, it has \textbf{high bias}, it systematically misses important structure in the data. Both training and test errors are large because the model is too rigid and underfits. As we make the model more flexible, it begins to capture the true relationships in the data, reducing bias and fitting the underlying pattern more accurately. Since this structure exists in both the training and test sets, the \textbf{test error initially decreases}.
-\end{minipage}
-\hfill
-\begin{minipage}{0.48\textwidth}
-\centering
-\includegraphics[width=\linewidth]{Images_qmd_ML/ML3_graph.png}
-\caption{Training versus test error}
-\label{fig:ML3_graph}
-\end{minipage}
-\end{figure}
+![Training versus test error as model complexity increases.](Images_qmd_ML/ML3_graph.png){#fig-ML3_graph width="65%" fig-pos="H"}
 
-Beyond a certain level of flexibility, however, the model becomes **too sensitive** to the training data. It starts fitting random noise or small fluctuations that are not part of the true signal. On the training data, the error keeps dropping, but these fitted noise patterns do not generalise to new observations. As a result, variance, the model’s sensitivity to random noise, dominates, and the **test error rises again**.
+\vspace{-0.6\baselineskip}
 
-The **U-shaped curve** of the test error reflects the sum of two competing effects: $$ \text{Test Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}$$ As model complexity increases, **bias² decreases** (the model fits better) while **variance increases** (the model becomes unstable across datasets). Initially, bias reduction dominates, leading to lower test error; eventually, the growing variance outweighs this benefit, causing the test error to rise again.
+\noindent \textcolor{mlblue}{\textbf{Blue = training error, falls as complexity increases}} \textcolor{mlred}{\textbf{Red = test error, falls at first, then rises (U-shape)}}\
+Faint curves show variability across training sets; thick curves show the typical pattern.\
+
+**Left (low complexity): underfitting** — the model is too rigid $\Rightarrow$ **high bias, low variance**; both \textcolor{mlblue}{training} and \textcolor{mlred}{test} error are relatively high because important structure is missed.\
+**Middle (intermediate complexity): best generalisation** — as flexibility increases, bias drops and the model captures the real signal present in both train and test data $\Rightarrow$ the \textcolor{mlred}{test error decreases} and reaches its minimum.\
+**Right (high complexity): overfitting** — beyond a point, the model becomes too sensitive and starts fitting noise $\Rightarrow$ **variance dominates, low bias**; the \textcolor{mlblue}{training error keeps decreasing}, but the \textcolor{mlred}{test error rises again} because fitted noise does not generalise well to new data.
+
+The \textcolor{mlred}{U-shaped test error} reflects the sum of two competing effects: $$ \text{Test Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error} $$ As model complexity increases, $\text{Bias}^2$ decreases (better fit to the signal), while variance increases (greater sensitivity to the particular training set). Initially, bias reduction dominates so the \textcolor{mlred}{test error falls}; eventually, variance dominates so the \textcolor{mlred}{test error rises}.
 
 # Cross-Validation
 
@@ -1004,7 +1007,7 @@ The **U-shaped curve** of the test error reflects the sum of two competing effec
 
 ## K-Fold Cross-Validation
 
--   We only have **one dataset** $\{(x_1, y_1), \dots, (x_n, y_n)\}$. The question is: *how can we estimate how the model will perform on new, unseen data*
+-   We only have **one dataset** $\{(x_1, y_1), \dots, (x_n, y_n)\}$. The question is: *how can we estimate how the model will perform on new, unseen data*?
 
 -   In **K-Fold Cross-Validation**, we randomly divide the dataset into $K$ equally sized subsets, called **folds**, denoted $C_1, C_2, \dots, C_K$.
 
@@ -1055,14 +1058,14 @@ In practical terms, LOOCV makes almost full use of the data for training in each
 ## Cross-validation applied to the body fat dataset
 
 \begin{minipage}{0.52\textwidth}
-\textbf{The body fat dataset} is used to illustrate how \textbf{K-Fold Cross-Validation (CV)} helps in selecting the most suitable regression model when multiple predictors are available.As seen in the plot on the right:
+\textbf{The body fat dataset} is used to illustrate how \textbf{10-fold cross-validation (CV)} can guide \textbf{model selection} when we have many possible predictors. For each model size $k$ (number of predictors), we consider the \textbf{best subset model} of that size, and then we estimate its \textbf{test performance} using CV.
 
 \begin{itemize}
   \setlength\itemsep{0.3em}
-  \item The \textbf{y-axis (CV)} represents the average cross-validation error.
-  \item Each point indicates the CV estimate for a model with a given number of variables.
-  \item The \textbf{grey bars} show one standard error around that estimate.
-  \item The model with the \textbf{lowest CV error} (black dot) achieves the best predictive performance under this random partitioning of the data.
+  \item The \textbf{y-axis (CV)} is the average cross-validated error (MSE) across the 10 folds.
+  \item Each point corresponds to the CV error for the \textbf{best model with $k$ predictors}.
+  \item The \textbf{grey bars} are $\pm 1$ \textbf{standard error} around the CV estimate (computed from the fold-to-fold variability).
+  \item The \textbf{black dot} marks the model size with the \textbf{lowest CV error} in this particular random split.
 \end{itemize}
 \end{minipage}
 \hfill
@@ -1088,28 +1091,32 @@ In practical terms, LOOCV makes almost full use of the data for training in each
 \end{minipage}
 \hfill
 \begin{minipage}{0.52\textwidth}
-\textbf{When the folds are randomly selected:}
+\textbf{Random folds imply randomness in the CV curve:} because the 10 folds are formed \textbf{at random}, repeating 10-fold CV can give a \textbf{slightly different CV curve} and the \textbf{minimum} may occur at a \textbf{different $k$} from run to run. The overall shape is typically similar (often decreasing then increasing), but the exact minimiser can change.
 
 \begin{itemize}
   \setlength\itemsep{0.3em}
-  \item Repeating the \textbf{10-fold CV} several times can lead to \textbf{different results}.
-  \item The \textbf{minimum CV error} does not always occur at the same number of predictors.
-  \item This variation arises because \textbf{CV depends on the random partitioning} of the data.
-  \item Therefore, a single CV run may not always yield a stable estimate of the optimal model size, in other words, \textbf{randomness matters}.
+  \item Repeating \textbf{10-fold CV} can lead to \textbf{different} selected model sizes.
+  \item The \textbf{argmin of CV} is therefore not always a stable choice.
+  \item This instability comes from the fact that \textbf{CV depends on the random partitioning} of observations into folds.
 \end{itemize}
 \end{minipage}
 
 ### Stability and the one-standard-error rule
 
-The instability caused by random fold assignments can be mitigated by applying the **one-standard-error rule**. Instead of always picking the model with the absolute lowest CV error, we choose the **simplest (most parsimonious)** model whose error is within **one standard error** of the minimum. This rule favours models that generalise better and are less sensitive to random fluctuations in the folds.
+Because the CV estimate has uncertainty, a practical way to stabilise model selection is the **one-standard-error rule**:
 
-To illustrate this, the cross-validation process was repeated **100 times**. Table \ref{tab:bodyfat-cv-results} shows how often each model size ($k$) was selected:
+1.  Find the **minimum** CV error across model sizes.
+2.  Add **one standard error**.
+3.  Choose the **simplest** model whose CV error is **no more than one standard error above** the minimum.\
+    This rule treats models within that band as essentially “good enough” given estimation noise and favours the most parsimonious option.
 
-::: {#tbl-bodyfat-cv-results .tbl-cap .booktabs}
-Model sizes (*k*) selected across 100 repetitions of 10-fold cross-validation.
+To illustrate this, the 10-fold CV procedure was repeated **100 times**. Table @tbl-bodyfat-cv-results shows how often each model size ($k$) was selected under (i) direct minimisation of CV, and (ii) the one-standard-error rule.
+
+::: {#tbl-bodyfat-cv-results tbl-pos="H"}
+Model sizes ($k$) selected across 100 repetitions of 10-fold cross-validation.
 
 ```{=latex}
-\begin{center}
+\centering
 \begin{tabular}{lccccccccccccc}
 \toprule
 \textit{k} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 \\
@@ -1118,17 +1125,12 @@ Model sizes (*k*) selected across 100 repetitions of 10-fold cross-validation.
 \textbf{one-sd-error rule} & 0 & 83 & 15 & 2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
 \bottomrule
 \end{tabular}
-\label{tab:bodyfat-cv-results}
-\end{center}
 ```
 :::
 
-These results show that **direct minimisation** of the CV error produces more variable choices across repetitions, whereas the **one-standard-error rule** consistently selects smaller and more stable models (most frequently $k = 2$). This confirms that the rule provides a **more robust and interpretable** choice, i.e., sacrificing only a negligible loss in predictive accuracy for a significant gain in simplicity and reliability.
-
 ## Final model selection
 
-Cross-validation identified a model with **three predictors** ($\hat{k} = 3$): **weight**, **abdomen**, and **wrist**.\
-As shown in Figure \ref{fig:bodyfat-cv1}, this specification achieved the **lowest cross-validation error** in the *best-subset selection* analysis, striking an effective balance between predictive accuracy and simplicity. It explains most of the variation in body fat percentage without overfitting.
+Cross-validation identified a model with **three predictors** ($\hat{k} = 3$): **weight**, **abdomen**, and **wrist**. As shown in Figure \ref{fig:bodyfat-cv1}, this specification achieved the **lowest cross-validation error** in the *best-subset selection* analysis, striking an effective balance between predictive accuracy and simplicity. It explains most of the variation in body fat percentage without overfitting.
 
 The corresponding model $\hat{f}_3$ is then refitted on **all 252 observations** to obtain the final parameter estimates based on the full dataset.
 
@@ -1147,21 +1149,24 @@ Overall, cross-validation proved useful not only for identifying the best-perfor
 -   In Python, this can be done with the transformer `StandardScaler()`.
 -   For a new input $x_0 \in \mathbb{R}^p$, standardise as $x_{0j}^{\text{scaled}} = (x_{0j} - \bar{x}_j)/\hat{\sigma}_j$ before applying the predictive model.
 
-Standardisation ensures that all predictors contribute equally to the model by removing scale effects. Without it, a single variable with large numerical values—such as *income* measured in thousands—can dominate the model’s distance or penalty calculations, overshadowing the contribution of smaller-scale variables such as *age* or *education*.
+**Standardisation ensures that all predictors contribute equally to the model by removing scale effects**. Without it, a variable with large numerical values (such as *income* measured in thousands) can dominate distance-based or penalty-based calculations, not because it is more informative, but because it stretches the geometry of the feature space.
 
-![Effect of standardisation on feature scale](Images_qmd_ML/ML4_stand.png)
+![Effect of standardisation on feature scale](Images_qmd_ML/ML4_stand.png){#fig-standardisation}
 
-Using an unscaled variable like *income* (with values in thousands) directly in a model can lead to **biased parameter estimation or distorted decision boundaries**. The figure above shows how scale differences skew the relative importance of predictors. After standardisation, each feature is centred and rescaled to unit variance, allowing the model to treat them on an equal footing.
+As shown in @fig-standardisation, unscaled predictors distort distances and decision boundaries in the original data, whereas standardisation recentres each variable and rescales it to unit variance. After this transformation, classification and regularisation methods operate on a balanced feature space, where each predictor influences the model according to its information content rather than its measurement scale.
+
 
 ## Back to linear models
 
 -   In the **regression setting**, a multiple linear model\
     $$ Y = \beta_0 + \beta_1 X_1 + \cdots + \beta_p X_p $$\
-    is fitted to the data $(x_i, y_i)$, $i = 1, \dots, n$.
+    is fitted to the data $(x_i, y_i)$, $i = 1, \dots, n$.[^4]
 
 -   The estimated vector $\hat{\boldsymbol{\beta}} = (\hat{\beta}_0, \dots, \hat{\beta}_p)$ minimises the residual sum of squares (RSS):\
     $$ \text{RSS} = \sum_{i=1}^{n} \left( y_i - \beta_0 - \sum_{j=1}^{p} \beta_j x_{ij} \right)^2 $$
 
+[^4]:$X_1$ refers to the vector of values for the first predictor variable across all observations in your dataset. This means it contains all individual observations for the predictor associated with the coefficient $\beta_1$.
+ 
 -   Why might we want to use a **different estimation method** than least squares?
 
 (1) **Prediction accuracy:** If $n$ is not much larger than the number of predictors $p$, or even $p \gg n$ (a *high-dimensional setting*), the least squares estimate $\hat{\boldsymbol{\beta}}$ may have high variance, leading to overfitting. By **shrinking** or **regularising** the coefficients, we can reduce variance and improve prediction accuracy on new test data.
@@ -1199,23 +1204,23 @@ These alternative methods adjust the standard least-squares fitting process by r
 
 ![Ridge regression coefficient paths](Images_qmd_ML/ML4_ridge.png){#fig-ridge-paths}
 
-As shown in @fig-ridge-paths, ridge regression progressively shrinks the coefficients as the regularisation parameter $\lambda$ increases.\
+As shown in @fig-ridge-paths, ridge regression progressively shrinks coefficient magnitudes as the regularisation parameter $\lambda$ increases.
 
-In the **left panel**, $\lambda$ is displayed on a logarithmic scale. Each coloured curve represents the standardised coefficient for one predictor. The **black curve**, corresponding to *Income*, starts around –200, indicating that higher income initially reduces the predicted credit balance. As $\lambda$ increases, its magnitude gradually decreases, meaning the model gives less weight to that predictor under stronger regularisation. The **red** (*Limit*), **blue** (*Rating*), and **yellow** (*Student*) curves follow similar paths, each shrinking smoothly towards zero.
+In the **left panel**, $\lambda$ is displayed on a logarithmic scale. Each coloured curve represents the standardised coefficient for one predictor. The \textcolor{black}{\textbf{black curve}} corresponds to *Income* and starts around –200, indicating that higher income initially reduces the predicted credit balance. As regularisation strengthens, its magnitude decreases smoothly, meaning the model assigns progressively less weight to that predictor. The \textcolor{red}{\textbf{red curve}} (*Limit*), \textcolor{mlblue}{\textbf{blue curve}} (*Rating*), and \textcolor{mlorange}{\textbf{orange/yellow curve}} (*Student*) exhibit the same continuous shrinkage towards zero.
 
-In the **right panel**, the same shrinkage is shown against the ratio $\|\hat{\boldsymbol{\beta}}^{R}_{\lambda}\|_2 / \|\hat{\boldsymbol{\beta}}\|_2$, which measures how much of the total coefficient magnitude remains relative to the unpenalised least-squares solution.
+In the **right panel**, the same coefficient paths are plotted against the ratio $\|\hat{\boldsymbol{\beta}}^{R}_{\lambda}\|_2 / \|\hat{\boldsymbol{\beta}}\|_2$, which measures the remaining overall coefficient magnitude relative to the unpenalised least-squares solution.
 
-These plots illustrate the **bias–variance trade-off**: increasing $\lambda$ reduces model variance but introduces bias. Ridge regression thus stabilises estimates in the presence of multicollinearity or high-dimensional data, and the optimal $\lambda$ is typically identified via cross-validation.
+Together, these plots illustrate the **bias–variance trade-off**: increasing $\lambda$ reduces variance by stabilising the estimates but introduces bias by shrinking coefficients towards zero. Ridge regression is therefore particularly effective in the presence of multicollinearity or high-dimensional data, with the optimal $\lambda$ typically selected via cross-validation.
 
-## Ridge regression: closed-form solution
+## Ridge Regression: Closed-Form Solution
 
--   Ridge regression has a **closed-form solution**: $$\hat{\boldsymbol{\beta}}^{R}_{\lambda} = (\mathbf{X}^{\mathsf{T}}\mathbf{X} + \lambda \mathbf{I})^{-1}\mathbf{X}^{\mathsf{T}}\mathbf{y}$$
+- Ridge regression has a closed-form solution: $$\hat{\beta}^{R}_{\lambda} = (X^{\mathsf{T}}X + \lambda I)^{-1}X^{\mathsf{T}}y$$
 
-    where $\mathbf{X} \in \mathbb{R}^{n \times p}$ is the data matrix, $\mathbf{I} \in \mathbb{R}^{p \times p}$ is the identity matrix, and $\mathbf{y} = (y_1, \dots, y_n)$ is the vector of responses.
+    where $(X \in \mathbb{R}^{n \times p})$ is the data matrix, $(I \in \mathbb{R}^{p \times p})$ is the identity matrix, and $( y = (y_1, \dots, y_n))$  is the vector of responses.
 
--   This can be compared to the **least squares solution**: $$\hat{\boldsymbol{\beta}} = (\mathbf{X}^{\mathsf{T}}\mathbf{X})^{-1}\mathbf{X}^{\mathsf{T}}\mathbf{y}$$
+- This can be compared to the least squares solution: $$\hat{\beta} = (X^{\mathsf{T}}X)^{-1}X^{\mathsf{T}}y$$
 
--   The ridge estimator modifies the least-squares expression by adding $\lambda \mathbf{I}$ before inversion. This term prevents instability when predictors are highly correlated or when $p > n$, and shows how ridge regression **shrinks** the least squares estimates towards zero.
+- The ridge estimator modifies the least-squares expression by adding $(\lambda I)$ before inversion. This term prevents instability when predictors are highly correlated or when $(p > n)$, and demonstrates how ridge regression shrinks the least squares estimates towards zero.
 
 ## Lasso: least absolute shrinkage and selection operator
 
@@ -1230,7 +1235,7 @@ These plots illustrate the **bias–variance trade-off**: increasing $\lambda$ r
 
 As shown in @fig-lasso-paths, lasso regression behaves similarly to ridge regression for small values of $\lambda$, but differs in how coefficients shrink as $\lambda$ increases.\
 - In the **left panel**, the coefficient paths are plotted against $\lambda$ on a logarithmic scale. As $\lambda$ grows, some coefficients are driven exactly to zero, effectively removing those predictors from the model.\
-- In the **right panel**, the same process is shown against the ratio $\|\hat{\boldsymbol{\beta}}^{L}_{\lambda}\|_1 / \|\hat{\boldsymbol{\beta}}\|_1$, representing the proportion of total coefficient magnitude retained.
+- In the **right panel**, the horizontal axis is the ratio $\lVert\hat{\boldsymbol{\beta}}^{L}_{\lambda}\rVert_1/\lVert\hat{\boldsymbol{\beta}}\rVert_1$, which measures how much total coefficient magnitude remains compared with least squares. Values near 1 mean weak regularisation; values near 0 mean strong regularisation, where many coefficients have been driven to zero. Unlike $\lambda$, this ratio is a normalised “model size” scale: moving left corresponds to a sparser model with fewer active predictors.
 
 This sparsity property distinguishes the lasso from ridge regression: while ridge continuously shrinks all coefficients, lasso can produce a simpler, more interpretable model by selecting only a subset of relevant predictors.
 
@@ -1242,7 +1247,15 @@ This sparsity property distinguishes the lasso from ridge regression: while ridg
 
 ![Geometric interpretation of lasso and ridge](Images_qmd_ML/ML4_geom.png){#fig-geom width="70%"}
 
-As shown in @fig-geom, the circular constraint region on the right represents ridge regression, where coefficients are continuously shrunk but rarely set to zero. The diamond-shaped region on the left represents the lasso: because the corners align with the coordinate axes, the optimal solution often lies exactly on an axis, producing zero-valued coefficients. This geometric property explains why the lasso can perform variable selection, while ridge regression cannot.
+As shown in @fig-geom, the picture can be read as “fit versus complexity” in the $(\beta_1,\beta_2)$-plane. The \textcolor{mlorange}{\textbf{red ellipses}} are RSS level sets: moving to ellipses closer to the origin means a smaller training error. The \textcolor{mlblue}{\textbf{blue shape}} is the constraint imposed by regularisation, i.e. the set of coefficient values we are allowed to choose.
+
+The estimate is the point where the \textcolor{mlorange}{\textbf{smallest (best) RSS ellipse}} first touches the \textcolor{mlblue}{\textbf{constraint region}}. In other words, we take the best-fitting solution we can achieve without leaving the allowed region.
+
+- With **ridge regression** (right panel), the constraint $\sum_{j=1}^{p}\beta_j^2 \le s$ is round (an $L_2$ ball). Because its boundary is smooth, the tangency point typically occurs away from the axes, so coefficients are \textbf{shrunk smoothly} towards zero but are \textbf{rarely exactly zero}.  
+- With **lasso** (left panel), the constraint $ \sum_{j=1}^{p}|\beta_j| \le s$ has corners (an $L_1$ ball). Since the corners lie on the coordinate axes, the first contact often happens at a corner, which forces at least one coefficient to be \textbf{exactly zero}. This is why lasso performs \textbf{variable selection}, whereas ridge mainly performs \textbf{shrinkage}.
+
+\textbf{Exam takeaway:} ridge uses a round constraint $\Rightarrow$ continuous shrinkage; lasso uses a diamond constraint with corners on the axes $\Rightarrow$ coefficients can hit zero.
+
 
 ## Comments
 
@@ -1294,7 +1307,7 @@ In @fig-hitters-lasso, the **left panel** shows the *lasso coefficient paths*.
 -   As $\lambda$ increases, some coefficients drop exactly to zero, removing the corresponding predictors from the model.
 -   This reflects lasso’s ability to perform **automatic variable selection** by enforcing sparsity.
 
-The **right panel** again shows the cross-validation MSE across values of $\lambda$.\
+The **right panel** again shows the cross-validation MSE across values of $\lambda$.
 
 -   The optimal $\lambda$ (dotted line) identifies a simpler model that excludes less relevant predictors while maintaining strong predictive performance.
 -   Compared with ridge, lasso yields more interpretable models by retaining only a subset of significant predictors.

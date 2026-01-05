@@ -1,25 +1,45 @@
 ---
-title: "Test"
-format: pdf
+title: "Machine Learning 2025"
+author: "Paco"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+format: 
+  pdf:
+    latex-engine: xelatex
+    mainfont: "Times New Roman"
+    include-in-header:
+      - file: disclaimer.tex
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{float}
+          \usepackage[dvipsnames]{xcolor}
+          \definecolor{mlorange}{HTML}{D4A96A}
+          \definecolor{mlblue}{HTML}{8CB6DF}
+          \definecolor{mlgreen}{HTML}{589276}
+          \definecolor{mlred}{HTML}{B2584F}
+          \definecolor{mlgrey}{HTML}{A9A9A9}
+          \definecolor{knnorange}{HTML}{EBB17C}
+          \definecolor{knngreen}{HTML}{9DC189}
+          \definecolor{knnblue}{HTML}{8CD3D5}
+    tbl-style: booktabs
+    tbl-cap-location: top
+    tbl-colwidths: auto
+toc: true
+toc-depth: 1
+number-sections: true
+execute:
+  engine: knitr
+editor: source
 ---
-# Deep learning: Convolutional neural networks
 
-## Image recognition: CIFAR-10
+![Training versus test error as model complexity increases.](Images_qmd_ML/ML3_graph.png){#fig-ML3_graph width=85% fig-pos="H"}
 
-To illustrate convolutional networks, we will work with the CIFAR-10 data set, a standard benchmark for image recognition. It consists of 60 000 colour images of size  $p = (32 \times 32)$ pixels, each belonging to one of 10 object classes: $$ \mathcal{G} = \{\text{airplane}, \text{automobile}, \text{bird}, \text{cat}, \text{deer}, \text{dog}, \text{frog}, \text{horse}, \text{ship}, \text{truck}\}. $$
+\vspace{-0.6\baselineskip}
+\noindent \textcolor{mlblue}{\textbf{Blue = training error, falls as complexity increases}} \textcolor{mlred}{\textbf{Red = test error, falls at first, then rises (U-shape)}}\
+Faint curves show variability across training sets; thick curves show the typical pattern.\
 
-Each image has **three colour channels** (red, green, blue). At every pixel we therefore store three intensity values, one per channel. If we ignore the spatial structure and simply stack all pixel values into a single vector, the predictor dimension would be $$ p = 32 \times 32 \times 3 = 1024. $$
+**Left (low complexity): underfitting** — the model is too rigid $\Rightarrow$ **high bias, low variance**; both \textcolor{mlblue}{training} and \textcolor{mlred}{test} error are relatively high because important structure is missed.\
+**Middle (intermediate complexity): best generalisation** — as flexibility increases, bias drops and the model captures the real signal present in both train and test data $\Rightarrow$ the \textcolor{mlred}{test error decreases} and reaches its minimum.\
+**Right (high complexity): overfitting** — beyond a point, the model becomes too sensitive and starts fitting noise $\Rightarrow$ **variance dominates, low bias**; the \textcolor{mlblue}{training error keeps decreasing}, but the \textcolor{mlred}{test error rises again} because fitted noise does not generalise well to new data.
 
-So each tiny CIFAR-10 image is already a 1024-dimensional point in input space. Many images are also quite ambiguous or noisy, making them challenging to classify even for humans. Yet modern convolutional neural networks, which explicitly exploit the 2D image structure and local patterns (edges, textures, shapes), reach test accuracies above 95 %. CIFAR-10 is therefore a convenient running example: small enough to train models quickly, but rich enough to show why specialised architectures for images are needed.
-
-## Image recognition: CIFAR-10
-
-To illustrate convolutional networks, we will work with the CIFAR-10 data set, a standard benchmark for image recognition. It consists of 60 000 colour images of size \(32 \times 32\) pixels, each belonging to one of 10 object classes:
-$$ \mathcal{G} = \{\text{airplane}, \text{automobile}, \text{bird}, \text{cat}, \text{deer}, \text{dog}, \text{frog}, \text{horse}, \text{ship}, \text{truck}\}. $$
-
-Each image has **three colour channels** (red, green, blue). At every pixel we therefore store three intensity values, one per channel. If we ignore the spatial structure and simply stack all pixel values into a single vector, the predictor dimension would be
-$$ p = 32 \times 32 \times 3 = 1024. $$
-
-So each tiny CIFAR-10 image is already a 1024-dimensional point in input space. Many images are also quite ambiguous or noisy, making them challenging to classify even for humans. Some examples are shown in @fig-cifar10-examples. Yet modern convolutional neural networks, which explicitly exploit the 2D image structure and local patterns (edges, textures, shapes), reach test accuracies above 95 %. CIFAR-10 is therefore a convenient running example: small enough to train models quickly, but rich enough to show why specialised architectures for images are needed.
-
-![Examples of CIFAR-10 images](Images_qmd_ML/ML12_imag.png){#fig-cifar10-examples width="80%" fig-align="center"}
+The \textcolor{mlred}{U-shaped test error} reflects the sum of two competing effects: $$ \text{Test Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error} $$
+As model complexity increases, $\text{Bias}^2$ decreases (better fit to the signal), while variance increases (greater sensitivity to the particular training set). Initially, bias reduction dominates so the \textcolor{mlred}{test error falls}; eventually, variance dominates so the \textcolor{mlred}{test error rises}.
