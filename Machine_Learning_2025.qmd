@@ -1320,7 +1320,7 @@ Together, these results demonstrate how both ridge and lasso manage the bias–v
 
 Classification, also called *pattern recognition*, aims to predict **qualitative** response variables $Y$ that take values in an unordered set $\mathcal{G} = \{ G_1, \ldots, G_q \}$, for example: infected $\in \{\text{Yes}, \text{No}\}$ and eye colour $\in \{\text{brown}, \text{blue}, \text{green}\}$.
 
-Given the vector of predictors $\mathbf{X} = (X_1, \ldots, X_p)$, the goal of classification is to build a function $G$, called a *classifier*, that takes $\mathbf{X}$ and predicts the value of $Y$, i.e. $G(\mathbf{X}) \in \mathcal{G}$.
+Given the vector of predictors $X = (X_1, \ldots, X_p)$, the goal of classification is to build a function $G$, called a *classifier*, that takes $X$ and predicts the value of $Y$, i.e. $G(X) \in \mathcal{G}$.
 
 Often, one is more interested in the **probability** that $Y$ belongs to each class $G_1, \ldots, G_q$, for instance:
 
@@ -1346,19 +1346,19 @@ Each observation corresponds to a patient, represented by their age ($X_1$) and 
 \end{figure}
 \end{minipage}
 
-This example illustrates a **binary classification** task where each observation is assigned to one of two possible categories. The goal is to construct a decision function $G(\mathbf{X})$ that correctly predicts the label $Y$ for new, unseen patients.
+This example illustrates a **binary classification** task where each observation is assigned to one of two possible categories. The goal is to construct a decision function $G(X)$ that correctly predicts the label $Y$ for new, unseen patients.
 
 Let us clarify that the classifier $G$ maps the two predictor variables $(\textit{age}, \textit{size})$ to one of the possible outcomes in $\mathcal{G}$, either *benign* or *malignant*. In other words, $G$ is a decision rule that assigns each patient to a diagnostic category based on these predictors.
 
 ## The 0–1 Loss Function
 
-How do we measure the quality of a prediction? For classification, the squared error loss is not ideal. Therefore, to measure the the **misclassification error** for a prediction $\hat{y}$, we usually use the **0–1 loss function** $$L(y, \hat{y}) = \mathbf{1}\{y \ne \hat{y}\} = 
+How do we measure the quality of a prediction? For classification, the squared error loss is not ideal. Therefore, to measure the **misclassification error** for a prediction $\hat{y}$, we usually use the **0–1 loss function** $$L(y, \hat{y}) = 1\{y \ne \hat{y}\} = 
   \begin{cases}
   0 & \text{if } y = \hat{y} \\
   1 & \text{if } y \ne \hat{y}
   \end{cases}.$$
 
--   For a classifier $\hat{G}$, the **expected misclassification rate** is $$\text{Err}_{\hat{G}} = \mathbb{E}[\,\mathbf{1}\{Y \ne \hat{G}(X)\}\,] = \Pr\{Y \ne \hat{G}(X)\}, $$ where the expectation is taken over $(X, Y)$.
+-   For a classifier $\hat{G}$, the **expected misclassification rate** is $$\text{Err}_{\hat{G}} = \mathbb{E}[\,1\{Y \ne \hat{G}(X)\}\,] = \Pr\{Y \ne \hat{G}(X)\}, $$ where the expectation is taken over $(X, Y)$. The expression essentially states that the error rate of the classifier $\hat{G}$ is equivalent to the expected value of the indicator function, which tracks the instances where the prediction does not equal the true classification. This is also equal to the probability of making an incorrect classification.
 
 -   **Note:** Other loss functions for classification tasks are also common, since:
 
@@ -1367,23 +1367,20 @@ How do we measure the quality of a prediction? For classification, the squared e
 
 ## The Bayes Classifier
 
-What is a \textbf{good classifier}? Ideally, we would like to find the optimal $G^*$ that minimises\
-$$ \text{Err}_{\hat{G}} = \Pr\{Y \ne \hat{G}(X)\}. $$
+What is a **good classifier**? Ideally, we would like to find the optimal $G^*$ that minimises $$ \text{Err}_{\hat{G}} = \Pr\{Y \ne \hat{G}(X)\}.$$
 
-For simplicity, consider \textbf{two-class classification}, i.e. $\mathcal{G} = \{0, 1\}$.\
-The optimal $G^*$ is called the \textbf{Bayes classifier}, which assigns each observation to the class with the highest conditional probability $\Pr(Y = j \mid X = \mathbf{x})$.
+For simplicity, consider **two-class classification**, i.e. $\mathcal{G} = \{0, 1\}$.\
+The optimal $G^*$ is called the **Bayes classifier**, which assigns each observation to the class with the highest conditional probability $\Pr(Y = j \mid X = x)$.
 
-Formally, the Bayes classifier assigns to a predictor $\mathbf{x}$ the most likely class: $$ G^*(\mathbf{x}) = \underset{j = 0, 1}{\arg\max} \, \Pr(Y = j \mid X = \mathbf{x}) = 
+Formally, the Bayes classifier assigns to a predictor $x$ the most likely class: $$ G^*(x) = \underset{j = 0, 1}{\arg\max} \, \Pr(Y = j \mid X = x) = 
   \begin{cases}
   0 & \text{if } \Pr(Y = 0 \mid X = \mathbf{x}) > 1/2, \\
   1 & \text{otherwise.}
   \end{cases} $$
 
--   The \textbf{Bayes decision boundary} is the curve (in $\mathbb{R}^p$) where\
-    $$ \Pr(Y = 0 \mid X = \mathbf{x}) = 1/2. $$
+-   The **Bayes decision boundary** is the curve (in $\mathbb{R}^p$) where $$ \Pr(Y = 0 \mid X = x) = 1/2. $$
 
--   The Bayes classifier achieves the \textbf{lowest possible 0–1 loss} — this minimum achievable error is called the \textbf{Bayes error rate}, given by\
-    $$ \text{Err}_{G^*} = \Pr\{Y \ne G^*(X)\}. $$
+-   The Bayes classifier achieves the **lowest possible 0–1 loss**; this minimum achievable error is called the **Bayes error rate**, given by $$ \text{Err}_{G^*} = \Pr\{Y \ne G^*(X)\}. $$
 
 The Bayes classifier represents the theoretical ideal: it predicts the class with the highest conditional probability given the input $X = \mathbf{x}$.\
 In practice, the true probabilities $\Pr(Y \mid X)$ are unknown, so learning algorithms approximate this rule from data.\
@@ -1407,13 +1404,13 @@ The \textbf{decision boundary} (white curve in the plot) separates regions where
 
 ## The Bayes Decision Rule
 
-The **Bayes classifier** provides the theoretical optimum but requires knowing the true probabilities $\Pr(Y \mid X)$, which are unknown in practice. To approximate it, we estimate the **posterior class probabilities** $$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}), \quad j = 0, 1, $$ and then apply the **plug-in decision rule**: $$ \hat{G}(\mathbf{x}) =
+The **Bayes classifier** provides the theoretical optimum but requires knowing the true probabilities $\Pr(Y \mid X)$, which are unknown in practice. To approximate it, we estimate the **posterior class probabilities** $$ \widehat{\Pr}(Y = j \mid X = x), \quad j = 0, 1, $$ and then apply the **plug-in decision rule**: $$ \hat{G}(x) =
 \begin{cases}
-0 & \text{if } \widehat{\Pr}(Y = 0 \mid X = \mathbf{x}) > 1/2, \\
+0 & \text{if } \widehat{\Pr}(Y = 0 \mid X = x) > 1/2, \\
 1 & \text{otherwise.}
 \end{cases} $$
 
-The **decision boundary** is the line (or surface in higher dimensions) where both posterior probabilities are equal: $$ \widehat{\Pr}(Y = 0 \mid X = \mathbf{x}) = \widehat{\Pr}(Y = 1 \mid X = \mathbf{x}) = 1/2. $$
+The **decision boundary** is the line (or surface in higher dimensions) where both posterior probabilities are equal: $$ \widehat{\Pr}(Y = 0 \mid X = x) = \widehat{\Pr}(Y = 1 \mid X = x) = 1/2. $$
 
 \begin{minipage}{0.55\textwidth}
 \textbf{Example.} Estimated and true Bayes decision boundaries.  
@@ -1436,7 +1433,7 @@ In practice, the plug-in rule approximates the Bayes classifier by estimating $\
 Depending on how we model the relationship between $Y$ and $X$, we can distinguish three main approaches to classification:
 
 **(a) Generative models** estimate the **joint distribution** of $(Y, X)$ and then deduce the posterior class probabilities for $j = 0, 1$:\
-$$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}) = \frac{\widehat{\Pr}(Y = j, X = \mathbf{x})}{\widehat{\Pr}(X = \mathbf{x})}. $$\
+$$ \widehat{\Pr}(Y = j \mid X = x) = \frac{\widehat{\Pr}(Y = j, X = x)}{\widehat{\Pr}(X = x)}. $$\
 - More complex and data-demanding, as they require modelling both $Y$ and $X$.\
 - **Examples:** Linear/Quadratic Discriminant Analysis, Naive Bayes.
 
@@ -1452,9 +1449,9 @@ $$ \widehat{\Pr}(Y = j \mid X = \mathbf{x}) = \frac{\widehat{\Pr}(Y = j, X = \ma
 
 Given a **training data set** $(x_1, y_1), \ldots, (x_n, y_n)$, with $x_i \in \mathbb{R}^p$ and $y_i \in \{1, \ldots, q\}$, how can we estimate the model $\hat{G}$?
 
-In regression, we minimise the **empirical mean squared error** on the training set. Similarly, for classification, we can minimise the **empirical misclassification rate**: $$ \text{err}_{\hat{G}} = \frac{1}{n} \sum_{i = 1}^{n} \mathbf{1}\{y_i \ne \hat{G}(x_i)\}. $$
+In regression, we minimise the **empirical mean squared error** on the training set. Similarly, for classification, we can minimise the **empirical misclassification rate**: $$ \text{err}_{\hat{G}} = \frac{1}{n} \sum_{i = 1}^{n} 1\{y_i \ne \hat{G}(x_i)\}. $$
 
-However, the **0–1 loss function** $\mathbf{1}\{y \ne \hat{y}\}$ is **discontinuous**, which makes **numerical optimisation** difficult.
+However, the **0–1 loss function** $1\{y \ne \hat{y}\}$ is **discontinuous**, which makes **numerical optimisation** difficult.
 
 Different methods such as **maximum likelihood estimation** are therefore used for **parameter estimation**, providing differentiable alternatives that approximate the 0–1 loss.
 
@@ -1480,7 +1477,7 @@ Given a **data set** $\{(x_1, y_1), \ldots, (x_n, y_n)\}$, we perform **K-Fold C
 
 For each fold $C_k$, $k = 1, \ldots, K$, we treat $C_k$ as the **validation/test set** and fit the classification model $\hat{G}_{-k}$ on the remaining $K - 1$ folds.\
 The **empirical misclassification rate** for fold $k$ is given by\
-$$ \text{err}_k = \frac{1}{|C_k|} \sum_{i \in C_k} L(y_i, \hat{G}_{-k}(x_i)) = \frac{1}{n/K} \sum_{i \in C_k} \mathbf{1}\{y_i \ne \hat{G}_{-k}(x_i)\}. $$
+$$ \text{err}_k = \frac{1}{|C_k|} \sum_{i \in C_k} L(y_i, \hat{G}_{-k}(x_i)) = \frac{1}{n/K} \sum_{i \in C_k} 1\{y_i \ne \hat{G}_{-k}(x_i)\}. $$
 
 The **K-Fold CV estimate** is then the average of these values:\
 $$ \text{CV}(K) = \frac{1}{K} \sum_{k = 1}^{K} \text{err}_k. $$
@@ -1495,16 +1492,16 @@ As shown in @fig-kfold-cv, each block $C_1, C_2, \ldots, C_K$ represents a diffe
 
 Linear classification methods assign classes according to the sign of a linear function. Suppose we have two classes $G = {0,1}$. Each observation $x$ is evaluated through a linear combination of its predictors, and the points where this expression equals zero define the decision boundary (or hyperplane).
 
-In a $p$-dimensional space, a hyperplane is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $x \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
+In a $p$-dimensional space, a **hyperplane** is a flat affine subspace of dimension $p - 1$. It is defined by parameters $b_0, b_1, \ldots, b_p \in \mathbb{R}$ as the set of points $x \in \mathbb{R}^p$ satisfying $$b_0 + b_1x_1 + \cdots + b_p x_p = 0. $$
 
-If a point $\mathbf{x}$ does not satisfy this equality, then $$b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
+If a point $x$ does not satisfy this equality, then $$b_0 + b_1x_1 + \cdots + b_p x_p > 0 $$
 
-indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.\
+indicates that it lies on one side of the hyperplane, while a negative value places it on the opposite side.
 
-Plugging any point $\mathbf{x}$ into this expression tells us on which side of the boundary it lies: a positive value corresponds to one class, a negative value to the other, and zero means the point lies exactly on the hyperplane.
+Plugging any point $x$ into this expression tells us on which side of the boundary it lies: a positive value corresponds to one class, a negative value to the other, and zero means the point lies exactly on the hyperplane.
 
 \begin{minipage}{0.55\textwidth}
-\textbf{Example $p = 1$.} In one dimension, the hyperplane degenerates into a single point separating two classes along a line:
+\textbf{Example $p = 1$}. In one dimension, the hyperplane degenerates into a single point separating two classes along a line:
 $$ b_0 + b_1x = 0 \;\;\Longleftrightarrow\;\; x = -\frac{b_0}{b_1}. $$
 The scalar $x = -b_0/b_1$ is where the linear function crosses zero, i.e. the \emph{decision boundary}. Plugging in values to the left or right yields positive or negative outputs, determining the class. The function’s sign alone decides the classification: points to the left or right of this threshold yield opposite signs of $b_0 + b_1x$, with positive values corresponding to one class and negative values to the other.
 \end{minipage}
@@ -1533,7 +1530,7 @@ Any point $(x_1, x_2)$ that satisfies this equation lies on the decision boundar
 \captionof{figure}{Linear decision boundary in $\mathbb{R}^2$ separating two classes.}\label{fig:hyperplane-2d}
 \end{minipage}
 
-Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + \mathbf{b}^\top \mathbf{x}$—that is, on which side of the boundary each observation lies. We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
+Figures \ref{fig:hyperplane-1d} and \ref{fig:hyperplane-2d} illustrate that a hyperplane in $\mathbb{R}^p$ is an affine subspace of dimension $p-1$. Classification decisions depend solely on the sign of $b_0 + b^\top x$—that is, on which side of the boundary each observation lies. We next show how \emph{Linear Discriminant Analysis (LDA)} uses probabilistic modelling to generate these linear decision boundaries.
 
 \bigskip
 
@@ -1590,9 +1587,9 @@ The model includes:
 -   the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$
 -   the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$
 
-We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} \mathbf{1}\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} \mathbf{x}_i \mathbf{1}\{y_i = j\}}{\sum_{i=1}^{n} \mathbf{1}\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} \mathbf{1}\{y_i = j\}}{n - q}.$$
+We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} 1\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} x_i 1\{y_i = j\}}{\sum_{i=1}^{n} 1\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (x_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} 1\{y_i = j\}}{n - q}.$$
 
-These estimators are simple closed forms — no iterative optimisation is needed — which makes LDA **computationally very fast**.\
+These estimators are simple closed forms, i.e., no iterative optimisation is needed — which makes LDA **computationally very fast**.\
 Unlike linear regression, we do not use the numerical values of the $y_i$’s, only their class membership.
 
 ## Prediction
@@ -1660,8 +1657,7 @@ Finally, **non-parametric approaches** estimate $g_j(x)$ directly from data with
 
 ## Iris Data Set: QDA
 
-We again use the **Iris data set** to compare QDA with LDA.\
-The same three classes (*setosa*, *versicolor*, and *virginica*) are modelled using only two predictors: sepal length and sepal width.
+We again use the **Iris data set** to compare QDA with LDA. The same three classes (*setosa*, *versicolor*, and *virginica*) are modelled using only two predictors: sepal length and sepal width.
 
 Fitting QDA allows each class to have its own covariance structure, producing **curved boundaries** that better adapt to class shapes in the feature space.
 
@@ -1682,7 +1678,7 @@ Moreover, LDA is a **stable estimation method**, meaning that even if the assume
 
 We do not need highly accurate $g_j$ to obtain a good posterior; @fig-comments-lda illustrates this idea.
 
-On the **left**, the two class-conditional densities $g_1(x)$ and $g_2(x)$ are clearly **non-Gaussian**—the blue density is even bimodal.\
+On the **left**, the two class-conditional densities $g_1(x)$ and $g_2(x)$ are clearly **non-Gaussian**, as we see, the blue density is even bimodal.\
 On the **right**, we see the corresponding **posterior probability** of belonging to the red class.\
 Despite the complex shape of the densities, the posterior remains **smooth and monotonic**, producing a clear linear-like separation.\
 This shows that even if the normality assumption fails, LDA still yields reliable classification boundaries.
@@ -1821,17 +1817,24 @@ Nevertheless, the objective function remains smooth and concave, which makes max
 
 ## Iris Data Set: Multinomial Logistic Regression
 
-We illustrate multinomial logistic regression using the **Iris data set**, which contains 150 observations from three species: *setosa*, *versicolor*, and *virginica*. Each plant is described by $p = 4$ predictors, but for visualisation we restrict attention to the first two: sepal length and sepal width.
+We illustrate multiclass classification using the **Iris data set**, which contains 150 observations from three species: *setosa*, *versicolor*, and *virginica*. Each plant is described by $p = 4$ predictors, but for visualisation we restrict attention to the first two: sepal length and sepal width.\
+With three classes, multinomial logistic regression models the full set of posterior probabilities $\Pr(Y = j \mid X = x)$ and predicts the class with the largest posterior probability.
 
-Multinomial logistic regression directly models the posterior probabilities $\Pr(Y = j \mid X = \mathbf{x})$ for the three classes. Each class is associated with its own linear predictor, relative to a reference class, and classification assigns each point to the class with the highest predicted probability.
+![Decision regions on the Iris data set (sepal length and sepal width). Left: LDA. Right: multinomial logistic regression.](Images_qmd_ML/ML5_log_iris.png){#fig-log-iris}
 
-![Decision regions obtained by multinomial logistic regression on the Iris data set.](Images_qmd_ML/ML5_log_iris.png){#fig-log-iris}
+In @fig-log-iris, each coloured region corresponds to the predicted class $\hat{y}(x) = \arg\max_j \hat{p}_j(x)$, and the points are the observed flowers.\
+The boundaries are the locations where two classes have the same (largest) posterior probability, for example $\hat{p}_a(x) = \hat{p}_b(x)$.
 
-@fig-log-iris shows the resulting **decision regions** in the two-dimensional feature space. Each coloured region corresponds to the class with the highest posterior probability, while the points indicate the observed flowers.
+Because both LDA and multinomial logistic regression are **linear classifiers**, their decision boundaries in this two-dimensional feature space are **straight lines**. In the multiclass setting, several straight boundaries combine to create a **piecewise linear partition** of the plane.
 
-As expected from the theory, the boundaries between regions are **linear**. In the multiclass setting, these linear boundaries combine to form a **piecewise linear partition** of the plane. The *setosa* class is cleanly separated, while *versicolor* and *virginica* overlap more substantially, reflecting their similarity in these two predictors.
+The two panels look very similar, and that is expected in this simple two-predictor example:\
+- *setosa* is cleanly separated in the upper-left part of the plane, so both methods agree almost everywhere for that class.\
+- The main ambiguity lies in the overlap between *versicolor* and *virginica*, so any differences between methods appear only in that overlap zone.
 
-This example highlights that multinomial logistic regression generalises binary logistic regression in a natural way, producing interpretable linear decision boundaries while providing full probabilistic predictions for multiple classes.
+The differences between the two fits are therefore subtle and local: they mainly affect (i) the precise position of the boundary that separates *versicolor* from *virginica* through the central cloud of points, and (ii) the location of the “junction” where all three regions meet.\
+In other words, the global structure is the same (linear separation with three regions), but a few borderline observations in the overlap area can be assigned differently depending on whether we fit a generative model (LDA) or a discriminative model (multinomial logistic regression).
+
+This illustrates an important exam point: even when two methods produce linear decision boundaries, they need not yield identical boundaries on the same data because they rely on different modelling assumptions and estimation criteria.
 
 ## Comments
 
