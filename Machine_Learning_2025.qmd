@@ -1871,7 +1871,7 @@ As a result:
 
 Image recognition aims to identify or classify objects within digital images by learning the relationship between pixel intensities and their corresponding labels. Each image is represented as a grid of pixels, where each pixel encodes the degree of darkness on a greyscale from 0 (white) to 9 (black). In this example, every handwritten digit image consists of $16 \times 16 = 256$ pixels, meaning we have 256 predictors for each observation.
 
-Each predictor corresponds to a specific pixel intensity, and together these values form a feature vector $x_i = (x_{i1}, x_{i2}, \ldots, x_{i256})$. The model learns a mapping $\hat{f}(\mathbf{x}_i)$ that associates these pixel values with the corresponding digit label $y_i \in \{0, \ldots, 9\}$. Classification algorithms such as logistic regression, neural networks, or convolutional networks can be used to learn this mapping.
+Each predictor corresponds to a specific pixel intensity, and together these values form a feature vector $x_i = (x_{i1}, x_{i2}, \ldots, x_{i256})$. The model learns a mapping $\hat{f}(x_i)$ that associates these pixel values with the corresponding digit label $y_i \in \{0, \ldots, 9\}$. Classification algorithms such as logistic regression, neural networks, or convolutional networks can be used to learn this mapping.
 
 This approach converts visual information into numerical data, allowing statistical or machine learning methods to identify complex patterns of brightness and shape that define each digit. The more pixels that are used as predictors, the higher the potential resolution and detail the model can learn, although this also increases computational cost and the need for regularisation.
 
@@ -2114,7 +2114,7 @@ Tree-based approaches can be grouped as follows:
 2. **Bagging / Boosting:** Methods combining multiple trees to improve prediction accuracy by reducing variance or bias.\
 3. **Random forests:** Ensembles that decorrelate bagged trees, increasing stability and robustness.
 
-As illustrated in Figure @fig-tbm, the **left panel** displays a small regression tree built using the predictors *age* ($X_1$) and *cancer size* ($X_2$). Each internal node represents a decision rule that splits the data based on a threshold value (e.g. *size \< 0.14*), dividing observations into smaller, more homogeneous groups. The **terminal nodes** (leaves) indicate the predicted response for each region. In this example, coloured as *red* and *black* to distinguish lower and higher predicted values.
+As illustrated in @fig-tbm, the **left panel** displays a small regression tree built using the predictors *age* ($X_1$) and *cancer size* ($X_2$). Each internal node represents a decision rule that splits the data based on a threshold value (e.g. *size \< 0.14*), dividing observations into smaller, more homogeneous groups. The **terminal nodes** (leaves) indicate the predicted response for each region. In this example, coloured as *red* and *black* to distinguish lower and higher predicted values.
 
 The **right panel** shows how these splits translate into a partitioning of the two-dimensional predictor space. Each rectangular region corresponds to one terminal node from the tree, defining an area where all observations receive the same fitted value. The vertical and horizontal lines represent the thresholds used in the tree’s internal splits. Collectively, these partitions form a **piecewise-constant regression surface**, demonstrating how decision trees approximate complex, nonlinear relationships through a sequence of simple, interpretable divisions.
 
@@ -2145,9 +2145,9 @@ An important advantage of trees is their strong \textbf{interpretability}: the s
 
 The regression tree partitions the feature space into three regions, each corresponding to one of the terminal nodes (leaves). Each region $R_j$ contains the observations that satisfy the set of split conditions leading to that node.
 
--   $R_1 = \{\mathbf{X} \mid \text{Years} < 4.5\}$,
--   $R_2 = \{\mathbf{X} \mid \text{Years} \ge 4.5,\, \text{Hits} < 117.5\}$,
--   $R_3 = \{\mathbf{X} \mid \text{Years} \ge 4.5,\, \text{Hits} \ge 117.5\}$.
+-   $R_1 = \{X \mid \text{Years} < 4.5\}$,
+-   $R_2 = \{X \mid \text{Years} \ge 4.5,\, \text{Hits} < 117.5\}$,
+-   $R_3 = \{X \mid \text{Years} \ge 4.5,\, \text{Hits} \ge 117.5\}$.
 
 \begin{minipage}{0.55\textwidth}
 \textbf{Interpretation:}
@@ -2170,18 +2170,18 @@ The regression tree partitions the feature space into three regions, each corres
 
 ## How to grow a regression tree?
 
-Given a training data set $(\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_n, y_n)$ with $\mathbf{x}_i \in \mathbb{R}^p$ and $y_i \in \mathbb{R}$, we seek to construct a regression tree that divides the predictor space into $J$ non-overlapping regions $R_1, \ldots, R_J$.
+Given a training data set $(x_1, y_1), \ldots, (x_n, y_n)$ with $x_i \in \mathbb{R}^p$ and $y_i \in \mathbb{R}$, we seek to construct a regression tree that divides the predictor space into $J$ non-overlapping regions $R_1, \ldots, R_J$.
 
 -   The goal is to partition the predictor space $(X_1, \ldots, X_p)$ into distinct regions that are as homogeneous as possible with respect to the response $y_i$.
 
 -   Although the regions could take any shape, regression trees restrict them to high-dimensional **rectangles (boxes)** for interpretability.
 
--   For each observation falling into region $R_j$, we predict a constant value: $$ \hat{y}_{R_j} = \frac{1}{n_j} \sum_{i : \mathbf{x}_i \in R_j} y_i $$\
+-   For each observation falling into region $R_j$, we predict a constant value: $$ \hat{y}_{R_j} = \frac{1}{n_j} \sum_{i : x_i \in R_j} y_i $$\
     where $n_j$ is the number of training observations in region $R_j$.
 
--   The prediction in each region is thus the **mean** of the training responses for that region
+-   The prediction in each region is thus the **mean** of the training responses for that region.
 
--   The optimal partitioning aims to find the regions $R_1, \ldots, R_J$ that minimise the residual sum of squares (RSS): $$ \sum_{j=1}^{J} \sum_{i : \mathbf{x}_i \in R_j} (y_i - \hat{y}_{R_j})^2$$ This recursive partitioning procedure builds the tree by successively splitting the predictor space to reduce the RSS at each step, producing a hierarchy of simple, interpretable decision rules.
+-   The optimal partitioning aims to find the regions $R_1, \ldots, R_J$ that minimise the residual sum of squares (RSS): $$ \sum_{j=1}^{J} \sum_{i: x_i \in R_j} \left(y_i - \hat{y}_{R_j}\right)^22$$ This recursive partitioning procedure builds the tree by successively splitting the predictor space to reduce the RSS at each step, producing a hierarchy of simple, interpretable decision rules.
 
 ## Tree growing: greedy algorithm
 
@@ -2194,17 +2194,17 @@ It is computationally infeasible to test all possible ways of dividing the featu
 
 Formally, for each predictor $X_j$ and potential cutpoint $t$, we define the half-planes:
 
-$$R_1(j, t) = \{ \mathbf{X} \mid X_j < t \}, \quad R_2(j, t) = \{ \mathbf{X} \mid X_j \ge t \}.$$
+$$R_1(j,t) = \{ X \mid X_j < t \}, \qquad R_2(j,t) = \{ X \mid X_j \ge t \}.$$
 
 The algorithm finds the values $(j^*, t^*)$ that minimise the sum of squared residuals:
 
-$$\sum_{i : \mathbf{x}_i \in R_1(j, t)} (y_i - \hat{y}_{R_1(j, t)})^2 + \sum_{i : \mathbf{x}_i \in R_2(j, t)} (y_i - \hat{y}_{R_2(j, t)})^2.$$
+$$\sum_{i : x_i \in R_1(j,t)} (y_i - \hat y_{R_1(j,t)})^2 \;+\; \sum_{i : x_i \in R_2(j,t)} (y_i - \hat y_{R_2(j,t)})^2.$$
 
 The splitting process is then repeated **recursively** on the resulting regions, producing a hierarchical partitioning of the predictor space.
 
-Once the regions $R_1, \ldots, R_J$ are formed, predictions for a new observation $\mathbf{x}$ are made by assigning it to the appropriate region $R_j$ and using the average response within that region:
+Once the regions $R_1, \ldots, R_J$ are formed, predictions for a new observation $x$ are made by assigning it to the appropriate region $R_j$ and using the average response within that region:
 
-$$\hat{f}(\mathbf{x}) = \sum_{j=1}^{J} \hat{y}_{R_j} \mathbf{1}\{ \mathbf{x} \in R_j \}.$$
+$$\hat{f}(x) = \sum_{j=1}^{J} \hat{y}_{R_j} 1\{ x \in R_j \}.$$
 
 ## Regression tree: two-dimensional feature space
 
@@ -2225,7 +2225,7 @@ When a tree is fully grown, it may overfit the training data. To improve general
 
 We consider a sequence of trees indexed by a tuning parameter $\alpha \ge 0$. For each $\alpha$, the corresponding subtree $T_\alpha \subset T_0$ minimises:
 
-$$ \sum_{j=1}^{|T_\alpha|} \sum_{i : \mathbf{x}_i \in R_j} (y_i - \hat{y}_{R_j})^2 + \alpha |T_\alpha|. $$
+$$ \sum_{j=1}^{|T_\alpha|} \sum_{i : x_i \in R_j} (y_i - \hat{y}_{R_j})^2 + \alpha |T_\alpha|. $$
 
 -   The first term measures the **fit** of the tree (training error).
 -   The second term $\alpha |T_\alpha|$ penalises **model complexity**, where $|T_\alpha|$ is the number of terminal nodes.
@@ -2296,7 +2296,7 @@ These impurity measures are minimised when the node is “pure”, meaning that 
 
 ![](Images_qmd_ML/ML6_node_imp.png){#fig-node-imp width="60%" fig-align="center"}
 
--   As we see above in Figure @fig-node-imp, both the Gini and cross-entropy curves decrease smoothly toward zero as the node becomes purer.
+-   As we see above in @fig-node-imp, both the Gini and cross-entropy curves decrease smoothly toward zero as the node becomes purer.
 
 -   The cross-entropy (red) penalises uncertainty more strongly around $p = 0.5$, offering steeper gradients that make it more sensitive than the Gini index (blue).
 
@@ -2320,7 +2320,7 @@ In @fig-heart-tree we can see the **unpruned tree**, which is relatively complex
 
 ![Training, CV and Test errors & Pruned tree](Images_qmd_ML/ML6_heart_t_prun.png){#fig-heart-pruned width="80%" fig-align="center"}
 
-In Figure @fig-heart-pruned, the **bottom-left panel** shows the training, cross-validation, and test errors for trees of increasing size. The **bottom-right panel** shows the **pruned tree** corresponding to the optimal level of complexity, selected by cross-validation. Pruning simplifies the model, improving interpretability while maintaining nearly the same predictive accuracy.
+In @fig-heart-pruned, the **bottom-left panel** shows the training, cross-validation, and test errors for trees of increasing size. The **bottom-right panel** shows the **pruned tree** corresponding to the optimal level of complexity, selected by cross-validation. Pruning simplifies the model, improving interpretability while maintaining nearly the same predictive accuracy.
 
 In this tree, several predictors are qualitative, for example, *Thal* and *ChestPain*. The algorithm evaluates all possible binary partitions of their categories. For instance, the split *ChestPain:bc* divides the data into two groups, one with “typical” or “asymptomatic” pain and another with “nonanginal” or “nontypical” patterns.
 
@@ -2351,13 +2351,13 @@ This visualisation illustrates how a decision tree partitions the predictor spac
 
 ## Cost-complexity pruning in Python
 
-The **cross-validation (CV) error plot**, shown in Figure @fig-cv-error, illustrates how the model’s performance changes as the pruning parameter $\alpha$ increases.
+The **cross-validation (CV) error plot**, shown in @fig-cv-error, illustrates how the model’s performance changes as the pruning parameter $\alpha$ increases.
 
 ![Cross-validation error plot](Images_qmd_ML/ML6_CV_error.png){#fig-cv-error fig-align="center" width="60%"}
 
 As $\alpha$ grows, the penalty for tree complexity becomes stronger, leading to **simpler trees** with fewer splits. Initially, this reduces **overfitting**, and the CV error decreases. However, beyond an optimal point, excessive pruning causes **underfitting**, and the CV error rises again.
 
-The **minimum of the CV error curve** corresponds to the value of $\alpha$ that achieves the best trade-off between bias and variance — that is, the subtree with the lowest expected prediction error on unseen data.
+The **minimum of the CV error curve** corresponds to the value of $\alpha$ that achieves the best trade-off between bias and variance, in other words, the subtree with the lowest expected prediction error on unseen data.
 
 ## Trees versus linear classifiers
 
