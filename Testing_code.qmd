@@ -76,7 +76,7 @@ The OOB error provides an internal validation mechanism without requiring an exp
 ## Bagging for trees
 
 -   Classification and regression trees are perfectly suited for bagging, since their poor predictive accuracy comes from their high variance.
--   For a regression problem, [^1] for all $B$ bootstrap training sets we grow a large tree **without pruning** to obtain a high-variance predictive model. We then average all these (possibly overfitted) trees to obtain a bagged model with reduced variance.
+-   For a regression problem, [^5] for all $B$ bootstrap training sets we grow a large tree **without pruning** to obtain a high-variance predictive model. We then average all these (possibly overfitted) trees to obtain a bagged model with reduced variance.
 -   This has shown to give impressive improvements in prediction accuracy, though at the cost of interpretability.
 -   Importantly, $B$ is not a classical tuning parameter, since a large $B$ will not overfit the data; the error will simply stabilise.
 -   For classification, we fit $B$ classification trees $\hat{G}^{*b}$ and then choose the predicted class by majority vote, that is $$ \hat{G}_{\text{bag}}(x) = \arg\max_{g=1,\dots,q} \frac{1}{B} \sum_{b=1}^{B} {1}\{ g = \hat{G}^{*b}(x) \}$$
@@ -87,7 +87,7 @@ The OOB error provides an internal validation mechanism without requiring an exp
     -   ${1}\{ g = \hat{G}^{*b}(x) \}$: for a given class $g$, this equals 1 if the $b$th tree predicts class $g$, and 0 otherwise. The sum $\sum_{b=1}^{B} {1}\{ g = \hat{G}^{*b}(x) \}$ therefore counts how many trees voted for $g$.
 -   Bagging is therefore especially effective for high-variance, low-bias models such as decision trees, as averaging across bootstrap replicates substantially reduces their prediction variance.
 
-[^1]: In this context, a regression problem refers to a supervised learning task where the target variable $y$ is continuous. In contrast, a classification problem deals with categorical outputs.
+[^5]: In this context, a regression problem refers to a supervised learning task where the target variable $y$ is continuous. In contrast, a classification problem deals with categorical outputs.
 
 ## Example: bagging and variance reduction
 
@@ -127,33 +127,23 @@ The **right plot** shows the distribution of the sample mean when $B = 500$. Ind
 
 This demonstrates that averaging only reduces variance effectively when the individual models or samples are **uncorrelated**. If the models are correlated (because they rely on similar features or data points) the benefit of averaging diminishes.
 
-In the next section, we see how random forests address this limitation by introducing randomness in feature selection (by randomly choosing subsets of predictors at each split) which reduces correlation between trees and improves variance reduction beyond bagging.
+In the next section, we see how random forests address this limitation by introducing randomness in feature selection (by randomly choosing subsets of predictors at each split)[^6] which reduces correlation between trees and improves variance reduction beyond bagging.
 
-```{r}
-#TODO add this foot ntoe_ the specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features.
-```
+[^6]: The specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features
 
 ## Bagging: correlated trees
 
 -   In bagging, each tree is trained on a bootstrap dataset that is drawn **with replacement** from the original training data. Because these bootstrap samples overlap substantially, the trees share **many common observations**.
--   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity. Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
+-   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity.[^7] Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
 
-```{r}
-#TODO include this as a footnote: Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity — that is, makes the resulting groups more homogeneous.
-# In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
-```
+[^7]:Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity,  that is, makes the resulting groups more homogeneous. In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
 
--   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$. In other words, for all $b = 1, \dots, B$” means that this correlation property applies across all the trees in the bagged ensemble, each $\hat{f}^{*b}(x_0)$ tends to give a similar prediction for the same input $x_0$.
+-   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$. In other words, "for all $b = 1, \dots, B$" means that this correlation property applies across all the trees in the bagged ensemble, each $\hat{f}^{*b}(x_0)$ tends to give a similar prediction for the same input $x_0$.
 
-As seen in @fig-bootstrapped-trees, the three trees trained on different bootstrap samples from the same dataset share much of their structure.\
-They all split early on similar variables (Thal, Ca, Oldpeak), showing that even after resampling, the bagged trees remain strongly correlated.This shows how, despite resampling, the bagged trees remain **strongly correlated** because they repeatedly rely on the same dominant predictors for their early decisions.
+As seen in @fig-bootstrapped-trees, the three trees trained on different bootstrap samples from the same dataset share much of their structure. They all split early on similar variables (Thal, Ca, Oldpeak), showing that even after resampling, the bagged trees remain strongly correlated.This shows how, despite resampling, the bagged trees remain **strongly correlated** because they repeatedly rely on the same dominant predictors for their early decisions.
 
 Such correlation limits the benefit of averaging in bagging: even though we combine many trees, if they make **similar errors**, the ensemble’s variance does not decrease as much as expected.\
 This motivates the next step, i.e., **random forests**, which introduce randomness in feature selection at each split to decorrelate the trees and achieve greater variance reduction.
-
-```{r}
-#TODO but if we add randomness to then reduce the variance, isnt it a bit working twice?
-```
 
 ## Random forest: main idea
 
@@ -213,7 +203,7 @@ These results confirm that random forests enhance predictive power by combining 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{Images_qmd_ML/ML7_heart_2.png}
-\caption{Confusion matrices for bagging (top) and random forest (bottom).}
+\caption{Confusion matrices for bagging and random forest.}
 \label{fig-heart-cm}
 \end{figure}
 \end{minipage}
@@ -226,7 +216,7 @@ These results confirm that random forests enhance predictive power by combining 
 -   For **classification**, we record the total decrease in **Gini index** or **deviance** associated with each predictor.
 -   Another way to assess importance is by **randomly permuting** a given predictor among the **out-of-bag (OOB) observations** and measuring how much the model’s prediction error increases. A strong increase indicates that the variable was important for accurate predictions.
 
-![Variable importance in the heart disease dataset](Images_qmd_ML/ML7_var_imp.png){#fig-var-imp width="55%" fig-align="center"}
+![Variable importance in the heart disease dataset](Images_qmd_ML/ML7_var_imp.png){#fig-var-imp width="50%" fig-align="center"}
 
 As seen in @fig-var-imp, the variables *Thal* (thalassemia type) and *Ca* (number of major vessels) are the most influential predictors of heart disease, followed by *ChestPain* and *Oldpeak*. Features such as *Fbs* (fasting blood sugar) or *RestECG* contribute comparatively little to the model’s performance.\
 This ranking provides a powerful interpretative tool to understand which features drive the predictive accuracy of the random forest, even though the individual trees themselves are no longer easily interpretable.
@@ -269,8 +259,7 @@ They are highly practical because they combine **robustness**, **accuracy**, and
 
 ## Digit classification with random forest
 
-As seen in @fig-digit-class, the **digit classification** task involves recognising handwritten digits (0–9) based on pixel intensity values.\
-Each model is trained on the same dataset and evaluated on its ability to correctly classify unseen digits.
+As seen in @fig-digit-class, the **digit classification** task involves recognising handwritten digits (0–9) based on pixel intensity values. Each model is trained on the same dataset and evaluated on its ability to correctly classify unseen digits.
 
 ![Examples of handwritten digits used in the classification task.](Images_qmd_ML/ML6_digit_class.png){#fig-digit-class width="70%" fig-align="center"}
 
@@ -309,13 +298,12 @@ RF & 0.0 & 5.9 \\
 \end{center}
 \end{minipage}
 
-The results show that **random forests** achieve the lowest **test error (5.9%)**, outperforming all other methods.\
-This strong generalisation comes from combining many decision trees trained on bootstrapped samples with random subsets of features. thereby creating a model structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
+The results show that **random forests** achieve the lowest **test error (5.9%)**, outperforming all other methods.
+  
+This strong generalisation comes from combining many decision trees trained on bootstrapped samples with random feature subsets, creating a model structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
 
-This strong generalisation arises from combining many decision trees trained on bootstrapped samples with random feature subsets, creating a structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
-
-Regularised logistic models (ridge and lasso) also perform well, as they prevent overfitting by penalising large coefficients.\
-However, random forests remain the most powerful approach here, thanks to their ability to model intricate decision boundaries while maintaining robustness through averaging and decorrelation.
+Regularised logistic models (ridge and lasso) also perform well, as they mitigate overfitting by penalising large coefficients.  
+However, random forests remain the most effective approach in this setting, as they can model highly complex decision boundaries while maintaining robustness through averaging and tree decorrelation.
 
 ## Digit classification: variable importance
 
@@ -338,9 +326,9 @@ Thus, pixel-level variable importance visualisation bridges the gap between **pe
 
 ## Boosting for trees
 
-Boosting builds upon the idea of bagging but reverses its focus. In **bagging**, we use many **unbiased**, high-variance models (deep trees) and reduce their variance through averaging. Each tree is grown independently on a bootstrap sample[^2] of the data, and their predictions are averaged to form a stable, low-variance model.
+Boosting builds upon the idea of bagging but reverses its focus. In **bagging**, we use many **unbiased**, high-variance models (deep trees) and reduce their variance through averaging. Each tree is grown independently on a bootstrap sample[^8] of the data, and their predictions are averaged to form a stable, low-variance model.
 
-[^2]: A bootstrap sample is a dataset obtained by **sampling with replacement** from the original training data. Each decision tree in bagging is trained on a different bootstrap sample, which introduces randomness: although all trees see roughly the same number of observations, they each **contain different subsets and repetitions** of the data. This variability makes the trees slightly different from one another, allowing their predictions to be **averaged** to reduce variance in the final ensemble. Averaging smooths out these fluctuations, it reduces variance, but does not change the underlying model’s bias (each tree is still an unbiased estimator, just noisy).
+[^8]: A bootstrap sample is a dataset obtained by **sampling with replacement** from the original training data. Each decision tree in bagging is trained on a different bootstrap sample, which introduces randomness: although all trees see roughly the same number of observations, they each **contain different subsets and repetitions** of the data. This variability makes the trees slightly different from one another, allowing their predictions to be **averaged** to reduce variance in the final ensemble. Averaging smooths out these fluctuations, it reduces variance, but does not change the underlying model’s bias (each tree is still an unbiased estimator, just noisy).
 
 **Boosting**, in contrast, aims to reduce the **bias** of the model. Instead of combining many deep, independent trees, it combines many **weak**, biased learners (typically shallow trees) that individually have low variance. These trees are not grown independently but **sequentially**: each new tree focuses on the parts of the data that the previous ones predicted poorly.
 
@@ -953,10 +941,10 @@ For now, the question is how we can improve an initial model using gradient desc
 1.  Start with an arbitrary initial value $\theta^{(0)}$.
 2.  For iterations $i=1,2,\dots$:
     1.  Compute the gradient (derivative) of the loss at the current parameters, $$\nabla_\theta J(\theta^{(i-1)})=\left.\frac{\partial J(\theta)}{\partial \theta}\right|_{\theta=\theta^{(i-1)}}.$$
-    2.  Update the parameters with learning rate $\alpha>0$,[^3] $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
+    2.  Update the parameters with learning rate $\alpha>0$,[^9] $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
 3.  Stop when a suitable stopping criterion is satisfied (for example, after a fixed number of iterations or when the loss stops improving).
 
-[^3]: $\alpha$ is the learning rate (step size) in gradient descent: it controls how far we move in the direction of the negative gradient at each update. A large $\alpha$ gives big, potentially unstable steps, while a small $\alpha$ yields slow but more stable progress.
+[^9]: $\alpha$ is the learning rate (step size) in gradient descent: it controls how far we move in the direction of the negative gradient at each update. A large $\alpha$ gives big, potentially unstable steps, while a small $\alpha$ yields slow but more stable progress.
 
 Intuitively, each step looks at the current model, determines in which direction in parameter space $J(\theta)$ decreases fastest, and moves a small distance in that direction. The gradient descent algorithm itself is completely standard; what is special in the neural-network setting is how we obtain the gradient efficiently for such a complex model. In essence, to fit a neural network by gradient descent we “only” need the gradients $\nabla_\theta J(\theta)$, and these are supplied by the back-propagation algorithm.
 
