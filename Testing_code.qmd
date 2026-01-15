@@ -76,7 +76,7 @@ The OOB error provides an internal validation mechanism without requiring an exp
 ## Bagging for trees
 
 -   Classification and regression trees are perfectly suited for bagging, since their poor predictive accuracy comes from their high variance.
--   For a regression problem, [^5] for all $B$ bootstrap training sets we grow a large tree **without pruning** to obtain a high-variance predictive model. We then average all these (possibly overfitted) trees to obtain a bagged model with reduced variance.
+-   For a regression problem, [^1] for all $B$ bootstrap training sets we grow a large tree **without pruning** to obtain a high-variance predictive model. We then average all these (possibly overfitted) trees to obtain a bagged model with reduced variance.
 -   This has shown to give impressive improvements in prediction accuracy, though at the cost of interpretability.
 -   Importantly, $B$ is not a classical tuning parameter, since a large $B$ will not overfit the data; the error will simply stabilise.
 -   For classification, we fit $B$ classification trees $\hat{G}^{*b}$ and then choose the predicted class by majority vote, that is $$ \hat{G}_{\text{bag}}(x) = \arg\max_{g=1,\dots,q} \frac{1}{B} \sum_{b=1}^{B} {1}\{ g = \hat{G}^{*b}(x) \}$$
@@ -87,7 +87,7 @@ The OOB error provides an internal validation mechanism without requiring an exp
     -   ${1}\{ g = \hat{G}^{*b}(x) \}$: for a given class $g$, this equals 1 if the $b$th tree predicts class $g$, and 0 otherwise. The sum $\sum_{b=1}^{B} {1}\{ g = \hat{G}^{*b}(x) \}$ therefore counts how many trees voted for $g$.
 -   Bagging is therefore especially effective for high-variance, low-bias models such as decision trees, as averaging across bootstrap replicates substantially reduces their prediction variance.
 
-[^5]: In this context, a regression problem refers to a supervised learning task where the target variable $y$ is continuous. In contrast, a classification problem deals with categorical outputs.
+[^1]: In this context, a regression problem refers to a supervised learning task where the target variable $y$ is continuous. In contrast, a classification problem deals with categorical outputs.
 
 ## Example: bagging and variance reduction
 
@@ -127,16 +127,18 @@ The **right plot** shows the distribution of the sample mean when $B = 500$. Ind
 
 This demonstrates that averaging only reduces variance effectively when the individual models or samples are **uncorrelated**. If the models are correlated (because they rely on similar features or data points) the benefit of averaging diminishes.
 
-In the next section, we see how random forests address this limitation by introducing randomness in feature selection (by randomly choosing subsets of predictors at each split)[^6] which reduces correlation between trees and improves variance reduction beyond bagging.
+In the next section, we see how random forests address this limitation by introducing randomness in feature selection (by randomly choosing subsets of predictors at each split)[^2] which reduces correlation between trees and improves variance reduction beyond bagging.
 
-[^6]: The specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features
+[^2]: The specific mechanism in random forests where, at each split of a tree, the algorithm randomly selects a subset of predictors (features) from the total available ones, instead of considering all features
 
 ## Bagging: correlated trees
 
 -   In bagging, each tree is trained on a bootstrap dataset that is drawn **with replacement** from the original training data. Because these bootstrap samples overlap substantially, the trees share **many common observations**.
--   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity.[^7] Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
+-   The decision tree algorithm is **greedy**: it chooses at each split the variable that gives the largest reduction in impurity.[^3] Since the datasets are very similar, the trees tend to select the **same predictors for their early splits**.
 
-[^7]:Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity,  that is, makes the resulting groups more homogeneous. In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
+[^3]: Impurity quantifies how mixed the node is. The decision tree algorithm greedily picks the split that most reduces impurity, that is, makes the resulting groups more homogeneous. In classification, impurity is measured using the Gini index or entropy, while in regression it’s measured using variance (RSS).
+
+<!-- -->
 
 -   As a result, the trees end up looking very similar and their predictions $\hat{f}^{*b}(x_0)$ for a new input $x_0$ are **highly correlated** for all $b = 1, \dots, B$. In other words, "for all $b = 1, \dots, B$" means that this correlation property applies across all the trees in the bagged ensemble, each $\hat{f}^{*b}(x_0)$ tends to give a similar prediction for the same input $x_0$.
 
@@ -299,10 +301,10 @@ RF & 0.0 & 5.9 \\
 \end{minipage}
 
 The results show that **random forests** achieve the lowest **test error (5.9%)**, outperforming all other methods.
-  
+
 This strong generalisation comes from combining many decision trees trained on bootstrapped samples with random feature subsets, creating a model structure that captures **non-linear dependencies** and **complex feature interactions** across the pixel space.
 
-Regularised logistic models (ridge and lasso) also perform well, as they mitigate overfitting by penalising large coefficients.  
+Regularised logistic models (ridge and lasso) also perform well, as they mitigate overfitting by penalising large coefficients.\
 However, random forests remain the most effective approach in this setting, as they can model highly complex decision boundaries while maintaining robustness through averaging and tree decorrelation.
 
 ## Digit classification: variable importance
@@ -326,9 +328,9 @@ Thus, pixel-level variable importance visualisation bridges the gap between **pe
 
 ## Boosting for trees
 
-Boosting builds upon the idea of bagging but reverses its focus. In **bagging**, we use many **unbiased**, high-variance models (deep trees) and reduce their variance through averaging. Each tree is grown independently on a bootstrap sample[^8] of the data, and their predictions are averaged to form a stable, low-variance model.
+Boosting builds upon the idea of bagging but reverses its focus. In **bagging**, we use many **unbiased**, high-variance models (deep trees) and reduce their variance through averaging. Each tree is grown independently on a bootstrap sample[^4] of the data, and their predictions are averaged to form a stable, low-variance model.
 
-[^8]: A bootstrap sample is a dataset obtained by **sampling with replacement** from the original training data. Each decision tree in bagging is trained on a different bootstrap sample, which introduces randomness: although all trees see roughly the same number of observations, they each **contain different subsets and repetitions** of the data. This variability makes the trees slightly different from one another, allowing their predictions to be **averaged** to reduce variance in the final ensemble. Averaging smooths out these fluctuations, it reduces variance, but does not change the underlying model’s bias (each tree is still an unbiased estimator, just noisy).
+[^4]: A bootstrap sample is a dataset obtained by **sampling with replacement** from the original training data. Each decision tree in bagging is trained on a different bootstrap sample, which introduces randomness: although all trees see roughly the same number of observations, they each **contain different subsets and repetitions** of the data. This variability makes the trees slightly different from one another, allowing their predictions to be **averaged** to reduce variance in the final ensemble. Averaging smooths out these fluctuations, it reduces variance, but does not change the underlying model’s bias (each tree is still an unbiased estimator, just noisy).
 
 **Boosting**, in contrast, aims to reduce the **bias** of the model. Instead of combining many deep, independent trees, it combines many **weak**, biased learners (typically shallow trees) that individually have low variance. These trees are not grown independently but **sequentially**: each new tree focuses on the parts of the data that the previous ones predicted poorly.
 
@@ -415,7 +417,7 @@ Now consider a binary classification problem with classes labelled $y_i \in \{-1
 A hyperplane **separates** the training data if it assigns positive values of $f(x_i)$ to all observations with $y_i = +1$ and negative values to all with $y_i = -1$. Formally, $$ y_i (\beta_0 + {\beta}^\top {x}_i) > 0, \quad \text{for all } i = 1, \ldots, n. $$\
 If such a hyperplane exists, there are infinitely many possible ones, each perfectly separating the two classes but differing in position.
 
-The **Maximal Margin Classifier (MMC)** resolves this ambiguity by choosing the separating hyperplane that **maximises** the **margin**, defined as the smallest distance between the hyperplane and any training observation. Denoting this distance by $M$, the optimisation problem is: $$ \max_{\beta_0, \boldsymbol{\beta}, M} \; M \quad \text{s.t.} \quad \|\boldsymbol{\beta}\| = 1, \; y_i (\beta_0 + {\beta}^\top {x}_i) \geq M \ \text{for all } i. $$ This ensures all observations lie at least $M$ units away from the separating boundary, yielding the widest possible margin.
+The **Maximal Margin Classifier (MMC)** resolves this ambiguity by choosing the separating hyperplane that **maximises** the **margin**, defined as **the smallest distance between the hyperplane and any training observation**. Denoting this distance by $M$, the optimisation problem is: $$ \max_{\beta_0, \boldsymbol{\beta}, M} \; M \quad \text{s.t.} \quad \|\boldsymbol{\beta}\| = 1, \; y_i (\beta_0 + {\beta}^\top {x}_i) \geq M \ \text{for all } i. $$ This ensures all observations lie at least $M$ units away from the separating boundary, yielding the widest possible margin.
 
 The observations that lie exactly at this minimal distance, i.e., those that satisfy $y_i (\beta_0 + \boldsymbol{\beta}^\top {x}_i) = M$, called the **support vectors**. They define the position of the maximal margin hyperplane. Small changes to these points can shift the boundary, whereas non-support points have no effect.
 
@@ -463,7 +465,7 @@ As illustrated in @fig-separating, several hyperplanes can perfectly separate th
 
 When a separating hyperplane exists, it defines a **natural classifier** for new data points. The function $f(x_0)$ tells us on which side of the hyperplane a point $x_0$ lies: if it is positive, we assign the class $+1$, and if negative, the class $-1$. The **magnitude** of this value indicates how far the point lies from the boundary.
 
-The **margin** represents the smallest distance between the training data and the separating hyperplane. The **Maximal Margin Classifier (MMC)** selects the hyperplane that maximises this margin, thereby creating the **widest possible gap** between the two classes. A wider margin leads to a more robust classifier, as small changes in the data are less likely to alter the decision boundary.
+The **margin** represents the **smallest distance between the training data and the separating hyperplane**. The **Maximal Margin Classifier (MMC)** selects the hyperplane that maximises this margin, thereby creating the **widest possible gap** between the two classes. A wider margin leads to a more robust classifier, as small changes in the data are less likely to alter the decision boundary.
 
 \begin{minipage}{0.55\textwidth}
 Only the observations lying exactly on the margin determine the boundary. These are known as \textbf{support vectors} because they “hold” the hyperplane in place. If one of them moves, the hyperplane shifts as well. Points further from the margin have no influence on its position.
@@ -497,10 +499,21 @@ These challenges motivate the next step, i.e., the **Support Vector Classifier**
 
 The maximal margin classifier seeks a separating hyperplane that classifies the training data perfectly, which is often too rigid in the presence of noise or mislabelled observations. The support vector classifier is a *soft margin* method that permits controlled violations of the margin to improve robustness and generalisation.
 
-We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$ \min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}} \left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right) \quad \text{s.t.} \quad y_i(\beta_0 + \boldsymbol{\beta}^{\top}x_i) \ge 1 - \xi_i, \ \xi_i \ge 0. $$
+We introduce slack variables $\xi_i \ge 0$ for training observations $(x_i, y_i)$ with $y_i \in \{-1, +1\}$ and solve the optimisation problem: $$\min_{\beta_0, \boldsymbol{\beta}, \boldsymbol{\xi}}
+\left( \frac{1}{2}\lVert \boldsymbol{\beta} \rVert^2 + C \sum_{i=1}^n \xi_i \right)
+\quad \text{s.t.} \quad
+y_i(\beta_0 + \boldsymbol{\beta}^{\top}x_i) \ge 1 - \xi_i,\ \xi_i \ge 0.$$
 
-Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, the parameter $C$ determines how strongly the model penalises violations of the margin (i.e., large $\xi_i$ values). The variables $\xi_i$ do not set the margin; instead, they measure how much each observation violates the margin constraint.\
-$C$ controls *tolerance*, $\xi_i$ measures *actual violations*, and $\boldsymbol{\beta}$ determines the *margin width*.
+Here, the parameter $C > 0$ controls the trade-off between a wide margin (small $\lVert \boldsymbol{\beta} \rVert$) and tolerance for violations (large $\xi_i$). In other words, $C$ determines how strongly the model penalises margin violations (large $\xi_i$ values). The variables $\xi_i$ **do not set the margin**; instead, they **measure how much each observation violates the margin constraint**.
+
+**Key roles (don’t mix these up):**
+
+-   $\boldsymbol{\beta}$ determines the *margin width* (via $\lVert\boldsymbol{\beta}\rVert$):
+    -   A small $\boldsymbol{\beta}$ produces a wider margin, resulting in a support vector classifier with high bias and low variance. The decision boundary is smoother and less sensitive to outliers, making it more stable but potentially unable to capture the true class boundary accurately, leading to underfitting.
+    -   A large $\boldsymbol{\beta}$ yields a narrow margin, yielding a classifier with low bias and high variance. The decision boundary fits the training data more closely and can represent the class separation more precisely, but it becomes highly sensitive to individual observations, increasing the risk of overfitting.
+-   $\xi_i$ measures the *actual violation* for point $i$.
+-   $C$ controls *how costly* violations are (a **penalty** parameter).
+-   $b$ (see @sec-tuning-b) controls *how many* violations are allowed (a **budget** parameter).
 
 The positions of points are as follows:
 
@@ -508,7 +521,7 @@ The positions of points are as follows:
 -   **Points with** $0 < \xi_i \le 1$: inside the margin but correctly classified.
 -   **Points with** $\xi_i > 1$: misclassified.
 
-As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points — the *support vectors*.
+As $C \to \infty$, we recover a hard margin (when separable). A smaller $C$ widens the margin and typically yields a smoother, more stable decision rule focused on the most informative points, i.e., the *support vectors*.
 
 Algorithmically:
 
@@ -516,73 +529,69 @@ Algorithmically:
 2.  Solve the convex quadratic programme above.
 3.  Form the decision function $\hat{f}(x) = \mathrm{sign}(\beta_0 + \boldsymbol{\beta}^{\top}x)$, supported by training points with non-zero Lagrange multipliers (the support vectors).
 
-Interpretation: the classifier allocates a *budget* of margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
+Interpretation: the classifier allows some margin violations to gain robustness to outliers, achieve better average classification, and admit solutions when the classes are not perfectly separable.
 
 ![Hard- versus soft-margin solutions on the same dataset.](Images_qmd_ML/ML9_SVC.png){#fig-ML9_SVC width="80%"}
 
-As seen in @fig-ML9_SVC, the **left-hand plot** shows the *maximal margin classifier*, which fits the training data perfectly but results in a narrow margin that is highly sensitive to outliers. Even one mislabelled point could completely change the orientation of the separating hyperplane.
+As seen in @fig-ML9_SVC, the **left-hand plot** shows the *maximal margin classifier*, which fits the training data perfectly but results in a narrow margin that is highly sensitive to outliers. Even one mislabelled point could completely change the orientation of the separating hyperplane. The **right-hand plot** depicts the *support vector classifier*, where some points are allowed to lie inside or even beyond the margin (those with $\xi_i > 0$). This flexibility leads to a wider margin and a more stable decision boundary.
 
-The **right-hand plot** depicts the *support vector classifier*, where some points are allowed to lie inside or even beyond the margin (those with $\xi_i > 0$). This flexibility leads to a wider margin and a more stable decision boundary.\
 The support vectors (the points closest to or inside the margin) determine this boundary, while all other points play no direct role in its position.
 
-## Mathematical formulation of the support vector classifier
+## Mathematical formulation of the support vector classifier (budget form)
 
-The soft-margin formulation can also be expressed as a maximisation problem. We aim to find the largest possible margin $M$ while allowing controlled violations through slack variables $\xi_i \ge 0$.
+The soft-margin classifier can be written as a *margin maximisation* problem with a total violation *budget* $b$. We maximise the margin $M$ while allowing controlled violations via slack variables $\xi_i \ge 0$.
 
 ![Soft-margin classifier with slack variables $\xi_i$ and total budget $b$.](Images_qmd_ML/ML9_SVC_s2.png){#fig-ML9_SVC_s2 width="25%" fig-align="center"}
 
-The optimisation problem is: $$\max_{\beta_0,\ldots,\beta_p,\ \xi_1,\ldots,\xi_n} \ M$$ subject to $$\sum_{j=1}^{p} \beta_j^2 = 1, \quad 
-y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) \ge M(1 - \xi_i),$$ $$\xi_i \ge 0, \quad 
+The optimisation problem is:$$\max_{\beta_0,\ldots,\beta_p,\ \xi_1,\ldots,\xi_n} \; M$$ subject to$$\sum_{j=1}^{p} \beta_j^2 = 1,\quad
+y_i(\beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}) \ge M(1 - \xi_i),$$ $$\xi_i \ge 0,\quad
 \sum_{i=1}^{n} \xi_i \le b.$$
 
-As illustrated in @fig-ML9_SVC_s2, the soft-margin classifier allows some points to fall inside or even beyond the margin, depending on their corresponding $\xi_i$ values.\
-Each $\xi_i$ quantifies how much observation $i$ violates the margin constraint:
+**Interpretation of** $\xi_i$ (margin violation for observation $i$):
 
--   $\xi_i = 0$: the observation lies on or outside the margin (correctly classified).
--   $0 < \xi_i \le 1$: the observation lies inside the margin but is still correctly classified.
--   $\xi_i > 1$: the observation is misclassified, on the wrong side of the separating hyperplane.
+-   $\xi_i = 0$: on or outside the margin (correctly classified).
+-   $0 < \xi_i \le 1$: inside the margin but still correctly classified.
+-   $\xi_i > 1$: misclassified (wrong side of the decision boundary).
 
-In @fig-ML9_SVC_s2, the points exactly on the margin correspond to $\xi_i = 0$, while those inside the shaded margin regions have $0 < \xi_i \le 1$.\
-Points that cross the decision boundary entirely (on the wrong side) represent $\xi_i > 1$ and contribute most to the violation term in the optimisation.
+**Role of** $b$: $b>0$ is the total “budget” of margin violations across all observations.
 
-The constant $b > 0$ acts as a *tuning* or *regularisation* parameter that sets the total “budget” of margin violations across all $n$ observations. A larger $b$ allows more flexibility, useful for noisy or non-separable data, while a smaller $b$ enforces stricter separation with fewer violations.
+-   Larger $b$: more total violation allowed (more flexibility).
+-   Smaller $b$: less total violation allowed (stricter separation).
 
-Here, the *support vectors* are the observations that either lie exactly on the margin or violate it (i.e. those for which $\xi_i > 0$). Only these points determine the position and orientation of the separating hyperplane ; all other observations, being further from the decision boundary, have no influence on the classifier.
+**Relationship between** $C$ and $b$:
 
-Consequently, the regularisation parameter $b$ indirectly controls the number of support vectors and hence the complexity of the model. A smaller $b$ (stricter margin) limits violations, reducing the number of support vectors and yielding a simpler, higher-bias but lower-variance model. Conversely, a larger $b$ allows more margin violations, increasing the number of support vectors and producing a more flexible, lower-bias but higher-variance classifier.
+-   Not the same parameter: $C$ is a **penalty** weight; $b$ is a **budget constraint**.
+-   Inversely related in effect:
+    -   Large $C$ (violations expensive) $\leftrightarrow$ small $b$ (small violation budget).
 
-## Tuning parameter $b$
+    -   Small $C$ (violations cheap) $\leftrightarrow$ large $b$ (large violation budget).
 
-The regularisation constant $b$ plays a central role in controlling the flexibility of the support vector classifier. It sets the total “budget” of margin violations permitted across all training observations, and therefore determines the number of support vectors used to define the decision boundary.
+**Support vectors** are points on the margin or violating it (typically $\xi_i>0$); they determine the separating hyperplane.
+
+## Tuning parameter $b$ {#sec-tuning-b}
+
+The parameter $b$ controls flexibility by setting the total violation budget, affecting the number of support vectors and model complexity:
+
+-   **Large** $b$: more violations allowed\
+    $\rightarrow$ typically more support vectors and a more flexible boundary\
+    $\rightarrow$ **lower bias, higher variance** (overfitting risk increases).
+-   **Small** $b$: fewer violations allowed\
+    $\rightarrow$ typically fewer support vectors and a simpler boundary\
+    $\rightarrow$ **higher bias, lower variance** (underfitting risk increases).
+
+$b$ is typically chosen via cross-validation.
 
 ![Effect of the tuning parameter $b$ on the margin width and classifier flexibility.](Images_qmd_ML/ML9_tunning_p_b.png){#fig-ML9_tunning_p_b fig-align="center" width="50%"}
 
-As illustrated in Figure @fig-ML9_tunning_p_b, increasing or decreasing $b$ directly influences the width of the margin and the bias–variance characteristics of the model:
-
--   **Large** $b$ allows more violations, leading to **wider margins** and a **higher-bias, lower-variance** classifier. The decision boundary becomes smoother and less sensitive to individual observations.
--   **Small** $b$ enforces fewer violations, producing **tighter margins** and a **lower-bias, higher-variance** classifier. The boundary fits the training data more closely but risks overfitting.
-
-The optimal value of $b$ is typically chosen through **cross-validation**, balancing the trade-off between margin width and classification accuracy on unseen data.
-
 ## Limitations of the support vector classifier
 
-Although the support vector classifier is a powerful method for constructing linear decision boundaries, it has an important limitation: it can only produce *linear* separation in the feature space.
-
-![Limitation of the support vector classifier: poor performance with non-linear class boundaries.](Images_qmd_ML/ML9_limitations.png){#fig-ML9_limitations width="85%" fig-align="center"}
-
-As shown in @fig-ML9_limitations, when the true decision boundary is non-linear, a linear classifier (such as the support vector classifier) fails to capture the complex shape that separates the two classes. In such cases:
-
--   A **linear decision boundary** performs poorly if the data are not linearly separable in the feature space $(X_1, \ldots, X_p)$.
--   One might try to **enlarge the feature space**, for example by adding polynomial terms such as $X_1^2, X_2^2, \ldots$, and then apply a linear classifier in this higher-dimensional space.
--   However, enlarging the feature space dramatically increases dimensionality, and the resulting **computational cost** can become infeasible for large datasets.
-
-This limitation motivates the next step: introducing **non-linear decision boundaries** through the use of kernels, which implicitly map the data into a higher-dimensional space without the need to compute the expanded features explicitly.
+The support vector classifier produces a *linear* decision boundary in the given feature space. If the true boundary is non-linear, a linear SVC may perform poorly. One can enlarge the feature space (e.g., polynomial features), but this may be computationally expensive; **kernels** address this by creating non-linear decision boundaries implicitly.
 
 # Support Vector Machines
 
 ## Support Vector Machines
 
-Support Vector Machines (SVMs) generalise the support vector classifier to allow **non-linear decision boundaries**. They achieve this by enlarging the feature space — but in an *automatic* way, without explicitly constructing new variables as in manual feature engineering.
+Support Vector Machines (SVMs) generalise the support vector classifier to allow **non-linear decision boundaries**. They achieve this by enlarging the feature space but in an *automatic* way, without explicitly constructing new variables as in manual feature engineering.
 
 In the support vector classifier, we used the decision function $$f(x) = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p, $$ which defines a **linear hyperplane** in the feature space. Once the optimal parameters are found, this function is used to classify new observations: $$ \hat{G}(x) =\begin{cases} +1 & \text{if } f(x) > 0, \\ -1 & \text{if } f(x) < 0. \end{cases} $$
 
@@ -604,9 +613,12 @@ This elegant idea is known as the **kernel trick**.
 -   With the **linear kernel**, $K({x}, {z}) = \langle {x}, {z} \rangle$, we recover the standard support vector classifier.
 -   With **non-linear kernels**, the classifier defines curved and flexible decision boundaries in the original predictor space while remaining linear in the (implicit) high-dimensional feature space.
 
-![Illustration of the kernel trick: the SVM implicitly enlarges the feature space to achieve non-linear decision boundaries.](Images_qmd_ML/ML9_kernel_trick.png){#fig-ML9_kernel_trick fig-align="center" width="70%"}
+![Illustration of the kernel trick: linear kernel case and conceptual extension to non-linear kernels.](Images_qmd_ML/ML9_kernel_trick.png){#fig-ML9_kernel_trick fig-align="center" width="70%"}
 
-As seen in @fig-ML9_kernel_trick, mapping the data into a higher-dimensional space allows a simple linear boundary in that space to correspond to a **non-linear boundary** in the original feature space, i.e., the essence of the kernel trick.
+As seen in @fig-ML9_kernel_trick, the figure illustrates the **linear kernel case**, showing a linear decision boundary with margins in the original predictor space.\
+The **kernel trick** consists in replacing the inner product by a kernel function, which implicitly enlarges the feature space so that a **linear boundary in that space** can correspond to a **non-linear boundary** in the original predictor space.
+
+The kernel trick replaces inner products by kernel functions, which implicitly map the data into a higher-dimensional feature space where the SVM fits a linear hyperplane; this corresponds to a non-linear decision boundary in the original space.
 
 ## The Kernel Trick: Examples
 
@@ -618,10 +630,10 @@ The **polynomial kernel** is defined as $$K({x}, {z}) = \left( 1 + \gamma \sum_{
 
 This kernel corresponds to fitting a **support vector classifier in a higher-dimensional space** that includes all polynomial terms up to degree $d$.\
 In the code, this is specified as `svm = SVC(kernel='poly', degree=d, gamma=gamma)`.\
-The parameter $\gamma$ controls the **scale** of the transformation and hence the flexibility of the decision boundary.
+The parameter $\gamma$ controls the **scale** of the transformation and hence the flexibility of the decision boundary, in other words, how strongly higher-order polynomial terms matter relative to lower-order ones.
 
--   Larger $\gamma$ and higher $d$ produce more flexible, curved boundaries that adapt to complex patterns.
--   Smaller $\gamma$ or lower $d$ result in smoother, more regular decision surfaces.
+- Larger $\gamma$ and higher $d$ produce more flexible, curved boundaries that adapt to complex patterns. 
+- Smaller $\gamma$ or lower $d$ result in smoother, more regular decision surfaces.
 
 ### The Radial (Gaussian) Kernel
 
@@ -687,8 +699,7 @@ This again illustrates the **bias–variance trade-off**: smaller $C$ increases 
 
 ### Model Selection by Cross-validation
 
-In this final example, an SVM with a **radial basis function (RBF) kernel** is tuned automatically using **cross-validation**.\
-Instead of choosing the parameters $\gamma$ and $C$ manually, a grid search is performed over a predefined range of values, and the model is evaluated with $k$-fold cross-validation to identify the best-performing combination.
+In this final example, an SVM with a **radial basis function (RBF) kernel** is tuned automatically using **cross-validation**. Instead of choosing the parameters $\gamma$ and $C$ manually, a grid search is performed over a predefined range of values, and the model is evaluated with $k$-fold cross-validation to identify the best-performing combination.
 
 ![Optimal decision boundary obtained by tuning the parameters $C$ and $\gamma$ via cross-validation.](Images_qmd_ML/ML9_SVM_py_3.png){#fig-ML9_SVM_py_3 fig-align="center" width="40%"}
 
@@ -701,43 +712,36 @@ This process demonstrates the value of **cross-validation** for model selection:
 
 ## Digit Classification with SVMs
 
-We now return to the **digit classification** problem introduced earlier (see Figure @fig-ML6-digit-class).\
-Support Vector Machines are applied here to classify handwritten digits using a **One-Versus-One** scheme, where one binary classifier is trained for each pair of digits.\
+We now return to the **digit classification** problem introduced earlier (see @fig-ML6-digit-class). Support Vector Machines are applied here to classify handwritten digits using a **One-Versus-One** scheme, where one binary classifier is trained for each pair of digits.\
 We compare SVMs using **linear**, **polynomial**, and **radial (Gaussian)** kernels. The tuning parameter $C$ was selected by **10-fold cross-validation** to optimise test accuracy.
 
-\begin{minipage}{0.55\textwidth}
-\textbf{Training and test data:}  
-\begin{itemize}
-\tightlist
-\item Training data $({x}_1, y_1), \ldots, ({x}_n, y_n)$, $n = 7290$, are used for model fitting and parameter tuning.  
-  \begin{itemize}
-  \tightlist
-  \item Predictors ${x}_i$ are greyscale pixel intensities of each image $\in \mathbb{R}^p$.  
-  \item Outcomes $y_i$ correspond to the true digit labels $\in \{0, 1, \ldots, 9\}$.
-  \end{itemize}
-\item Test data $(\hat{{x}}_1, \hat{y}_1), \ldots, (\hat{{x}}_m, \hat{y}_m)$, $m = 2006$, are used only for evaluating predictive performance.
-\end{itemize}
 
-\smallskip
-\textbf{Models compared:}  
+The training data consist of pairs $(x_1, y_1), \ldots, (x_n, y_n)$ with $n = 7290$, and are used for model fitting and parameter tuning. Each predictor vector $x_i \in \mathbb{R}^p$ contains the greyscale pixel intensities of an image, and the response variable $y_i \in \{0,1,\ldots,9\}$ indicates the true handwritten digit.
+
+The test data consist of $(\hat{x}_1, \hat{y}_1), \ldots, (\hat{x}_m, \hat{y}_m)$ with $m = 2006$, and are used exclusively to evaluate predictive performance.
+
+\begin{minipage}{0.55\textwidth}
+\textbf{Models compared}
+
 \begin{itemize}
 \tightlist
-\item \textbf{linreg:} direct linear regression.  
-\item \textbf{LDA1:} LDA based on the raw pixel values $x_i$.  
-\item \textbf{LDA2:} LDA based on $x_i$ and their squares $x_i^2$.  
-\item \textbf{QDA:} Quadratic Discriminant Analysis with a separate covariance matrix per class.  
-\item \textbf{log:} multinomial logistic regression.  
-\item \textbf{log-ridge:} logistic regression with ridge penalty.  
-\item \textbf{log-lasso:} logistic regression with lasso penalty.  
-\item \textbf{RF:} random forest.  
-\item \textbf{linear SVM:} support vector classifier with a linear kernel.  
-\item \textbf{radial SVM:} support vector machine with an RBF kernel.
+\item \textbf{linreg:} direct linear regression  
+\item \textbf{LDA1:} LDA based on the raw pixel values $x_i$  
+\item \textbf{LDA2:} LDA based on $x_i$ and their squares $x_i^2$  
+\item \textbf{QDA:} Quadratic Discriminant Analysis with a separate covariance matrix per class  
+\item \textbf{log:} multinomial logistic regression  
+\item \textbf{log-ridge:} logistic regression with ridge penalty  
+\item \textbf{log-lasso:} logistic regression with lasso penalty  
+\item \textbf{RF:} random forest  
+\item \textbf{linear SVM:} support vector classifier with a linear kernel  
+\item \textbf{radial SVM:} support vector machine with an RBF kernel  
 \end{itemize}
 \end{minipage}
 \hfill
 \begin{minipage}{0.4\textwidth}
 \begin{center}
-\textbf{Training and test errors (\%)}  
+\textbf{Training and test errors (\%)}
+
 \begin{tabular}{lcc}
 \hline
 Method & Training & Test \\
@@ -756,8 +760,6 @@ radial SVM & 0.6 & 5.4 \\
 \end{tabular}
 \end{center}
 \end{minipage}
-
-\smallskip
 
 The results show that both **linear** and **radial** SVMs perform extremely well, with the **radial kernel** achieving the lowest test error (5.4%).\
 This demonstrates the flexibility of kernel-based SVMs in modelling complex, non-linear decision boundaries, even in high-dimensional spaces like image pixels.
@@ -941,10 +943,10 @@ For now, the question is how we can improve an initial model using gradient desc
 1.  Start with an arbitrary initial value $\theta^{(0)}$.
 2.  For iterations $i=1,2,\dots$:
     1.  Compute the gradient (derivative) of the loss at the current parameters, $$\nabla_\theta J(\theta^{(i-1)})=\left.\frac{\partial J(\theta)}{\partial \theta}\right|_{\theta=\theta^{(i-1)}}.$$
-    2.  Update the parameters with learning rate $\alpha>0$,[^9] $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
+    2.  Update the parameters with learning rate $\alpha>0$,[^5] $$\theta^{(i)}=\theta^{(i-1)}-\alpha\nabla_\theta J(\theta^{(i-1)}).$$
 3.  Stop when a suitable stopping criterion is satisfied (for example, after a fixed number of iterations or when the loss stops improving).
 
-[^9]: $\alpha$ is the learning rate (step size) in gradient descent: it controls how far we move in the direction of the negative gradient at each update. A large $\alpha$ gives big, potentially unstable steps, while a small $\alpha$ yields slow but more stable progress.
+[^5]: $\alpha$ is the learning rate (step size) in gradient descent: it controls how far we move in the direction of the negative gradient at each update. A large $\alpha$ gives big, potentially unstable steps, while a small $\alpha$ yields slow but more stable progress.
 
 Intuitively, each step looks at the current model, determines in which direction in parameter space $J(\theta)$ decreases fastest, and moves a small distance in that direction. The gradient descent algorithm itself is completely standard; what is special in the neural-network setting is how we obtain the gradient efficiently for such a complex model. In essence, to fit a neural network by gradient descent we “only” need the gradients $\nabla_\theta J(\theta)$, and these are supplied by the back-propagation algorithm.
 
@@ -1699,34 +1701,31 @@ In practice, many applications start with the simple “fixed feature extractor 
 
 Classical deep neural networks are only the starting point. Around them there is a whole ecosystem of architectures and applications that keeps growing.
 
-- **Recurrent neural networks (RNNs).**  
-  Designed for **sequences** rather than static inputs. They are widely used for time-series forecasting, natural language, speech, and any setting where past inputs influence future predictions. The key idea is that the network maintains a **hidden state** that propagates through time and summarises past information.
+-   **Recurrent neural networks (RNNs).**\
+    Designed for **sequences** rather than static inputs. They are widely used for time-series forecasting, natural language, speech, and any setting where past inputs influence future predictions. The key idea is that the network maintains a **hidden state** that propagates through time and summarises past information.
 
-- **Generative Adversarial Networks (GANs).**  
-  GANs are **generative models**: instead of predicting labels, they generate new samples that look like the training data. A *generator* network tries to create realistic images, while a *discriminator* network tries to distinguish real from fake. Training them together leads to very sharp, realistic samples and underlies technologies such as deepfakes.
+-   **Generative Adversarial Networks (GANs).**\
+    GANs are **generative models**: instead of predicting labels, they generate new samples that look like the training data. A *generator* network tries to create realistic images, while a *discriminator* network tries to distinguish real from fake. Training them together leads to very sharp, realistic samples and underlies technologies such as deepfakes.
 
-- **Autoencoders (and variational autoencoders).**  
-  Autoencoders learn to **compress data into a low-dimensional code** and then reconstruct it. They are used for dimension reduction, denoising and representation learning. Variational autoencoders add a probabilistic layer and can also be used as generative models.
+-   **Autoencoders (and variational autoencoders).**\
+    Autoencoders learn to **compress data into a low-dimensional code** and then reconstruct it. They are used for dimension reduction, denoising and representation learning. Variational autoencoders add a probabilistic layer and can also be used as generative models.
 
-- **Deep reinforcement learning.**  
-  In reinforcement learning, an agent must learn how to act in an environment to maximise long-term reward. Deep networks are used to approximate value functions or policies when states are high-dimensional (e.g. images), enabling applications such as game-playing agents and robotics.
+-   **Deep reinforcement learning.**\
+    In reinforcement learning, an agent must learn how to act in an environment to maximise long-term reward. Deep networks are used to approximate value functions or policies when states are high-dimensional (e.g. images), enabling applications such as game-playing agents and robotics.
 
 Overall, deep learning is not a single model but a **family of tools**: convolutional networks for images, RNNs for sequences, GANs and autoencoders for generation and compression, and deep RL for sequential decision-making.
-
 
 ## Reinforcement learning
 
 Reinforcement learning formalises **learning by trial and error**.
 
-- There is an **agent** (for example a robot, a trading algorithm, or a game-playing program) that repeatedly interacts with an **environment**.
-- At each time step the agent observes a **state**, chooses an **action**, and receives a **reward** plus a new state.
-- Over many iterations the agent aims to learn a **strategy of action** (a *policy*) that maximises the expected **long-term cumulative reward**, not just the immediate one.
+-   There is an **agent** (for example a robot, a trading algorithm, or a game-playing program) that repeatedly interacts with an **environment**.
+-   At each time step the agent observes a **state**, chooses an **action**, and receives a **reward** plus a new state.
+-   Over many iterations the agent aims to learn a **strategy of action** (a *policy*) that maximises the expected **long-term cumulative reward**, not just the immediate one.
 
 In simple settings the optimal policy can sometimes be computed exactly. In more realistic settings the state is high-dimensional (e.g. raw images of a game screen) and the dynamics are complex. Here **deep neural networks** are used inside the RL algorithm to approximate:
 
-- a **value function** (how good a state or state–action pair is), or
-- a **policy** (a mapping from states to action probabilities).
+-   a **value function** (how good a state or state–action pair is), or
+-   a **policy** (a mapping from states to action probabilities).
 
 This combination, known as **deep reinforcement learning**, has enabled systems that learn to play Atari games directly from pixels and programmes such as AlphaGo, which learned to play Go at superhuman level by combining deep networks with reinforcement learning.
-
-
