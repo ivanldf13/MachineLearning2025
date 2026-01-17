@@ -581,6 +581,8 @@ The parameter $b$ controls flexibility by setting the total violation budget, af
 
 $b$ is typically chosen via cross-validation.
 
+Allowing many margin violations reduces bias because the classifier is not forced to maintain a rigid separation, but it increases variance because the decision boundary becomes sensitive to many support vectors.
+
 ![Effect of the tuning parameter $b$ on the margin width and classifier flexibility.](Images_qmd_ML/ML9_tunning_p_b.png){#fig-ML9_tunning_p_b fig-align="center" width="50%"}
 
 ## Limitations of the support vector classifier
@@ -619,6 +621,8 @@ As seen in @fig-ML9_kernel_trick, the figure illustrates the **linear kernel cas
 The **kernel trick** consists in replacing the inner product by a kernel function, which implicitly enlarges the feature space so that a **linear boundary in that space** can correspond to a **non-linear boundary** in the original predictor space.
 
 The kernel trick replaces inner products by kernel functions, which implicitly map the data into a higher-dimensional feature space where the SVM fits a linear hyperplane; this corresponds to a non-linear decision boundary in the original space.
+
+**The kernel trick lets a linear classifier behave non-linearly without ever computing non-linear features**
 
 ## The Kernel Trick: Examples
 
@@ -787,7 +791,7 @@ Each hidden unit $Z_j$ is obtained in two clear steps:
 
 1.  **Linear combination of the inputs.** We first compute a linear predictor $$ Z_j^{\text{lin}} = b_j^{(1)} + w_j^{(1)\top} X, \quad j = 1,\dots,m, $$ which is a compact way of writing $$ Z_j^{\text{lin}} = b_j^{(1)} + w_{j1}^{(1)} X_1 + w_{j2}^{(1)} X_2 + \cdots + w_{jp}^{(1)} X_p. $$ where
 
-    -   $w_j^{(1)} = (w_{j1}^{(1)},\dots,w_{jp}^{(1)})^\top \in \mathbb{R}^p$ is the weight vector of the $j$-th hidden unit. in other words. In other words, $w_{j1}^{(1)},\dots,w_{jp}^{(1)}$ are **weights** saying how important each feature is for this particular hidden unit and correspond to the arrows from the input nodes to a given hidden node in the network diagram.
+    -   $w_j^{(1)} = (w_{j1}^{(1)},\dots,w_{jp}^{(1)})^\top \in \mathbb{R}^p$ is the weight vector of the $j$-th hidden unit. In other words, $w_{j1}^{(1)},\dots,w_{jp}^{(1)}$ are **weights** saying how important each feature is for this particular hidden unit and correspond to the arrows from the input nodes to a given hidden node in the network diagram.
     -   $b_j^{(1)} \in \mathbb{R}$ is its **bias** (an intercept term inside this inner linear model; it is unrelated to the “bias” from the bias–variance trade-off),
     -   $Z_j^{\text{lin}}$ is therefore a standard linear combination of the original predictors.
 
@@ -890,7 +894,7 @@ The network in @fig-dnn-arch visualises this construction: the green nodes are t
 
 ## The architecture of deep neural networks
 
-The **depth** of a neural network is the total number of layers, counting both hidden layers and the output layer (and sometimes also the input layer, depending on convention). For each layer, the **width** is the number of neurons in that layer. Together, depth and width largely determine the **architecture** of a deep neural network.
+The **depth** of a neural network is the **total number of layers, counting both hidden layers and the output layer** (and sometimes also the input layer, depending on convention). For each layer, the **width** is the **number of neurons in that layer**. Together, depth and width largely determine the **architecture** of a deep neural network.
 
 In practice there can be additional architectural choices, such as restricting which neurons are connected, or forcing some weights to be shared across different parts of the network (as in convolutional neural networks). A good architecture is usually found by combining prior experience with systematic comparison via cross-validation: we try several candidate depths and widths and keep the one that generalises best to new data.
 
@@ -902,7 +906,7 @@ In deep neural networks the default choice for all activation functions is usual
 
 For regression problems we typically have a single output ($q = 1$) and use the identity in the output layer, $$ h(z) = z, $$ so the network returns a real-valued prediction. For classification, the output functions $h_i$ are the softmax components, which turn the final layer scores into class probabilities.
 
-The hidden layers act as **feature extractors**: each layer transforms the representation from the previous one, gradually extracting higher-level patterns in the data. The first hidden layer, which is directly connected to the inputs, is particularly important for interpretation and visualisation of what features the network is learning.
+The hidden layers act as **feature extractors**: *each layer transforms the representation from the previous one, gradually extracting higher-level patterns in the data*. The first hidden layer, which is directly connected to the inputs, is particularly important for interpretation and visualisation of what features the network is learning.
 
 Deep networks are **highly flexible**: with enough neurons they can approximate any continuous function on $\mathbb{R}^p$ to arbitrary accuracy (under mild assumptions). However, this flexibility comes at a cost. They contain **many parameters**, so fitting them is computationally expensive and there is a serious risk of overfitting. In practice, choosing and training a good architecture relies on experience plus careful use of validation and regularisation.
 
@@ -1090,7 +1094,7 @@ In summary, back-propagation scales well to deep neural networks precisely becau
 
 Recall from the gradient descent section that the loss for regression is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$ so its gradient is the sum of the per-sample gradients $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$ Back-propagation gives us exactly these single-sample gradients: for each training pair $(x_i,y_i)$ we can run a forward pass, compute the loss, and then a backward pass to obtain $\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2$.
 
-To improve the error function $J(\theta)$ we now have two options; the first one is **batch optimisation** (the classical setting in the script):
+To improve the error function $J(\theta)$ we now have two options; the first one is **batch optimisation** (the classical setting):
 
 -   For each update step we use the **whole training set** $(x_1,y_1),\dots,(x_n,y_n)$.
 -   We compute all per-sample gradients via back-propagation and sum them to obtain the exact gradient $\nabla_\theta J(\theta)$ as in the formula above.
@@ -1100,7 +1104,7 @@ This procedure is simply **standard gradient descent** applied to neural network
 
 ## Stochastic gradient descent
 
-For regression the loss is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$ so the exact gradient needed for gradient descent is $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$ In batch optimisation we use **all** $n$ training samples to compute this gradient before each update. As highlighted in the script, when $n$ is very large (millions or billions of examples), a single full gradient step already becomes prohibitively slow.
+For regression the loss is $$J(\theta)=\sum_{i=1}^n\big(y_i-\hat f_\theta(x_i)\big)^2,$$ so the exact gradient needed for gradient descent is $$\nabla_\theta J(\theta)=\sum_{i=1}^n\nabla_\theta\big(y_i-\hat f_\theta(x_i)\big)^2.$$ In batch optimisation we use **all** $n$ training samples to compute this gradient before each update. When $n$ is very large (millions or billions of examples), a single full gradient step already becomes prohibitively slow.
 
 To make learning feasible we approximate this gradient using much smaller **mini-batches**.
 
@@ -1131,7 +1135,7 @@ Because of this, the way we **initialise** the parameters already acts as a firs
 
 -   Since $J(\theta)$ is non-convex, the **starting values** $\theta^{(0)}$ can have a strong influence on the final solution we reach with gradient descent. Different random initialisations may lead to different local minima, some of which generalise better than others.
 
--   A general recommendation in the script is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.
+-   A general recommendation is to initialise all weights as **small random numbers**, for example drawn from a normal or uniform distribution centred at zero.
 
     -   If the initial weights are **too large**, then in the forward pass repeated linear combinations make activations **explode**: values become huge, the initial predictions are extremely poor, and we may never reach a “reasonable” region of parameter space.
     -   If the initial weights are **too small**, we **lose signal** during forward and back-propagation: activations and gradients become tiny, so essentially nothing moves and the network does not learn.
@@ -1142,7 +1146,7 @@ Good initialisation therefore aims for a **compromise**: small random weights th
 
 Deep neural networks have **a huge number of parameters**. If we simply ran gradient descent all the way to (a) minimum of the training loss $J(\theta)$, the training error would become extremely small, but we would usually **overfit**: the model would adapt to noise and idiosyncrasies of the training set, and its **prediction error** on new data would be poor.
 
-Regularisation explicitly **prevents overfitting**: we sacrifice some training fit in order to improve the **generalisation error** (test error). The script presents several complementary tools:
+Regularisation explicitly **prevents overfitting**: we sacrifice some training fit in order to improve the **generalisation error** (test error). We have several complementary tools:
 
 ### Parameter penalties
 
@@ -1160,7 +1164,7 @@ As in other regularised models, $\alpha$ is typically chosen by **validation or 
 
 ## Dropout
 
-Dropout is presented in the script as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**.
+Dropout could be considered as a **completely different** type of regularisation: instead of adding a penalty, we change the **network structure at every gradient step**.
 
 Before each forward pass (and the corresponding back-propagation), **every non-output neuron is independently dropped with some probability** $q\in[0,1]$:
 
@@ -1169,22 +1173,55 @@ Before each forward pass (and the corresponding back-propagation), **every non-o
 
 If a unit is dropped, its activation is set to zero and none of its outgoing weights contribute in that update. In that gradient step we pretend that the network **never had** those grey units. We compute the gradient only on the **reduced network**, and only the weights belonging to currently active connections are updated.
 
-In @fig-dropout-structure you see this visually: the grey input and hidden units are dropped for the current step, while the blue units form the “thinned” network that actually propagates the signal from the inputs to the outputs.
-
-![Dropout in one gradient step: grey units are dropped and only the blue “thinned network” is used for forward and backward passes.](Images_qmd_ML/ML11_regulariation.png){#fig-dropout-structure width="75%" fig-align="center"}
+In @fig-dropout-bagging you see this visually: the grey input and hidden units are dropped for the current step, while the blue units form the “thinned” network that actually propagates the signal from the inputs to the outputs.
 
 This procedure **robustifies the fitting**:
 
 -   Each weight that is updated must learn to work **independently of particular neighbours**, because some of those neighbours might vanish in the next iteration.
 -   The network cannot rely on a single fragile pathway; useful information must be distributed across many different paths through the network.
 
-The script then makes a clear analogy to **bagging / random forests**: if we look at the input layer, dropout means some predictors (say $X_3$) are simply not used in that step, just like in random forests we exclude some variables in individual trees. Over many gradient steps, we are effectively training **many slightly different networks**, each seeing a different subset of units.
+We could make a clear analogy to **bagging / random forests**: if we look at the input layer, dropout means some predictors (say $X_3$) are simply not used in that step, just like in random forests we exclude some variables in individual trees. Over many gradient steps, we are effectively training **many slightly different networks**, each seeing a different subset of units.
 
 In simple cases one can interpret the final model as a kind of **ensemble average** over all these thinned networks: we combine the fitted weights and the dropout probabilities, just as bagging combines predictions from bootstrap samples. This ensemble view explains why dropout leads to a more **robust final predictor**. @fig-dropout-bagging illustrates this “ensemble of thinned networks” perspective.
 
 ![Dropout as an implicit ensemble: across many training steps, different thinned networks are fitted, and the final predictor behaves like an average over these models.](Images_qmd_ML/ML11_regularisation_2.png){#fig-dropout-bagging width="80%" fig-align="center"}
 
 At **test time** we use the **full network without dropout**, but rescale activations or weights so that the expected activation of each unit matches what it saw during training. Operationally, dropout behaves like a cheap built-in ensemble method that regularises deep networks and improves generalisation.
+
+## Early stopping
+
+Probably the **most commonly used** regularisation method in deep learning is **early stopping**. Instead of modifying the loss function or the network architecture, early stopping intervenes directly in the **optimisation process**.
+
+The key observation is the following:
+
+- For large networks with enough **capacity to overfit**, the **training error** typically decreases steadily as gradient descent progresses.
+- At the same time, the **validation error** (which approximates the test error) often decreases only up to a point and then **starts to increase**, indicating overfitting.
+
+Early stopping exploits this behaviour. Rather than running gradient descent until convergence, we:
+
+- monitor the validation error over training iterations (or epochs);
+- identify the iteration $i^*$ at which the **validation error is minimal**;
+- **stop the optimisation** at that point and return the parameter vector $\theta^{(i^*)}$.
+
+In other words, we deliberately **do not** go all the way to a (local) minimum of the training loss $J(\theta)$. Instead, we stop at a parameter configuration that gives the **best generalisation performance**, even if the training error could still be reduced further.
+
+This makes early stopping a form of **implicit regularisation**: it limits how complex the fitted model becomes by preventing the parameters from fully adapting to noise in the training data.
+
+An interesting theoretical result is that, in some simplified settings, **early stopping can be shown to be equivalent to $\ell_2$ regularisation**. Intuitively, stopping early keeps the weights small, just like an explicit ridge penalty would.
+
+## Parameter sharing
+
+Another important regularisation principle is **parameter sharing**. Here, regularisation is achieved by **reducing the number of free parameters** in the model.
+
+The idea is motivated by **invariances** or **domain knowledge**. In many applications, it makes sense to **force groups of parameters to have the same value**, rather than estimating them independently.
+
+- By sharing parameters, we drastically **reduce the number of unique parameters**.
+- This lowers model complexity and therefore acts as a strong form of regularisation.
+- At the same time, it encodes useful structural assumptions about the problem into the model.
+
+The most prominent example of parameter sharing appears in **convolutional neural networks (CNNs)** for image recognition. There, the same filter (i.e. the same set of weights) is applied across different spatial locations of the image, reflecting the assumption that relevant patterns can occur anywhere in the image.
+
+Overall, regularisation for deep neural networks is an **active area of research**, and in practice several techniques (parameter penalties, dropout, early stopping, and parameter sharing) are often combined to achieve good generalisation.
 
 # Deep learning: Convolutional Neural Networks
 
@@ -1447,7 +1484,7 @@ These learned filters behave like simple edge or stroke detectors:
 
 Where a particular pattern appears in the digit (for example, the horizontal top of a 2 or the vertical spine of a 4), the matching filter produces a **high activation** in that region of its activation map. Thus, each filter specialises in one basic pattern, and its activation map shows *where* that pattern is present in the image.
 
-Two important points the script emphasises:
+Two important points to emphasise:
 
 -   In the **first layer**, filters and activations are still closely related to the raw pixels, so we can interpret them visually.
 -   Deeper layers then **combine** these basic features (edges, blobs, simple shapes) into more complex patterns that are harder to interpret directly but more useful for classification.
