@@ -1110,7 +1110,7 @@ Because the CV estimate has uncertainty, a practical way to stabilise model sele
 3.  Choose the **simplest** model whose CV error is **no more than one standard error above** the minimum.\
     This rule treats models within that band as essentially “good enough” given estimation noise and favours the most parsimonious option.
 
-To illustrate this, the 10-fold CV procedure was repeated **100 times**. Table @tbl-bodyfat-cv-results shows how often each model size ($k$) was selected under (i) direct minimisation of CV, and (ii) the one-standard-error rule.
+To illustrate this, the 10-fold CV procedure was repeated **100 times**. @tbl-bodyfat-cv-results shows how often each model size ($k$) was selected under (i) direct minimisation of CV, and (ii) the one-standard-error rule.
 
 ::: {#tbl-bodyfat-cv-results tbl-pos="H"}
 Model sizes ($k$) selected across 100 repetitions of 10-fold cross-validation.
@@ -1253,7 +1253,7 @@ As shown in @fig-geom, the picture can be read as “fit versus complexity” in
 The estimate is the point where the \textcolor{mlorange}{\textbf{smallest (best) RSS ellipse}} first touches the \textcolor{mlblue}{\textbf{constraint region}}. In other words, we take the best-fitting solution we can achieve without leaving the allowed region.
 
 -   With **ridge regression** (right panel), the constraint $\sum_{j=1}^{p}\beta_j^2 \le s$ is round (an $L_2$ ball). Because its boundary is smooth, the tangency point typically occurs away from the axes, so coefficients are \textbf{shrunk smoothly} towards zero but are \textbf{rarely exactly zero}.\
--   With **lasso** (left panel), the constraint \$ \sum\_{j=1}\^{p}\|\beta\_j\| \le s\$ has corners (an $L_1$ ball). Since the corners lie on the coordinate axes, the first contact often happens at a corner, which forces at least one coefficient to be \textbf{exactly zero}. This is why lasso performs \textbf{variable selection}, whereas ridge mainly performs \textbf{shrinkage}.
+-   With **lasso** (left panel), the constraint $ \sum_{j=1}^{p} |\beta_j| \le s $ has corners (an $L_1$ ball). Since the corners lie on the coordinate axes, the first contact often happens at a corner, which forces at least one coefficient to be \textbf{exactly zero}. This is why lasso performs \textbf{variable selection}, whereas ridge mainly performs \textbf{shrinkage}.
 
 \textbf{Exam takeaway:} ridge uses a round constraint $\Rightarrow$ continuous shrinkage; lasso uses a diamond constraint with corners on the axes $\Rightarrow$ coefficients can hit zero.
 
@@ -1437,11 +1437,11 @@ $$ \widehat{\Pr}(Y = j \mid X = x) = \frac{\widehat{\Pr}(Y = j, X = x)}{\widehat
 - More complex and data-demanding, as they require modelling both $Y$ and $X$.\
 - **Examples:** Linear/Quadratic Discriminant Analysis, Naive Bayes.
 
-**(b) Discriminative models** estimate only the **conditional distribution** $\Pr(Y \mid X)$. That is, they directly model the posterior class probabilities $\widehat{\Pr}(Y = j \mid X = \mathbf{x})$.\
+**(b) Discriminative models** estimate only the **conditional distribution** $\Pr(Y \mid X)$. That is, they directly model the posterior class probabilities $\widehat{\Pr}(Y = j \mid X = x)$.\
 - Usually preferred, since they provide posterior probabilities and are less complex than generative models.\
 - **Examples:** *k*-Nearest Neighbours (kNN), Logistic Regression, Random Forest, Neural Networks.
 
-**(c) Geometric models** directly estimate a **decision boundary function** that predicts the class (0 or 1) from $\mathbf{x}$ without modelling probabilities.\
+**(c) Geometric models** directly estimate a **decision boundary function** that predicts the class (0 or 1) from $x$ without modelling probabilities.\
 - Simpler, since no probability distribution is assumed, but they do not provide estimates of class probabilities.\
 - **Examples:** Support Vector Machines (SVM).
 
@@ -1587,7 +1587,7 @@ The model includes:
 -   the **class mean vectors** $\boldsymbol{\mu}_1, \ldots, \boldsymbol{\mu}_q \in \mathbb{R}^p$
 -   the **common covariance matrix** $\boldsymbol{\Sigma} \in \mathbb{R}^{p \times p}$
 
-We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} 1\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} x_i 1\{y_i = j\}}{\sum_{i=1}^{n} 1\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (x_i - \hat{\boldsymbol{\mu}}_j)(\mathbf{x}_i - \hat{\boldsymbol{\mu}}_j)^{\top} 1\{y_i = j\}}{n - q}.$$
+We estimate these by the **maximum likelihood estimators**: $$\hat{\pi}_j = \frac{1}{n} \sum_{i=1}^{n} 1\{y_i = j\}, \quad \hat{\boldsymbol{\mu}}_j = \frac{\sum_{i=1}^{n} x_i 1\{y_i = j\}}{\sum_{i=1}^{n} 1\{y_i = j\}}, $$ $$\hat{\boldsymbol{\Sigma}} = \frac{\sum_{j=1}^{q} \sum_{i=1}^{n} (x_i - \hat{\boldsymbol{\mu}}_j)(x_i - \hat{\boldsymbol{\mu}}_j)^{\top} 1\{y_i = j\}}{n - q}.$$
 
 These estimators are simple closed forms, i.e., no iterative optimisation is needed — which makes LDA **computationally very fast**.\
 Unlike linear regression, we do not use the numerical values of the $y_i$’s, only their class membership.
